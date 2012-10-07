@@ -6,11 +6,12 @@ domino_elem::domino_elem(domino_elem_value_t val1, domino_elem_value_t val2,
    // 1st half
    h1.other_half = &h2;
    h1.direction = (is_vertical ? down : right);
-   h1.owner = this;
+   //h1.owner = this;
+
    // 2nd half
    h2.other_half = &h1;
    h2.direction = (is_vertical ? up : left);
-   h2.owner = this;
+   //h2.owner = this;
 }
 
 std::ostream& operator<<(std::ostream& os, const domino_elem& domino)

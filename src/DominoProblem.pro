@@ -24,6 +24,8 @@ HEADERS += \
     domino_elem.h \
     domino_elem_located.h \
     domino_problem.h \
+    domino_elem_located_fwd.h \
+#    simple_tree.h
 
 SOURCES += \
     main.cpp \

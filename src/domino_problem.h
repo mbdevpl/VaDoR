@@ -3,10 +3,11 @@
 
 #include <sstream>
 #include <string>
-#include <simple_list.h>
+#include "simple_list.h"
 #include "half_elem.h"
 #include "domino_elem.h"
 #include "domino_elem_located.h"
+//#include "simple_tree.h"
 
 // temporary!!!
 #include <iostream>
@@ -46,7 +47,7 @@ private:
    typedef simple_list<board_column,size_t> whole_board;
 private:
    // constant collection of domino_elem*
-   elem_ptr_list elements;
+   elem_loc_ptr_list elements;
    size_t width;
    size_t height;
    // constant collection of half_elem* that come from 'elements' field
@@ -54,14 +55,18 @@ private:
    // collection of half_elem* that come from 'elements' field
    whole_board board;
    // collection of domino_elem*
-   elem_ptr_list on_board;
+   elem_loc_ptr_list on_board;
 public:
    domino_problem(size_t width, size_t height,
                   const elem_loc_list& elements);
+#ifdef DEBUG
+   void demo_solution();
+#endif // DEBUG
    simple_list<elem_list,size_t> all_best_soluions();
    std::string str();
 private:
-   static void removeAt(size_t x, size_t y, whole_board& b, elem_ptr_list& backing_list);
+   static void removeAt(size_t x, size_t y, whole_board& b, elem_loc_ptr_list& backing_list);
+   void removePiece(domino_elem_located* piece, whole_board& b, elem_loc_ptr_list& backing_list);
    static size_t distance(size_t x, size_t y, whole_board& b, half_direction dir)
    {
       if(dir == up)
@@ -158,9 +163,9 @@ private:
       }
       throw std::runtime_error("distance in given direction cannot be measured");
    }
-   static elem_ptr_list find_all_possible_moves(whole_board& b/*, elem_ptr_list& elems*/)
+   static elem_loc_ptr_list find_all_possible_moves(whole_board& b/*, elem_ptr_list& elems*/)
    {
-      elem_ptr_list found;
+      elem_loc_ptr_list found;
       size_t width = b.length();
       size_t x = 0;
       for(whole_board::elem col = b.first(); col; ++col, ++x)
@@ -173,7 +178,7 @@ private:
             half_elem*& h = cell.value_ref();
             if(!h)
                continue;
-            domino_elem*& e = h->owner;
+            domino_elem_located*& e = h->owner;
             if(e->is_vertical)
             {
                // checking short sides in vertical pieces
@@ -306,7 +311,7 @@ private:
             half_elem*& h = cell.value_ref();
             if(!h)
                continue;
-            domino_elem*& e = h->owner;
+            domino_elem_located*& e = h->owner;
             // this loop checks all first halves, otherwise the elements
             //  would be checked two times
             if(h != &(e->h1))

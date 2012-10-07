@@ -1,5 +1,5 @@
 /*!
-simple_list: container template
+simple_list: list template
 Copyright (C) 2012  Mateusz Bysiek, http://mbdev.pl/
 
 This program is free software: you can redistribute it and/or modify
@@ -14,13 +14,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+  */
 
 #pragma once
 #ifndef SIMPLE_LIST_H
 #define SIMPLE_LIST_H
 
-//#include "MBdev_QtTools_global.h"
 #ifndef SIMPLE_LIST_NOSTRINGS
 #include <string>
 #include <ostream>
@@ -66,9 +65,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   - sorting (insert, heap, etc.)
   - easy converting to/from STL containers
   - parallel version (for OpenCL) of the template, stored in GPU memory instead of RAM
+  - moving data between lists without copying data, but just with pointers rearrangement
   */
 template<typename T, typename L>
-class /*MBDEV_QTTOOLSSHARED_EXPORT*/ simple_list
+class simple_list
 {
 private:
    // Single element of the list, pointing to the next and previous elements.
@@ -251,7 +251,7 @@ public:
         If it was also a last element of that list, the last_elem field value changes so that
         it points to the real last element.
         */
-      inline void connectTo(simple_list* the_list)
+      inline void connectTo(simple_list<T,L>* the_list)
       {
          if(connected())
             return;
@@ -404,7 +404,7 @@ public:
   It is exactly the same as: \code simple_list<T, unsigned long long> \endcode
   */
 template<typename T>
-class /*MBDEV_QTTOOLSSHARED_EXPORT*/ simpler_list : public simple_list<T, unsigned long long>
+class simpler_list : public simple_list<T, unsigned long long>
 {
 public:
    simpler_list()
@@ -422,7 +422,7 @@ public:
 
   It is exactly the same as: \code simple_list<void*, unsigned long long> \endcode
   */
-class /*MBDEV_QTTOOLSSHARED_EXPORT*/ simplest_list : public simpler_list<void*>
+class simplest_list : public simpler_list<void*>
 {
 public:
    simplest_list()
@@ -434,8 +434,6 @@ public:
    simplest_list(unsigned long long length, void* array[])
       : simpler_list(length, array) { }
 };
-
-//#ifdef MBDEV_QTTOOLS_LIBRARY
 
 template<typename T, typename L>
 typename simple_list<T,L>::elem_raw& simple_list<T,L>::elem_raw::operator=(
@@ -838,6 +836,8 @@ typename T& simple_list<T,L>::operator[](const L& index)
    return element(index).value_ref();
 }
 
+#ifndef SIMPLE_LIST_NOSTRINGS
+
 template<typename T, typename L>
 std::string simple_list<T,L>::str() const
 {
@@ -852,6 +852,8 @@ std::string simple_list<T,L>::str() const
    s << " }";
    return s.str();
 }
+
+#endif // SIMPLE_LIST_NOSTRINGS
 
 #ifdef DEBUG
 
@@ -1047,7 +1049,5 @@ std::ostream& simple_list<T,L>::test(std::ostream& s)
 }
 
 #endif // DEBUG
-
-//#endif // MBDEV_QTTOOLS_LIBRARY
 
 #endif // SIMPLE_LIST_H

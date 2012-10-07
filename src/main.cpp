@@ -10,6 +10,7 @@
 #include <rapidxml.hpp>
 
 #include "domino_problem.h"
+//#include "simple_tree.h"
 
 void all_chars(std::ostream& s)
 {
@@ -137,13 +138,31 @@ raw_domino_problem read_xml(const std::string& path)
 
 int main()
 {
+#ifdef DEBUG
+   //simple_tree<int,size_t> x;
+#endif // DEBUG
+
    //all_chars(std::cout);
    std::cout << "Vanishing Domino Problem" << std::endl;
 
    raw_domino_problem pr = read_xml("problem1.xml");
+#ifdef DEBUG
    std::cout << pr << std::endl;
+#endif // DEBUG
+
    domino_problem prob(pr.width, pr.height, pr.elements);
-   prob.all_best_soluions();
+
+#ifdef DEBUG
+   prob.demo_solution();
+#endif // DEBUG
+
+   simple_list<domino_problem::elem_list,size_t> solutions = prob.all_best_soluions();
+
+   size_t index = 0;
+   for(simple_list<domino_problem::elem_list,size_t>::elem_const i = solutions.first(); i; ++i)
+   {
+      std::cout << index++ << i.value_ref_const() << std::endl;
+   }
 
    //   domino_problem::elem_loc_list e;
    //   e.append(domino_elem_located(2, 1, true, 0, 0));

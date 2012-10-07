@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include "domino_elem.h"
+#include "domino_elem_located_fwd.h"
 
 class domino_elem_located : public domino_elem {
 public:

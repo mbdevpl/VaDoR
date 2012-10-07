@@ -3,13 +3,14 @@
 
 #include <ostream>
 #include "domino_elem_fwd.h"
+#include "domino_elem_located_fwd.h"
 
 class half_elem {
 public:
    domino_elem_value_t value;
    half_elem* other_half;
    half_direction direction;
-   domino_elem* owner;
+   domino_elem_located* owner;
 public:
    half_elem()
       : value(0), other_half(0), direction(none), owner(0) { }
