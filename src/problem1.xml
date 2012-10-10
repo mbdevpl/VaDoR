@@ -1,0 +1,12 @@
+<domino_board width="5" height="4"> 
+    <piece x="0" y="0" orientation="vertical" value1="2" value2="1" /> 
+    <piece x="0" y="2" orientation="vertical" value1="3" value2="2" /> 
+    <piece x="1" y="0" orientation="horizontal" value1="1" value2="0" /> 
+    <piece x="1" y="1" orientation="vertical" value1="3" value2="0" /> 
+    <piece x="1" y="3" orientation="horizontal" value1="0" value2="0" /> 
+    <piece x="2" y="1" orientation="vertical" value1="1" value2="1" /> 
+    <piece x="3" y="0" orientation="horizontal" value1="3" value2="3" /> 
+    <piece x="3" y="1" orientation="vertical" value1="0" value2="2" /> 
+    <piece x="3" y="3" orientation="horizontal" value1="2" value2="2" /> 
+    <piece x="4" y="1" orientation="vertical" value1="4" value2="4" /> 
+</domino_board>

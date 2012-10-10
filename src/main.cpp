@@ -1,8 +1,8 @@
+#include <QtGui/QApplication>
 #include <iostream>
 #include <ostream>
 #include <limits>
 #include <iomanip>
-
 #include <string>
 #include <fstream>
 #include <streambuf>
@@ -10,6 +10,7 @@
 #include <rapidxml.hpp>
 
 #include "domino_problem.h"
+#include "mainwindow.h"
 //#include "simple_tree.h"
 
 void all_chars(std::ostream& s)
@@ -136,8 +137,13 @@ raw_domino_problem read_xml(const std::string& path)
    return results;
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    QApplication app(argc, argv);
+
+    MainWindow w;
+    w.show();
+/*
 #ifdef DEBUG
    //simple_tree<int,size_t> x;
 #endif // DEBUG
@@ -156,6 +162,7 @@ int main()
    prob.demo_solution();
 #endif // DEBUG
 
+
    simple_list<domino_problem::elem_list,size_t> solutions = prob.all_best_soluions();
 
    size_t index = 0;
@@ -163,7 +170,7 @@ int main()
    {
       std::cout << index++ << i.value_ref_const() << std::endl;
    }
-
+*/
    //   domino_problem::elem_loc_list e;
    //   e.append(domino_elem_located(2, 1, true, 0, 0));
    //   e.append(domino_elem_located(3, 2, true, 0, 2));
@@ -184,6 +191,6 @@ int main()
 
    //std::cout << prob.str() << std::endl;
 
-   return 0;
+   return app.exec();
 }
 
