@@ -140,9 +140,6 @@ raw_domino_problem read_xml(const std::string& path)
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
-
-    MainWindow w;
-    w.show();
 /*
 #ifdef DEBUG
    //simple_tree<int,size_t> x;
@@ -190,6 +187,11 @@ int main(int argc, char **argv)
    /*std::cout << *///prob.all_best_soluions();
 
    //std::cout << prob.str() << std::endl;
+
+
+
+   MainWindow w;
+   w.show();
 
    return app.exec();
 }

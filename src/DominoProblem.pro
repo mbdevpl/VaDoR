@@ -2,7 +2,7 @@ TARGET = vador
 
 TEMPLATE = app
 CONFIG += console
-#CONFIG -= qt
+CONFIG += qt
 QT += core gui
 
 # platform specific defines
