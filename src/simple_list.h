@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
-
 #pragma once
 #ifndef SIMPLE_LIST_H
 #define SIMPLE_LIST_H
@@ -34,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #endif // DEBUG
 
-//#include <initializer_list>
+#include "simple_container.h"
 
 /*!
   \brief Simple list, that should be first of all easy to inherit from and expand.
@@ -66,45 +65,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   - easy converting to/from STL containers
   - parallel version (for OpenCL) of the template, stored in GPU memory instead of RAM
   - moving data between lists without copying data, but just with pointers rearrangement
+
+  Examples of 'for' loops involving simple_list:
+  \code
+  int arr[] = {10,20,30,40,50};
+  simple_list<int,short> list(5, arr);
+
+   for(simple_list<int,short>::elem e = list.first(); e.valid(); e.next())
+      ; // just iteration here ...
+   for(simple_list<int,short>::elem e = list.first(); !e.empty(); ++e)
+      ; // this loop is equivalent to the previous one
+   for(simple_list<int,short>::elem e = list.first(); e; ++e)
+      ; // this loop is equivalent to both previous loops
+
+  const simple_list<int,short> list_const(5, arr);
+
+   for(simple_list<int,short>::elem_const e = list_const.first(); e; ++e)
+      ; // iterating even if the list is const (and this is safe!)
+  \endcode
+
   */
 template<typename T, typename L>
 class simple_list
 {
 private:
+   typedef simple_list<T,L> C;
    // Single element of the list, pointing to the next and previous elements.
    class elem_raw
    {
+      ELEM_RAW_BASIC;
    private:
-      // Value of this element of the list.
-      T elem_value;
+      //T elem_value;
       // Pointer to the next element.
       elem_raw* ptr_next;
       // Pointer to the previous element.
       elem_raw* ptr_prev;
    public:
-      // Default constructor.
-      inline elem_raw()
-         : elem_value(), ptr_next(0), ptr_prev(0) { }
-      // Constructs element with specified value.
-      inline elem_raw(const T& value)
-         : elem_value(value), ptr_next(0), ptr_prev(0) { }
+      ELEM_RAW_DEF_CONSTR, ptr_next(0), ptr_prev(0) { }
+      ELEM_RAW_VAL_CONSTR, ptr_next(0), ptr_prev(0) { }
       // Constructs element with specified value and specified next & previous elements.
       inline elem_raw(const T& value, elem_raw* next, elem_raw* prev)
          : elem_value(value), ptr_next(next), ptr_prev(prev) { }
-      // Copy constructor.
-      inline elem_raw(const elem_raw& e)
-         : elem_value(e.elem_value), ptr_next(e.ptr_next), ptr_prev(e.ptr_prev) { }
-      // Destructor.
-      inline ~elem_raw() { elem_value = T(); ptr_prev = ptr_next = 0; }
    public:
-      // Copy assignment operator.
-      inline elem_raw& operator=(const elem_raw& e);
-      // Returns value of this element.
-      inline T value() const { return elem_value; }
-      // Returns reference to the value of this element.
-      inline T& value_ref() { return elem_value; }
-      // Returns reference to the value of this element.
-      inline const T& value_ref_const() const { return elem_value; }
+      ELEM_RAW_DESTR { ELEM_RAW_DESTR_T ptr_prev = ptr_next = 0; }
+   public:
       // Gets the reference to the next element.
       inline elem_raw*& next() { return this->ptr_next; }
       // Gets the reference to previous element.
@@ -119,92 +123,17 @@ public:
    // Advanced pointer to the element of the list, const-correct.
    class elem_const
    {
-   protected:
-      // pointer to the list which is
-      simple_list<T,L>* list;
-      // raw pointer to the actual data
-      elem_raw* e;
+      ELEM_CONST_BASIC;
+      ELEM_CONST_TRAVERSE(back,forward);
    public:
-      // Default constructor.
-      inline elem_const()
-         : list(nullptr), e(nullptr) { }
-   protected:
-      inline elem_const(const T& value)
-         : list(nullptr), e(new elem_raw(value)) { }
-      //      inline elem_const(elem_raw* e_ptr, L /*index*/)
-      //         : list(nullptr), e(e_ptr) { }
-   public:
-      inline elem_const(const elem_const& element_const)
-         : list(element_const.list), e(element_const.e) { }
-      inline virtual ~elem_const() { list = 0; e = 0; }
-   public:
-      // Returns value stored in this element.
-      inline T value() const { return e->value(); }
-      // Reference to the value stored in this element.
-      inline const T& value_ref_const() const { return e->value_ref_const(); }
-   public:
-      /*!
-        \brief Checks if there is a raw pointer assigned to this element.
-
-        This method is useful in for loops involving simple_list:
-        \code
-        int arr[] = {10,20,30,40,50};
-        simple_list<int,short> list(5, arr);
-
-         for(simple_list<int,short>::elem e = list.first(); e.valid(); e.next())
-            ; // just iteration here ...
-         for(simple_list<int,short>::elem e = list.first(); !e.empty(); ++e)
-            ; // this loop is equivalent to the previous one
-         for(simple_list<int,short>::elem e = list.first(); e; ++e)
-            ; // this loop is equivalent to both previous loops
-
-        const simple_list<int,short> list_const(5, arr);
-
-         for(simple_list<int,short>::elem_const e = list_const.first(); e; ++e)
-            ; // iterating even if the list is const (and this is safe!)
-        \endcode
-
-        \return True if there is a raw pointer assigned to this element.
-        */
-      inline bool valid() const { return (e ? true : false); }
-      // Returns true if there is no raw pointer assigned to this element.
-      inline bool empty() const { return (e ? false : true); }
-      // Returns true if this element is connected to a list
-      inline bool connected() const { return (list ? true : false); }
-   public:
+      // Moves back by the specified ammount.
+      const elem_const& back(L count) const;
+      // Goes to the previous element.
+      const elem_const& back() const;
       // Goes to the next element.
       const elem_const& forward() const;
       // Moves forward by the specified ammount.
       const elem_const& forward(L count) const;
-      // Goes to the previous element.
-      const elem_const& back() const;
-      // Moves back by the specified ammount.
-      const elem_const& back(L count) const;
-   public:
-      const elem_const& operator=(const elem_const& element_const) const;
-      // Moves forward by the specified ammount.
-      const elem_const& operator+=(L count) const { return forward(count); }
-      // Moves back by the specified ammount.
-      const elem_const& operator-=(L count) const { return back(count); }
-      // Goes to the next element.
-      const elem_const& operator++() const { return forward(); }
-      // Goes to the previous element.
-      const elem_const& operator--() const { return back(); }
-      bool operator==(const elem_const& element_const) const
-      {
-         if(e == element_const.e && list == element_const.list)
-            return true;
-         return false;
-      }
-      bool operator!=(const elem_const& element_const) const
-      {
-         if(e == element_const.e && list == element_const.list)
-            return false;
-         return true;
-      }
-      // Returns copy of the value stored in this element.
-      inline const T& operator*() const { return value_ref_const(); }
-      inline operator bool() const { return valid(); }
 #ifdef DEBUG
    public:
       static std::string test();
@@ -215,19 +144,7 @@ public:
    // Advanced pointer to the element of the list. Can be used to modify the list.
    class elem : public elem_const
    {
-   public:
-      // Default constructor.
-      inline elem()
-         : elem_const() { }
-   private:
-      inline elem(const T& value)
-         : elem_const(value) { }
-   public:
-      //      inline elem(elem_raw* e_ptr, L index)
-      //         : elem_const(e_ptr, index) { }
-      inline elem(const elem& element)
-         : elem_const(element) { }
-      inline virtual ~elem() { }
+      ELEM_BASIC;
    public:
       // Goes to the next element.
       elem& forward();
@@ -237,33 +154,7 @@ public:
       elem& back();
       // Moves back by the specified ammount.
       elem& back(L count);
-      /*!
-        \brief Connects this element to the given list, unless it is already connected.
-
-        Connection indicates that the element is contained in the connected list.
-        This has a lot of consequences for the behaviour of the list, because a connected
-        element can directy change values of fields of the list.
-
-        Elements returned via first() element() and last() methods of simple_list are already
-        connected to the list, on which the methods are executed.
-
-        For example, if a connected element is removed, the list length decreses.
-        If it was also a last element of that list, the last_elem field value changes so that
-        it points to the real last element.
-        */
-      inline void connectTo(simple_list<T,L>* the_list)
-      {
-         if(connected())
-            return;
-         list = the_list;
-      }
-   public:
-      // Returns copy of this element.
-      inline elem copy() const { return elem(*this); }
-      // Reference to the value stored in this element.
-      inline T& value_ref() { return e->value_ref(); }
    private:
-      inline void clear() { e = 0; }
       inline void delete_and_clear();
    public:
       /*!
@@ -302,7 +193,6 @@ public:
         */
       void remove();
    public:
-      elem& operator=(const elem& e_ptr);
       // Moves forward by the specified ammount.
       elem& operator+=(L count) { return forward(count); }
       // Moves back by the specified ammount.
@@ -311,10 +201,6 @@ public:
       inline elem& operator++() { return forward(); }
       // Goes to the previous element.
       inline elem& operator--() { return back(); }
-      // Reference to the value stored in this element.
-      inline T& operator*() { return value_ref(); }
-      inline operator elem_const() { return elem_const(*this); }
-      inline operator elem_raw*() { return e; }
    public:
       static inline void clear(elem& element) { element.clear(); }
 #ifdef DEBUG
@@ -435,15 +321,15 @@ public:
       : simpler_list(length, array) { }
 };
 
-template<typename T, typename L>
-typename simple_list<T,L>::elem_raw& simple_list<T,L>::elem_raw::operator=(
-      const elem_raw& e)
-{
-   elem_value = e.elem_value;
-   ptr_next = e.ptr_next;
-   ptr_prev = e.ptr_prev;
-   return *this;
-}
+//template<typename T, typename L>
+//typename simple_list<T,L>::elem_raw& simple_list<T,L>::elem_raw::operator=(
+//      const elem_raw& e)
+//{
+//   elem_value = e.elem_value;
+//   ptr_next = e.ptr_next;
+//   ptr_prev = e.ptr_prev;
+//   return *this;
+//}
 
 template<typename T, typename L>
 const typename simple_list<T,L>::elem_const& simple_list<T,L>::elem_const::forward() const
@@ -485,14 +371,14 @@ const typename simple_list<T,L>::elem_const& simple_list<T,L>::elem_const::back(
    return *this;
 }
 
-template<typename T, typename L>
-const typename simple_list<T,L>::elem_const& simple_list<T,L>::elem_const::operator=(
-      const elem_const& element_const) const
-{
-   *(simple_list<T,L>**)(&list) = element_const.list;
-   *(elem_raw**)(&e) = element_const.e;
-   return *this;
-}
+//template<typename T, typename L>
+//const typename simple_list<T,L>::elem_const& simple_list<T,L>::elem_const::operator=(
+//      const elem_const& element_const) const
+//{
+//   *(simple_list<T,L>**)(&list) = element_const.list;
+//   *(elem_raw**)(&e) = element_const.e;
+//   return *this;
+//}
 
 template<typename T, typename L>
 typename simple_list<T,L>::elem& simple_list<T,L>::elem::forward()
@@ -532,12 +418,12 @@ typename simple_list<T,L>::elem& simple_list<T,L>::elem::back(L count)
    return *this;
 }
 
-template<typename T, typename L>
-typename simple_list<T,L>::elem& simple_list<T,L>::elem::operator=(const elem& e_ptr)
-{
-   elem_const::operator =(e_ptr);
-   return *this;
-}
+//template<typename T, typename L>
+//typename simple_list<T,L>::elem& simple_list<T,L>::elem::operator=(const elem& e_ptr)
+//{
+//   elem_const::operator =(e_ptr);
+//   return *this;
+//}
 
 template<typename T, typename L>
 void simple_list<T,L>::elem::delete_and_clear()
@@ -559,11 +445,11 @@ void simple_list<T,L>::elem::insertNext(const T& value)
 {
    if(empty())
    {
-      if(connected() && list->list_length == 0)
+      if(connected() && c->list_length == 0)
       {
          e = new elem_raw(value);
-         list->last_elem = list->first_elem = *this;
-         list->list_length = 1;
+         c->last_elem = c->first_elem = *this;
+         c->list_length = 1;
       }
       return;
    }
@@ -576,12 +462,12 @@ void simple_list<T,L>::elem::insertNext(const T& value)
    e->next() = new_elem;
    if(connected())
    {
-      L& len = list->list_length;
+      L& len = c->list_length;
       ++len;
       if(len == 1)
          throw std::runtime_error("something went wrong: empty list has a non empty element");
-      if(e == list->last_elem.e)
-         list->last_elem.forward();
+      if(e == c->last_elem.e)
+         c->last_elem.forward();
       return;
    }
 }
@@ -591,11 +477,11 @@ void simple_list<T,L>::elem::insertPrev(const T& value)
 {
    if(empty())
    {
-      if(connected() && list->list_length == 0)
+      if(connected() && c->list_length == 0)
       {
          e = new elem_raw(value);
-         list->last_elem = list->first_elem = *this;
-         list->list_length = 1;
+         c->last_elem = c->first_elem = *this;
+         c->list_length = 1;
       }
       return;
    }
@@ -608,12 +494,12 @@ void simple_list<T,L>::elem::insertPrev(const T& value)
    e->prev() = new_elem;
    if(connected())
    {
-      L& len = list->list_length;
+      L& len = c->list_length;
       ++len;
       if(len == 1)
          throw std::runtime_error("something went wrong: empty list has a non empty element");
-      if(e == list->first_elem.e)
-         list->first_elem.back();
+      if(e == c->first_elem.e)
+         c->first_elem.back();
       return;
    }
 }
@@ -625,18 +511,18 @@ void simple_list<T,L>::elem::remove()
       return;
    if(connected())
    {
-      L& len = list->list_length;
+      L& len = c->list_length;
       --len;
       if(!len)
       {
          // zero elements left => this is the only elem in the list
-         list->first_elem.clear();
-         list->last_elem.clear();
+         c->first_elem.clear();
+         c->last_elem.clear();
       }
-      else if(e == list->first_elem.e)
-         list->first_elem.forward();
-      else if(e == list->last_elem.e)
-         list->last_elem.back();
+      else if(e == c->first_elem.e)
+         c->first_elem.forward();
+      else if(e == c->last_elem.e)
+         c->last_elem.back();
    }
    delete_and_clear();
 }

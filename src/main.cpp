@@ -10,6 +10,7 @@
 #include <rapidxml.hpp>
 
 #include "domino_problem.h"
+//#include "simple_container.h"
 //#include "simple_tree.h"
 
 void all_chars(std::ostream& s)
@@ -139,7 +140,11 @@ raw_domino_problem read_xml(const std::string& path)
 int main()
 {
 #ifdef DEBUG
+   //elem_raw<int>::test();
    //simple_tree<int,size_t> x;
+   //elem_raw<int,size_t,342> e(256,nullptr);
+   //simple_tree<int,size_t>::test();
+   //e2.subCount();
 #endif // DEBUG
 
    //all_chars(std::cout);

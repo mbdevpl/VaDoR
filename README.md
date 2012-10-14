@@ -22,4 +22,4 @@ License
 
 Copyright 2012. All rights reserved: M. Bysiek, R. Łojek, S. Peryt.
 Do not distribute without permission of all of the authors, unless 
-different license is applied for specific source code files.
+a different license is applied for specific source code files.

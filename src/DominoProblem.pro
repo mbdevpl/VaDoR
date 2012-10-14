@@ -13,19 +13,23 @@ win32:DEFINES += WINDOWS
 CONFIG(debug, debug|release): DEFINES += DEBUG
 else:CONFIG(release, debug|release): DEFINES += RELEASE
 
+#unix:QMAKE_CXXFLAGS += -save-temps
+#win32:QMAKE_CXXFLAGS += -P
+
 # INCLUDEPATH += D:/Projects/Cpp/QtTools/src
 # INCLUDEPATH += D:/Projects/Cpp/Libraries/Includes/rapidxml
 
 HEADERS += \
-    simple_list.h \
     rapidxml.hpp \
+    simple_container.h \
+    simple_list.h \
+    simple_tree.h \
     half_elem.h \
     domino_elem_fwd.h \
     domino_elem.h \
+    domino_elem_located_fwd.h \
     domino_elem_located.h \
     domino_problem.h \
-    domino_elem_located_fwd.h \
-#    simple_tree.h
 
 SOURCES += \
     main.cpp \
