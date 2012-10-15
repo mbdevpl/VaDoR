@@ -30,6 +30,7 @@ HEADERS += \
     domino_elem_located_fwd.h \
     domino_elem_located.h \
     domino_problem.h \
+    domino_problem_input.h
 
 SOURCES += \
     main.cpp \
@@ -37,3 +38,4 @@ SOURCES += \
     domino_elem.cpp \
     domino_elem_located.cpp \
     domino_problem.cpp \
+    domino_problem_input.cpp

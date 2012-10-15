@@ -19,6 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SIMPLE_TREE_H
 #define SIMPLE_TREE_H
 
+#ifdef DEBUG
+#include <ostream>
+#include <iostream>
+#endif
+
 #include "simple_container.h"
 #include "simple_list.h"
 
@@ -92,6 +97,7 @@ public:
    class elem : public elem_const
    {
       ELEM_BASIC;
+      ELEM_TRAVERSE(right,left);
    public:
       void insertAbove(const T& value);
       void insertLeftmost(const T& value);

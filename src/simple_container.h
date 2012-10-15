@@ -189,7 +189,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
    inline operator elem_const() { return elem_const(*this); } \
    inline operator elem_raw*() { return e; }
 
-#define ELEM_TRAVERSE(decrement,increment)
+#define ELEM_TRAVERSE(decrement,increment) \
+public: \
+   /*! Moves back by the specified ammount. */ \
+   elem& operator-=(L count) { return decrement(count); } \
+   /*! Goes to the previous element. */ \
+   inline elem& operator--() { return decrement(); } \
+   /*! Goes to the next element. */ \
+   inline elem& operator++() { return increment(); } \
+   /*! Moves forward by the specified ammount. */ \
+   elem& operator+=(L count) { return increment(count); }
 
 #ifdef DEBUG
 
@@ -199,42 +208,61 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
    s << " size = " << size; \
    s << std::endl; \
    T t; \
-   elem_raw e1; \
-   elem_raw e2(t); \
-   elem_raw e3(e2); \
-   e1.value(); \
-   e1.value_ref(); \
-   e1.value_ref_const(); \
-   e1 = e3;
+   elem_raw elem_raw_1; \
+   elem_raw elem_raw_2(t); \
+   elem_raw elem_raw_3(elem_raw_2); \
+   elem_raw_1.value(); \
+   elem_raw_1.value_ref(); \
+   elem_raw_1.value_ref_const(); \
+   elem_raw_1 = elem_raw_3;
 
 #define ELEM_CONST_BASIC_TEST \
    int size_list = sizeof(C*) * 8; \
    int size_e = sizeof(C::elem_raw*) * 8; \
-   int size = size_list + size_e; \
+   int size = sizeof(elem_const) * 8; \
    s << " elem_const:"; \
    s << " size = " << size; \
    s << " (size_list = " << size_list \
      << " size_e = " << size_e << ")"; \
-   s << "\n"; \
+   s << std::endl; \
    T x; \
    bool y; \
-   elem_const a; \
-   elem_const b(0); /* memory alloc */ \
-   elem_const c(b); \
-   elem_raw* ptr = a.e; \
+   elem_const elem_const_1; \
+   elem_const elem_const_2(0); /* memory alloc */ \
+   elem_const elem_const_3(elem_const_2); \
+   elem_raw* ptr = elem_const_1.e; \
+   elem_const_1 = elem_const_3; \
+   y = elem_const_1.connected(); \
+   y = elem_const_1.empty(); \
+   x = *elem_const_1; \
+   y = elem_const_1.valid(); \
+   x = elem_const_1.value(); \
+   ++elem_const_1; \
+   elem_const_1+=2; \
+   --elem_const_1; \
+   elem_const_1-=2; \
+   delete ptr;
+
+#define ELEM_BASIC_TEST \
+   T x; \
+   elem a; \
+   elem b(0); /* memory alloc */ \
+   elem c(b); \
+   elem_raw* d; \
+   elem_const e; \
    a = c; \
-   y = a.connected(); \
-   y = a.empty(); \
+   c.copy(); \
+   a.connectTo(0); \
    x = *a; \
-   y = a.valid(); \
-   x = a.value(); \
+   *a = x; \
+   d = (elem_raw*)a; \
+   e = (elem_const)a; \
    ++a; \
    a+=2; \
    --a; \
    a-=2; \
-   delete ptr;
-
-#define ELEM_BASIC_TEST \
+   a.clear(); \
+   delete d;
 
 #define CONTAINER_BASIC_TEST \
    elem_raw::test(s); \

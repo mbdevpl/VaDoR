@@ -115,7 +115,7 @@ private:
       inline elem_raw*& prev() { return this->ptr_prev; }
 #ifdef DEBUG
    public:
-      static std::string test();
+      static std::ostream& test(std::ostream& s = std::cout);
 #endif
    };
 
@@ -136,7 +136,7 @@ public:
       const elem_const& forward(L count) const;
 #ifdef DEBUG
    public:
-      static std::string test();
+      static std::ostream& test(std::ostream& s = std::cout);
 #endif
    };
 
@@ -145,6 +145,7 @@ public:
    class elem : public elem_const
    {
       ELEM_BASIC;
+      ELEM_TRAVERSE(back,forward);
    public:
       // Goes to the next element.
       elem& forward();
@@ -193,19 +194,10 @@ public:
         */
       void remove();
    public:
-      // Moves forward by the specified ammount.
-      elem& operator+=(L count) { return forward(count); }
-      // Moves back by the specified ammount.
-      elem& operator-=(L count) { return back(count); }
-      // Goes to the next element.
-      inline elem& operator++() { return forward(); }
-      // Goes to the previous element.
-      inline elem& operator--() { return back(); }
-   public:
       static inline void clear(elem& element) { element.clear(); }
 #ifdef DEBUG
    public:
-      static std::string test();
+      static std::ostream& test(std::ostream& s = std::cout);
 #endif
    };
 
@@ -744,21 +736,9 @@ std::string simple_list<T,L>::str() const
 #ifdef DEBUG
 
 template<typename T, typename L>
-std::string simple_list<T,L>::elem_raw::test()
+std::ostream& simple_list<T,L>::elem_raw::test(std::ostream& s)
 {
-   int size_val = sizeof(T) * 8;
-   int size_next = sizeof(elem_raw*) * 8;
-   int size_prev = sizeof(elem_raw*) * 8;
-   int size = size_val + size_next + size_prev;
-   std::stringstream s;
-   s << " elem_raw:";
-   s << " size = " << size;
-   s << " (size_val = " << size_val
-     << " size_next = " << size_next
-     << " size_prev = " << size_prev << ")";
-   s << "\n";
-
-   //typedef simple_list<T,L>::elem_raw el_r;
+   ELEM_RAW_BASIC_TEST;
    elem_raw e1;
    elem_raw e2(0);
    elem_raw e3(T(), &e1, &e2);
@@ -766,90 +746,40 @@ std::string simple_list<T,L>::elem_raw::test()
 
    e1.next() = &e4;
    e1.prev() = &e4;
-   e1.value();
-   e1.value_ref();
-   e1 = e2;
 
-   return s.str();
+   return s;
 }
 
 template<typename T, typename L>
-std::string simple_list<T,L>::elem_const::test()
+std::ostream& simple_list<T,L>::elem_const::test(std::ostream& s)
 {
-   int size_list = sizeof(simple_list<T,L>*) * 8;
-   int size_e = sizeof(simple_list<T,L>::elem_raw*) * 8;
-   int size = size_list + size_e;
-   std::stringstream s;
-   s << " elem_const:";
-   s << " size = " << size;
-   s << " (size_list = " << size_list
-     << " size_e = " << size_e << ")";
-   s << "\n";
-
-   T x;
-   bool y;
+   ELEM_CONST_BASIC_TEST;
    elem_const a;
-   elem_const b(0); // memory alloc
-   elem_const c(b);
-   elem_raw* ptr = a.e;
-   a = c;
-   y = a.connected();
-   y = a.empty();
-   x = *a;
-   y = a.valid();
-   x = a.value();
    a.forward();
    a.forward(2);
    a.back();
    a.back(2);
-   ++a;
-   a+=2;
-   --a;
-   a-=2;
 
-   delete ptr;
-
-   return s.str();
+   return s;
 }
 
 template<typename T, typename L>
-std::string simple_list<T,L>::elem::test()
+std::ostream& simple_list<T,L>::elem::test(std::ostream& s)
 {
-   T x;
-   std::stringstream s;
-   elem a;
-   elem b(0); // memory alloc
-   elem c(b);
-   elem_raw* d;
-   elem_const e;
+   ELEM_BASIC_TEST;
+   elem f;
+   f.forward();
+   f.forward(2);
+   f.back();
+   f.back(2);
+   f.insertNext(0);
+   f.insertPrev(0);
 
-   a = c;
-   c.copy();
-   a.connectTo(0);
-   x = *a;
-   *a = x;
-   d = (elem_raw*)a;
-   e = (elem_const)a;
-   a.forward();
-   a.forward(2);
-   a.back();
-   a.back(2);
-   ++a;
-   a+=2;
-   --a;
-   a-=2;
+   f.remove();
+   elem::clear(f);
+   f.delete_and_clear();
 
-   a.clear();
-   elem::clear(a);
-   a.delete_and_clear();
-
-   a.remove();
-   a.insertNext(0);
-   a.insertPrev(0);
-
-   delete d;
-
-   return s.str();
+   return s;
 }
 
 template<typename T, typename L>
@@ -888,9 +818,7 @@ std::ostream& simple_list<T,L>::test(std::ostream& s)
    int size_len = sizeof(L) * 8;
    int size = size_first + size_last + size_len;
    s << "type info for simple_list<" << type_name << "," << length_name << ">\n";
-   s << elem_raw::test();
-   s << elem_const::test();
-   s << elem::test();
+   CONTAINER_BASIC_TEST;
    s << " list:";
    s << " size = " << size;
    s << " (size_first = " << size_first

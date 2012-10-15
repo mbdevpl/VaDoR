@@ -63,7 +63,6 @@ public:
    void demo_solution();
 #endif // DEBUG
    simple_list<elem_list,size_t> all_best_soluions();
-   std::string str();
 private:
    static void removeAt(size_t x, size_t y, whole_board& b, elem_loc_ptr_list& backing_list);
    void removePiece(domino_elem_located* piece, whole_board& b, elem_loc_ptr_list& backing_list);
