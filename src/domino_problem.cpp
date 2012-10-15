@@ -123,17 +123,17 @@ simple_list<domino_problem::elem_list,size_t> domino_problem::all_best_soluions(
 void domino_problem::demo_solution()
 {
    std::cout << find_all_possible_moves(board) << std::endl;
-   std::cout << str() << std::endl;
+   //std::cout << str() << std::endl;
 
    removeAt(2, 0, board, elements);
 
    std::cout << find_all_possible_moves(board) << std::endl;
-   std::cout << str() << std::endl;
+   //std::cout << str() << std::endl;
 
    removeAt(1, 1, board, elements);
 
    std::cout << find_all_possible_moves(board) << std::endl;
-   std::cout << str() << std::endl;
+   //std::cout << str() << std::endl;
 }
 
 #endif // DEBUG

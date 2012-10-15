@@ -1,9 +1,9 @@
-
 TARGET = vador
 
 TEMPLATE = app
 CONFIG += console
-CONFIG -= qt
+CONFIG += qt
+QT += core gui
 
 # platform specific defines
 unix:DEFINES += LINUX
@@ -30,7 +30,8 @@ HEADERS += \
     domino_elem_located_fwd.h \
     domino_elem_located.h \
     domino_problem.h \
-    domino_problem_input.h
+    domino_problem_input.h \
+    mainwindow.h \
 
 SOURCES += \
     main.cpp \
@@ -38,4 +39,8 @@ SOURCES += \
     domino_elem.cpp \
     domino_elem_located.cpp \
     domino_problem.cpp \
-    domino_problem_input.cpp
+    domino_problem_input.cpp \
+    mainwindow.cpp \
+
+FORMS += \
+    mainwindow.ui \
