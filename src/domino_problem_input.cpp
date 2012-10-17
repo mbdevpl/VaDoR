@@ -141,7 +141,7 @@ domino_problem_input::domino_problem_input(const std::string& path)
    //initial_board = board;
 }
 
-std::string domino_problem_input::board_str()
+std::string domino_problem_input::board_str() const
 {
    //size_t len = elements.length();
    std::stringstream s;
@@ -160,7 +160,7 @@ std::string domino_problem_input::board_str()
       s << '|';
       for(size_t x = 0; x < width; ++x)
       {
-         half_elem*& h_elem = board[x][y];
+         half_elem* h_elem = board[x][y];
          if(h_elem)
          {
             s << fill << fill << fill;
@@ -178,7 +178,7 @@ std::string domino_problem_input::board_str()
       s << '|';
       for(size_t x = 0; x < width; ++x)
       {
-         half_elem*& h_elem = board[x][y];
+         half_elem* h_elem = board[x][y];
          if(h_elem)
          {
             s << fill << h_elem->value << fill;
@@ -196,7 +196,7 @@ std::string domino_problem_input::board_str()
       s << '|';
       for(size_t x = 0; x < width; ++x)
       {
-         half_elem*& h_elem = board[x][y];
+         half_elem* h_elem = board[x][y];
          if(h_elem)
          {
             s << fill << fill << fill;
@@ -214,7 +214,7 @@ std::string domino_problem_input::board_str()
       s << '+';
       for(size_t x = 0; x < width; ++x)
       {
-         half_elem*& h_elem = board[x][y];
+         half_elem* h_elem = board[x][y];
          if(h_elem)
          {
             if(h_elem->direction == down)

@@ -12,14 +12,16 @@
 
 class domino_problem_input
 {
-public:
+protected:
    typedef simple_list<domino_elem_located*,size_t> elements_t;
    typedef simple_list<half_elem*,size_t> column_t;
    typedef simple_list<column_t,size_t> board_t;
-public:
+protected:
+   // collection of domino_elem*
    elements_t elements;
    size_t width;
    size_t height;
+   // collection of half_elem* that come from 'elements' field
    board_t board;
 public:
    domino_problem_input(const std::string& path);
@@ -31,10 +33,11 @@ public:
    inline size_t w() { return width; }
    inline size_t h() { return height; }
 public:
-   std::string board_str();
-   friend std::ostream& operator<<(std::ostream& os, const domino_problem_input& pr)
+   std::string board_str() const;
+   friend std::ostream& operator<<(std::ostream& os, const domino_problem_input& input)
    {
-      os << '[' << pr.width << 'x' << pr.height << "]: " << pr.elements;
+      os << '[' << input.width << 'x' << input.height << "]: " << input.elements << "\n";
+      os << input.board_str();
       return os;
    }
 };

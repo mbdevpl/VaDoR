@@ -7,58 +7,49 @@
 #include "half_elem.h"
 #include "domino_elem.h"
 #include "domino_elem_located.h"
+#include "domino_problem_input.h"
 //#include "simple_tree.h"
 
-// temporary!!!
-#include <iostream>
-
 #ifdef DEBUG
+#include <iostream>
 //#define DEBUG_DOMINO
 #endif
 
-class raw_domino_problem
+class domino_problem : public domino_problem_input
 {
+//public:
+//   // list of elements
+//   typedef simple_list<domino_elem,size_t> elem_list;
+//   // list of located elements
+//   typedef simple_list<domino_elem_located,size_t> elem_loc_list;
+//private:
+//   // list of pointers to elements
+//   typedef simple_list<domino_elem*,size_t> elem_ptr_list;
+//   // list of pointers to located elements
+//   typedef simple_list<domino_elem_located*,size_t> elem_loc_ptr_list;
+//private:
+//   typedef simple_list<half_elem*,size_t> board_column;
+//   typedef simple_list<board_column,size_t> whole_board;
+protected:
+   // pieces currently on the board
+   elements_t on_board;
+   // possible to remove in the next turn
+   elements_t possible;
+   // not longer on board, removed in the previous turns
+   elements_t removed;
+   // algorithm does not know anything about these pieces
+   elements_t unresolved;
+   // possible to remove if other pieces are placed right
+   elements_t checked;
+   // impossible to remove due to size of the board
+   elements_t invalid;
 public:
-   simple_list<domino_elem_located,size_t> elements;
-   size_t width;
-   size_t height;
-public:
-   friend std::ostream& operator<<(std::ostream& os, const raw_domino_problem& pr)
-   {
-      os << '[' << pr.width << 'x' << pr.height << "]: " << pr.elements;
-      return os;
-   }
-};
+   domino_problem(const domino_problem_input& input);
+private:
+   // scan all unresolved pieces to know which cannot be removed at all
+   void resolve_elements();
+   void scan_board();
 
-class domino_problem
-{
-public:
-   // list of elements
-   typedef simple_list<domino_elem,size_t> elem_list;
-   // list of located elements
-   typedef simple_list<domino_elem_located,size_t> elem_loc_list;
-private:
-   // list of pointers to elements
-   typedef simple_list<domino_elem*,size_t> elem_ptr_list;
-   // list of pointers to located elements
-   typedef simple_list<domino_elem_located*,size_t> elem_loc_ptr_list;
-private:
-   typedef simple_list<half_elem*,size_t> board_column;
-   typedef simple_list<board_column,size_t> whole_board;
-private:
-   // constant collection of domino_elem*
-   elem_loc_ptr_list elements;
-   size_t width;
-   size_t height;
-   // constant collection of half_elem* that come from 'elements' field
-   whole_board initial_board;
-   // collection of half_elem* that come from 'elements' field
-   whole_board board;
-   // collection of domino_elem*
-   elem_loc_ptr_list on_board;
-public:
-   domino_problem(size_t width, size_t height,
-                  const elem_loc_list& elements);
 #ifdef DEBUG
    void demo_solution();
 #endif // DEBUG

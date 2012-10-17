@@ -1,76 +1,72 @@
 #include "domino_problem.h"
 
-domino_problem::domino_problem(size_t width, size_t height,
-                               const simple_list<domino_elem_located,size_t>& dominos)
-   : elements(), width(width), height(height), board(), on_board()
+domino_problem::domino_problem(const domino_problem_input& input)
+   : elements(input.elements), width(input.width), height(input.height), board(input.board),
+     on_board(input.elements), possible(), removed(), unresolved(input.elements),
+     checked(), invalid()
 {
-#ifdef DEBUG
-   simple_list<size_t,size_t>::test();
-#endif
-   //size_t length = elements.length();
-
-   for(simple_list<domino_elem_located,size_t>::elem_const i = dominos.first(); i; ++i)
+   resolve_elements();
+   scan_board();
+}
+void domino_problem::resolve_elements()
+{
+   for(elements_t::elem i = unresolved.first(); i; ++i)
    {
-      const domino_elem_located& loc_el = *i;
-      domino_elem_located* el = new domino_elem_located(loc_el.h1.value, loc_el.h2.value,
-                                                        loc_el.is_vertical, loc_el.x, loc_el.y);
-      elements.append(el);
-   }
-   on_board = elements;
-
-   //elem_loc_list not_added(dominos);
-
-   for(size_t x = 0; x < width; ++x)
-   {
-      board_column col;
-      for(size_t y = 0; y < height; ++y)
-         col.append(0);
-      board.append(col);
-   }
-
-#ifdef DEBUG_DOMINO
-   std::cout << dominos << std::endl;
-   std::cout << elements << std::endl;
-   std::cout << board << std::endl;
-   std::cout << str() << std::endl;
-#endif // DEBUG_DOMINO
-
-   for(size_t x = 0; x < width; ++x)
-   {
-      for(size_t y = 0; y < height; ++y)
+      domino_elem_located* e = i.value_ref();
+      domino_elem_value_t v1 = e->h1.value;
+      domino_elem_value_t v2 = e->h2.value;
+      if(e->is_vertical)
       {
-         elem_loc_ptr_list::elem it = elements.first();
-         elem_loc_list::elem_const loc_it = dominos.first();
-         while(it)
-         {
-            domino_elem& el = *(it.value_ref());
-            const domino_elem_located& loc_el = loc_it.value_ref_const();
-            if(loc_el.x == x && loc_el.y == y)
-            {
-               // found element that starts at current point
-               board[x][y] = &(el.h1);
-               half_direction& dir = el.h1.direction;
-               if(dir == up)
-                  board[x][y-1] = &(el.h2);
-               else if(dir == right)
-                  board[x+1][y] = &(el.h2);
-               else if(dir == down)
-                  board[x][y+1] = &(el.h2);
-               else if(dir == left)
-                  board[x-1][y] = &(el.h2);
-#ifdef DEBUG_DOMINO
-               std::cout << board << std::endl;
-               std::cout << str() << std::endl;
-#endif // DEBUG_DOMINO
-               break;
-            }
-            ++it;
-            ++loc_it;
-         }
-
+         // up & down
+         // left & right
+         if(v1 > y && v2 >= height - y
+               && (v1 > x || v2 > x) && (v1 >= width - x || v2 >= width - x) )
+            invalid.append(e);
+         else
+            checked.append(e);
       }
+      else
+      {
+         // left & right
+         // up & down
+         if(v1 > x || v2 >= width - x
+               && (v1 > y || v2 > y) && (v1 >= height - y || v2 >= height - y) )
+            invalid.append(e);
+         else
+            checked.append(e);
+      }
+      elements_t::elem i2 = i.copy();
+      i.forward();
+      i2.remove();
+      i.back();
    }
-   initial_board = board;
+}
+
+void domino_problem::scan_board()
+{
+
+   for(elements_t::elem i = checked.first(); i; ++i)
+   {
+      domino_elem_located* e = i.value_ref();
+      else if(can_be_removed(e))
+         possible.append(e);
+   }
+}
+
+bool domino_problem::can_be_removed(domino_elem_located* e)
+{
+   if(e->is_vertical)
+   {
+      if(distance(e->x, e->y, board, up) == )
+         return false;
+      distance(e->x, e->y+1, board, down);
+   }
+   else
+   {
+      distance(e->x, e->y, board, left);
+      distance(e->x+1, e->y, board, right);
+   }
+   distance(e->x, e->y, board, up);
 }
 
 void domino_problem::removeAt(size_t x, size_t y, whole_board& b,

@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Tue Oct 16 21:46:06 CEST 2012
+markTmpDer=true
+builderNum=2
+outputDir=
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=tmp
+mainTexFile=vador.tex
+outputFile=bysiek,lojek,peryt-vador_initial.pdf
+langSpell=en
+markDer=true
+srcDir=
