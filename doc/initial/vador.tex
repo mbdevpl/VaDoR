@@ -1,15 +1,39 @@
 \documentclass{article}
 \usepackage[cm]{fullpage} %very small margins (around 1.5cm)
 \usepackage{enumitem} %remove vertical space in itemize with: [noitemsep,nolistsep]
-\usepackage{minted}
+\usepackage{multicol} %use \begin{multicols}{#} for # columns 
+\usepackage{graphicx} %use \includegraphics[scale=1.00]{file.jpg} for images
+\usepackage{color}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{lastpage} %page x of y with: \cfoot{\thepage{} of \pageref{LastPage}}
+\usepackage{fancyhdr} % also needed for footers
+\usepackage{minted} %use \begin{minted}[mathescape,linenos,numbersep=5pt,gobble=0,framesep=2mm]{c++}
+
+\fancyhead{}
+\fancyfoot{}
+\lfoot{\textcolor{gray}{M.Bysiek R.Lojek S.Peryt}}
+\cfoot{page \thepage{} of \pageref{LastPage}}
+\rfoot{\textcolor{gray}{VaDoR}}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
 
 \begin{document}
+
+\begin{multicols}{2}
+\begin{flushleft}
+\includegraphics[scale=0.60]{logo_pw.jpg}
+\end{flushleft}
+\begin{flushright}
+\includegraphics[scale=0.25]{logo_mini.png}
+\end{flushright}
+\end{multicols}
 
 \title{VAnishing DOmino pRoblem - VaDoR}
 \author{Mateusz Bysiek, Radoslaw Lojek, Stanislaw Peryt; Computer Science, MiNI, WUT}
 \date{17 October 2012}
-\maketitle
 
+\maketitle
 
 \section{Problem description}
 Vanishing domino problem. Full definition is available in the document provided by laboratories
@@ -75,6 +99,8 @@ XML file.
   \item value1 - value of the beginning of the piece i.e. value at $(x,y)$
   \item value2 - value of the end of the piece i.e. location depends on the orientation
 \end{itemize}
+
+\subsection{Output}
 
 \subsection{Class variables}
 Main class of the program is called domino\_problem.
@@ -155,6 +181,59 @@ My approximate algorithm is a polynomial time random algorithm.
 It uses the same data structures as mentioned in the accurate algorithm, but it simply randomly
 chooses one possible option and tries to resolve it, in step (8) it does not have any loop.
 If a dead end is reached, the algorithm ends and returns so-far-calculated path.
+
+\subsubsection{by Stanislaw Peryt}
+% Input Data:
+% collection of domino pieces from input file
+% Description and Class Variables:
+% This algorithm is based on the idea of Greedy algorithms. I assume some additional classification which is done only once for each element. For classification purposes each dominoPiece should contain some additional fields:
+% boolean isIndependent; //can be removed even from empty board, so it does not  have to be removed immediately
+% boolean canBeRemoved; //initially false. Changes to true, when fulfills removal conditions
+% waitingFor - list of pieces for which it is waiting;
+% waitForMe - list of pieces waiting for it;
+% I decided to add this classification, because in greedy strategy, we could remove pieces immediately when they fulfill removal requirements. But it may happen, that there are some pieces, for which pieces we already removed are necessary to fulfill removal requirements. When we have this classification based on scopes of domino pieces, we can wait with removing, and eliminate at least some of those situations described above, providing better local optimal choices.
+% For this algorithm we also need:
+% board – contains all domino pieces that have remained on the board
+% roots – contains possible starting pieces, i.e. containing zero
+% neighbors – contains domino pieces, which are neighbors of deleted piece, i.e. pieces alongside empty fields
+% Algorithm:
+% 1. Create board from input
+% 2. Find possible roots and assign them to neighbors
+% 3. for each dominoPiece in board assign scopes and waiting property
+%    determine scopes based on numbers given on dominoPiece
+%    determine dominoPieces on scopes and assign them to the waitForMe list
+%    tell those pieces to assign this dominoPiece on their waitingFor list
+% 4. stop=false;
+% 5. while(!stop){
+%    for each dominoPiece in neighbors{
+%       if dominoPiece can be removed {
+%          if domino Piece isIndependent&&list of pieces it is waiting for is not empty{
+%             wait with removal;
+%          }
+%          else
+%             remove it(from neighbors and board) and tell waiting pieces, if there were any waiting for this piece, that it does not need waiting any more. (i.e. delete piece from waiting list) 
+%       }
+%    }
+%    determine new neighbors into temp //each removed piece can produce at most 6 new neighbors
+% 
+% 6.       if temp equals neighbors{
+%          check if something can be removed{
+%             remove first;
+%          }
+%          else stop=true;
+%    }
+%       else
+%          neighbors=temp;
+% }
+% 7. calculate score
+% Estimation of complexity:
+% Partial Complexities:
+% n-complexity of classification
+% n^2-complexity of part at “while(!stop) loop”
+% In order to associate attributes for classification we need to iterate once through whole collection which is of size n. Then in the while loop we are trying to remove pieces. In worst case we delete only one piece in one iteration which gives us at most n runs of while and inside while loop, we iterate through neighbors collection which is always smaller than n, but it is n dependent. Therefore for each n, algorithm executes number of operations proportional to n, which gives us quadratic time complexity.
+%    
+% Final worst case complexity : n^2 + n
+
 
 %\section{Proof of correctness}
 %-prove, that algorithm is considering all cases, and find optimal one
