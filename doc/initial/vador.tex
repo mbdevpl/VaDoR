@@ -20,6 +20,11 @@
 
 \begin{document}
 
+\title{VAnishing DOmino pRoblem - VaDoR}
+\author{Mateusz Bysiek, Radoslaw Lojek, Stanislaw Peryt; Computer Science, MiNI, WUT}
+\date{17 October 2012}
+\maketitle
+
 \begin{multicols}{2}
 \begin{flushleft}
 \includegraphics[scale=0.60]{logo_pw.jpg}
@@ -29,15 +34,13 @@
 \end{flushright}
 \end{multicols}
 
-\title{VAnishing DOmino pRoblem - VaDoR}
-\author{Mateusz Bysiek, Radoslaw Lojek, Stanislaw Peryt; Computer Science, MiNI, WUT}
-\date{17 October 2012}
+\tableofcontents
 
-\maketitle
+\pagebreak[4]
 
 \section{Problem description}
 Vanishing domino problem. Full definition is available in the document provided by laboratories
-supervisor. From now on, the problem will be reffered to as VaDoR.
+supervisor. From now on, the problem will be referred to as VaDoR.
 
 \section{Estimation of complexity}
 \subsection{Number of states}
@@ -73,21 +76,24 @@ Therefore, the total complexity of the accurate algorithm should be roughly $ 2^
 \section{Description of the accurate algorithm}
 \subsection{Input}
 XML file.
-\begin{minted}[mathescape,linenos,numbersep=5pt,gobble=0,framesep=2mm]{xml}
-<domino_board width="5" height="4"> 
-    <piece x="0" y="0" orientation="vertical" value1="2" value2="1" /> 
-    <piece x="0" y="2" orientation="vertical" value1="3" value2="2" /> 
-    <piece x="1" y="0" orientation="horizontal" value1="1" value2="0" /> 
-    <piece x="1" y="1" orientation="vertical" value1="3" value2="0" /> 
-    <piece x="1" y="3" orientation="horizontal" value1="0" value2="0" /> 
-    <piece x="2" y="1" orientation="vertical" value1="1" value2="1" /> 
-    <piece x="3" y="0" orientation="horizontal" value1="3" value2="3" /> 
-    <piece x="3" y="1" orientation="vertical" value1="0" value2="2" /> 
-    <piece x="3" y="3" orientation="horizontal" value1="2" value2="2" /> 
-    <piece x="4" y="1" orientation="vertical" value1="4" value2="4" /> 
+\begin{minted}[linenos,numbersep=5pt]{xml}
+<domino_board width="5" height="4">
+    <piece x="0" y="0" orientation="vertical" value1="2" value2="1" />
+    <piece x="0" y="2" orientation="vertical" value1="3" value2="2" />
+    <piece x="1" y="0" orientation="horizontal" value1="1" value2="0" />
+    <piece x="1" y="1" orientation="vertical" value1="3" value2="0" />
+    <piece x="1" y="3" orientation="horizontal" value1="0" value2="0" />
+    <piece x="2" y="1" orientation="vertical" value1="1" value2="1" />
+    <piece x="3" y="0" orientation="horizontal" value1="3" value2="3" />
+    <piece x="3" y="1" orientation="vertical" value1="0" value2="2" />
+    <piece x="3" y="3" orientation="horizontal" value1="2" value2="2" />
+    <piece x="4" y="1" orientation="vertical" value1="4" value2="4" />
 </domino_board>
 \end{minted}
 
+\pagebreak[4]
+
+Description of the \verb|piece| tag:
 \begin{itemize}[noitemsep,nolistsep]
   \item x - coordinate, from zero, increasing from the right to the left side of the board
   \item y - coordinate, from zero, increasing from the top to the bottom side of the board
@@ -100,13 +106,53 @@ XML file.
   \item value2 - value of the end of the piece i.e. location depends on the orientation
 \end{itemize}
 
+\vspace{7pt}
+
+If a tag \verb|removed_pieces| is present inside the \verb|domino_board| tag, it is ignored. If an
+attribute \verb|order| is attached to the \verb|piece| tag, it is also ignored. That way the output file 
+can be used as an input, and pieces can be rearanged and put back on the board using a text editor, without
+worrying about problems with parsing.
+
 \subsection{Output}
+Another XML file.
+
+\begin{minted}[linenos,numbersep=5pt]{xml}
+<domino_board width="5" height="4">
+    <piece x="0" y="0" orientation="vertical" value1="2" value2="1" />
+    <piece x="0" y="2" orientation="vertical" value1="3" value2="2" />
+    <piece x="3" y="0" orientation="horizontal" value1="3" value2="3" />
+    <piece x="4" y="1" orientation="vertical" value1="4" value2="4" />
+    <removed_pieces>
+       <piece order="0" x="1" y="0" orientation="horizontal" value1="1" value2="0" />
+       <piece order="1" x="1" y="1" orientation="vertical" value1="3" value2="0" />
+       <piece order="2" x="2" y="1" orientation="vertical" value1="1" value2="1" />
+       <piece order="3" x="3" y="1" orientation="vertical" value1="0" value2="2" />
+       <piece order="4" x="1" y="3" orientation="horizontal" value1="0" value2="0" />
+       <piece order="5" x="3" y="3" orientation="horizontal" value1="2" value2="2" />
+    </removed_pieces>
+</domino_board>
+\end{minted}
+
+It is an extension of an input format. Program will be designed in such a way, that output from the program 
+can be used again as an input (as it is described in ``Input'' section).
+
+\vspace{7pt}
+
+Description of extension the \verb|piece| tag:
+\begin{itemize}[noitemsep,nolistsep]
+  \item order - number, from zero, increasing in order in which the pieces were removed from the board
+\end{itemize}
+
+\vspace{7pt}
+
+The \verb|removed_pieces| tag contains all of the pieces that were removed from the board, with complete 
+information about their origin. 
 
 \subsection{Class variables}
 Main class of the program is called domino\_problem.
 
 Rough list of fields of the class:
-\begin{minted}[mathescape,linenos,numbersep=5pt,gobble=0,framesep=2mm]{c++}
+\begin{minted}[linenos,numbersep=5pt]{c++}
 /* elements_t is a list of domino pieces */
    // collection of pieces
    elements_t elements;
@@ -131,7 +177,7 @@ Rough list of fields of the class:
 There is also a supporting variable, graph, which stores data about every state analyzed by the
 algorithm.
 \begin{minted}[mathescape,linenos,numbersep=5pt,gobble=0,framesep=2mm]{c++}
-	graph_t graph
+   graph_t graph
 \end{minted}
 
 \subsection{Algorithm}
@@ -168,76 +214,182 @@ a description of instructions instead.
 \end{enumerate}
 
 \section{Description of the approximate algorithms}
-\subsection{Input}
-The same as in case of accurate algorithm.
 
-\subsection{Class variables and algorithm}
-\subsubsection{By Mateusz Bysiek}
+\subsection{By Mateusz Bysiek}
+\subsubsection{Input}
+The same as in case of accurate algorithm.
+\subsubsection{Class variables and algorithm}
 Development of approximations of NP problems is usually a consequence 
 of deep understanding of the problem, and extensive experience in solving it using
 some kind of accurate algorithm. Without them, randomization can be used.
 My approximate algorithm is a polynomial time random algorithm.
 
 It uses the same data structures as mentioned in the accurate algorithm, but it simply randomly
-chooses one possible option and tries to resolve it, in step (8) it does not have any loop.
+chooses one possible option and tries to resolve it (in step 8. it does not have any loop).
 If a dead end is reached, the algorithm ends and returns so-far-calculated path.
 
-\subsubsection{by Stanislaw Peryt}
-% Input Data:
-% collection of domino pieces from input file
-% Description and Class Variables:
-% This algorithm is based on the idea of Greedy algorithms. I assume some additional classification which is done only once for each element. For classification purposes each dominoPiece should contain some additional fields:
-% boolean isIndependent; //can be removed even from empty board, so it does not  have to be removed immediately
-% boolean canBeRemoved; //initially false. Changes to true, when fulfills removal conditions
-% waitingFor - list of pieces for which it is waiting;
-% waitForMe - list of pieces waiting for it;
-% I decided to add this classification, because in greedy strategy, we could remove pieces immediately when they fulfill removal requirements. But it may happen, that there are some pieces, for which pieces we already removed are necessary to fulfill removal requirements. When we have this classification based on scopes of domino pieces, we can wait with removing, and eliminate at least some of those situations described above, providing better local optimal choices.
-% For this algorithm we also need:
-% board – contains all domino pieces that have remained on the board
-% roots – contains possible starting pieces, i.e. containing zero
-% neighbors – contains domino pieces, which are neighbors of deleted piece, i.e. pieces alongside empty fields
-% Algorithm:
-% 1. Create board from input
-% 2. Find possible roots and assign them to neighbors
-% 3. for each dominoPiece in board assign scopes and waiting property
-%    determine scopes based on numbers given on dominoPiece
-%    determine dominoPieces on scopes and assign them to the waitForMe list
-%    tell those pieces to assign this dominoPiece on their waitingFor list
-% 4. stop=false;
-% 5. while(!stop){
-%    for each dominoPiece in neighbors{
-%       if dominoPiece can be removed {
-%          if domino Piece isIndependent&&list of pieces it is waiting for is not empty{
-%             wait with removal;
-%          }
-%          else
-%             remove it(from neighbors and board) and tell waiting pieces, if there were any waiting for this piece, that it does not need waiting any more. (i.e. delete piece from waiting list) 
-%       }
-%    }
-%    determine new neighbors into temp //each removed piece can produce at most 6 new neighbors
-% 
-% 6.       if temp equals neighbors{
-%          check if something can be removed{
-%             remove first;
-%          }
-%          else stop=true;
-%    }
-%       else
-%          neighbors=temp;
-% }
-% 7. calculate score
-% Estimation of complexity:
-% Partial Complexities:
-% n-complexity of classification
-% n^2-complexity of part at “while(!stop) loop”
-% In order to associate attributes for classification we need to iterate once through whole collection which is of size n. Then in the while loop we are trying to remove pieces. In worst case we delete only one piece in one iteration which gives us at most n runs of while and inside while loop, we iterate through neighbors collection which is always smaller than n, but it is n dependent. Therefore for each n, algorithm executes number of operations proportional to n, which gives us quadratic time complexity.
-%    
-% Final worst case complexity : n^2 + n
+\pagebreak[4]
+
+\subsection{by Stanislaw Peryt}
+
+\subsubsection{Input Data}
+collection of domino pieces from input file
+\subsubsection{Description and Class Variables}
+This algorithm is based on the idea of Greedy algorithms. I assume some additional classification
+which is done only once for each element. For classification purposes each dominoPiece should
+contain some additional fields:
+
+\begin{minted}[linenos,numbersep=5pt]{c++}
+boolean isIndependent; //can be removed even from empty board, so it does not have to 
+   // be removed immediately
+boolean canBeRemoved; //initially false. Changes to true, when fulfills removal conditions
+list<waitingFor>; // list of pieces for which it is waiting;
+list<waitForMe>; // list of pieces waiting for it;
+\end{minted}
+
+I decided to add this classification, because in greedy strategy, we could remove pieces immediately
+when they fulfill removal requirements. But it may happen, that there are some pieces, for which
+pieces we already removed are necessary to fulfill removal requirements. When we have this
+classification based on scopes of domino pieces, we can wait with removing, and eliminate at least
+some of those situations described above, providing better local optimal choices.
+
+For this algorithm we also need:
+board – contains all domino pieces that have remained on the board
+roots – contains possible starting pieces, i.e. containing zero
+neighbors – contains domino pieces, which are neighbors of deleted piece, i.e. pieces alongside empty fields
+\subsubsection{Algorithm}
+\begin{enumerate}[noitemsep,nolistsep]
+   \item Create board from input
+   \item Find possible roots and assign them to neighbors
+   \item for each dominoPiece in board assign scopes and waiting property
+   \begin{enumerate}[noitemsep,nolistsep]
+      \item determine scopes based on numbers given on dominoPiece
+      \item determine dominoPieces on scopes and assign them to the waitForMe list
+      \item tell those pieces to assign this dominoPiece on their waitingFor list
+   \end{enumerate}
+   \item stop=false;
+   \item while(!stop)\{
+   \begin{itemize}[noitemsep,nolistsep]
+     \item for each dominoPiece in neighbors\{
+         \begin{enumerate}[noitemsep,nolistsep]
+            \item if dominoPiece can be removed \{
+            \begin{enumerate}[noitemsep,nolistsep]
+               \item if (domino Piece isIndependent) and (list of pieces it is waiting for is not empty) \{ \\
+                  wait with removal; \\
+               \}
+               \item else
+                  remove it(from neighbors and board) and tell waiting pieces, if there were any waiting
+                  for this piece, that it does not need waiting any more. (i.e. delete piece from waiting
+                  list)
+            \end{enumerate}
+            \}
+         \end{enumerate}
+         \} \\
+         determine new neighbors into temp (each removed piece can produce at most 6 new neighbors)
+     \item if temp equals neighbors\{
+         \begin{itemize}[noitemsep,nolistsep]
+            \item check if (something can be removed): remove first;
+            \item else stop=true;
+         \end{itemize}
+         \}
+     \item else neighbors=temp;
+   \end{itemize}
+   \}
+   \item calculate score
+\end{enumerate}
+\subsubsection{Estimation of complexity}
+Partial Complexities:
+
+$n$-complexity of classification
+
+$n^2$-complexity of part at “while(!stop) loop”
+
+In order to associate attributes for classification we need to iterate once through whole collection
+which is of size n. Then in the while loop we are trying to remove pieces. In worst case we delete
+only one piece in one iteration which gives us at most n runs of while and inside while loop, we
+iterate through neighbors collection which is always smaller than n, but it is n dependent.
+Therefore for each n, algorithm executes number of operations proportional to n, which gives us
+quadratic time complexity.
+
+Final worst case complexity : $n^2 + n$
+
+\subsection{by Radoslaw Lojek}
+
+\subsubsection{Introduction}
+The solution I have designed is the most intuitive and straight forward algorithm. It checks all
+possible elements along its way. If a domino piece satisfies necessary conditions of being removed,
+it is thrown away from a board of elements. The operation is repeated for all consecutive elements
+until nothing can't be removed, or the domino board is empty.
+
+\subsubsection{Data structure}
+The data structure I have decided to use is a two dimensional array of objects, where object is a
+single domino field. Each object consists of fields such as: its value, location X and Y, boolean
+saying if a piece is placed horizontally/vertically, boolean saying if it is successor or
+predecessor field (value above or on the left side of a domino piece is successor, otherwise
+predecessor) and of course pointer to the other half of the piece. If a single cell in a matrix is
+empty, meaning that no piece is there, it is marked as a null pointer.
+\\
+\begin{minted}[linenos,numbersep=5pt]{c++}
+class dominoField {
+   int value;
+   int X;
+   int Y; 
+   boolean isSuccessor;
+   boolean isVertical; 
+   dominoField *twinField; 
+}
+\end{minted}
 
 
-%\section{Proof of correctness}
-%-prove, that algorithm is considering all cases, and find optimal one
+\subsubsection{Algorithm Pseudo-Code}
+The algorithm takes as a parameters two dimensional array of elements and its vertical and
+horizontal size. Returns elements that were removed during the calculations. Below algorithm is
+simple, since it does not involve more complicated concepts such as Artificial Intelligence or
+complex graph algorithms.
+\\
+\begin{minted}[linenos,numbersep=5pt]{c++}
+List<dominoPiece> solveDominoProblem(dominoField **board, int dimX, int dimY){
+   List<dominoPiece> result_list;
+   int iterPiecesRemoved = 1;
+   
+   while iterPiecesRemoved != 0 {
+      iterPiecesRemoved = 0;
+      for i = 0 to dimX {
+         for j = 0 to dimY {
+            if !isEmpty(board,i,j) and isElemRemovable(board, dimX, dimY, i, j){ 
+               result_list.add( removePiece(board,i,j) );
+               iterPiecesRemoved = iterPiecesRemoved + 1;
+            }
+         }
+      }
+   }
+   return result_list;
+}
+\end{minted}
 
-%\section{Description of inner data structure, input and output}
+%\begin{wrapfigure}{r}{0.3\textwidth}
+%  \vspace{-30pt}
+  \begin{center}
+    \includegraphics[width=0.2\textwidth]{dirPiece.png}
+  \end{center}
+ % \vspace{-20pt}
+%\end{wrapfigure}
+
+I will let myself omit pseudo code of functions used above. Just briefly explain how isElemRemovable
+will work: depending on the location of a 'twinField' of a single piece, function counts the number
+of empty fields in each possible direction (as depicted on the right). Once the directions are
+counted, function checks if they meet requirements for the piece to be removed - if it does, returns
+true or false otherwise.
+
+\subsubsection{Time complexity}
+Time complexity of the considered algorithm is \textit{$n^2$}, since we go in each iteration 
+through all possible domino fields \textit{n} times. Each iteration is repeated in worst case
+\textit{1/2*n} times, because may occur situation in which only one domino element (two fields)
+disappears in one \textit{while} loop iteration.
+
+\subsubsection{Example}
+
+\includegraphics[width=1\textwidth]{board1.jpg} \\
+\includegraphics[width=0.163\textwidth]{board2.jpg}
 
 \end{document}
