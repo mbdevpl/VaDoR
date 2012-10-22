@@ -1,0 +1,7 @@
+#ifndef ALGORITHM_ENUM_H
+#define ALGORITHM_ENUM_H
+
+
+
+
+#endif // ALGORITHM_ENUM_H

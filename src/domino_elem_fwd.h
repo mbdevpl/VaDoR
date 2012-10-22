@@ -9,4 +9,8 @@ enum half_direction {
    up,down,left,right,none
 };
 
+enum current_algorithm {
+    accurate,mateusz,radek,stanislaw
+};
+
 #endif // DOMINO_ELEM_FWD_H

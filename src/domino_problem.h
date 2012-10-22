@@ -14,7 +14,7 @@
 #include <iostream>
 //#define DEBUG_DOMINO
 #endif
-
+/*
 class domino_problem : public domino_problem_input
 {
 //public:
@@ -153,8 +153,10 @@ private:
       }
       throw std::runtime_error("distance in given direction cannot be measured");
    }
-   static elem_loc_ptr_list find_all_possible_moves(whole_board& b/*, elem_ptr_list& elems*/)
-   {
+   */
+
+//   static elem_loc_ptr_list find_all_possible_moves(whole_board& b/*, elem_ptr_list& elems*/)
+ /*  {
       elem_loc_ptr_list found;
       size_t width = b.length();
       size_t x = 0;
@@ -396,5 +398,5 @@ private:
       return found;
    }
 };
-
+*/
 #endif // DOMINO_PROBLEM_H

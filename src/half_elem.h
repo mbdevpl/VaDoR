@@ -11,6 +11,8 @@ public:
    half_elem* other_half;
    half_direction direction;
    domino_elem_located* owner;
+   int loc_x;
+   int loc_y;
 public:
    half_elem()
       : value(0), other_half(0), direction(none), owner(0) { }

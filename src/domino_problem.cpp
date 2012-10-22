@@ -1,5 +1,5 @@
 #include "domino_problem.h"
-
+/*
 domino_problem::domino_problem(const domino_problem_input& input)
    : elements(input.elements), width(input.width), height(input.height), board(input.board),
      on_board(input.elements), possible(), removed(), unresolved(input.elements),
@@ -131,5 +131,5 @@ void domino_problem::demo_solution()
    std::cout << find_all_possible_moves(board) << std::endl;
    //std::cout << str() << std::endl;
 }
-
-#endif // DEBUG
+*/
+//#endif // DEBUG

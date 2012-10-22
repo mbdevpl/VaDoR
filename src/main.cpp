@@ -17,17 +17,17 @@ int main(int argc, char **argv)
 {
    //all_chars(std::cout);
 
-   //    QApplication app(argc, argv);
-   //    MainWindow w;
-   //    w.show();
-   //    return app.exec();
+       QApplication app(argc, argv);
+       MainWindow w;
+       w.show();
+       return app.exec();
 
-   std::cout << "Vanishing Domino Problem" << std::endl;
+  /* std::cout << "Vanishing Domino Problem" << std::endl;
    domino_problem_input input("problem1.xml");
 #ifdef DEBUG
    std::cout << input << std::endl;
 #endif // DEBUG
-
+*/
 
    //domino_problem prob(pr.width, pr.height, pr.elements);
 

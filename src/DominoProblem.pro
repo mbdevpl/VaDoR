@@ -4,6 +4,8 @@ TEMPLATE = app
 CONFIG += console
 CONFIG += qt
 QT += core gui
+QT += xml
+
 
 # platform specific defines
 unix:DEFINES += LINUX
@@ -32,6 +34,9 @@ HEADERS += \
     domino_problem.h \
     domino_problem_input.h \
     mainwindow.h \
+    domino_problem_r.h \
+    approximate_r.h \
+    summary_window.h
 
 SOURCES += \
     main.cpp \
@@ -41,6 +46,10 @@ SOURCES += \
     domino_problem.cpp \
     domino_problem_input.cpp \
     mainwindow.cpp \
+    domino_problem_r.cpp \
+    approximate_r.cpp \
+    summary_window.cpp
 
 FORMS += \
     mainwindow.ui \
+    summary_window.ui
