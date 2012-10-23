@@ -4,9 +4,9 @@
 #include <limits>
 #include <iomanip>
 
-//#include <streambuf>
-
 #include "domino_problem_input.h"
+#include "domino_problem.h"
+#include "domino_problem_solver.h"
 //#include "simple_container.h"
 //#include "simple_tree.h"
 
@@ -17,32 +17,36 @@ int main(int argc, char **argv)
 {
    //all_chars(std::cout);
 
-       QApplication app(argc, argv);
-       MainWindow w;
-       w.show();
-       return app.exec();
+   QApplication app(argc, argv);
+   //   MainWindow w;
+   //   w.show();
+   //   return app.exec();
 
-  /* std::cout << "Vanishing Domino Problem" << std::endl;
+   // Radziu, czy mozesz po prostu odkomentowac swoj kod, a to co ponizej
+   // zostawic w spokoju? i tak jak jest "return" to nic dalej sie nie wykona
+   //
+   // z gory dzieki :)
+   //
+   std::cout << "Vanishing Domino Problem" << std::endl;
    domino_problem_input input("problem1.xml");
 #ifdef DEBUG
    std::cout << input << std::endl;
 #endif // DEBUG
-*/
+   domino_problem prob(input);
+   domino_problem_solver solver(prob);
+   solver.execute();
 
-   //domino_problem prob(pr.width, pr.height, pr.elements);
+   //#ifdef DEBUG
+   //   prob.demo_solution();
+   //#endif // DEBUG
 
-//#ifdef DEBUG
-//   prob.demo_solution();
-//#endif // DEBUG
+   //   simple_list<domino_problem::elem_list,size_t> solutions = prob.all_best_soluions();
 
-
-//   simple_list<domino_problem::elem_list,size_t> solutions = prob.all_best_soluions();
-
-//   size_t index = 0;
-//   for(simple_list<domino_problem::elem_list,size_t>::elem_const i = solutions.first(); i; ++i)
-//   {
-//      std::cout << index++ << i.value_ref_const() << std::endl;
-//   }
+   //   size_t index = 0;
+   //   for(simple_list<domino_problem::elem_list,size_t>::elem_const i = solutions.first(); i; ++i)
+   //   {
+   //      std::cout << index++ << i.value_ref_const() << std::endl;
+   //   }
 
 #ifdef DEBUG
    //elem_raw<int>::test();
@@ -71,6 +75,7 @@ int main(int argc, char **argv)
    /*std::cout << *///prob.all_best_soluions();
 
    //std::cout << prob.str() << std::endl;
+   return 0;
 }
 
 void all_chars(std::ostream& s)

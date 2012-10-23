@@ -36,7 +36,8 @@ HEADERS += \
     mainwindow.h \
     domino_problem_r.h \
     approximate_r.h \
-    summary_window.h
+    summary_window.h \
+    domino_problem_solver.h
 
 SOURCES += \
     main.cpp \
@@ -48,7 +49,8 @@ SOURCES += \
     mainwindow.cpp \
     domino_problem_r.cpp \
     approximate_r.cpp \
-    summary_window.cpp
+    summary_window.cpp \
+    domino_problem_solver.cpp
 
 FORMS += \
     mainwindow.ui \

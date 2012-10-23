@@ -11,13 +11,17 @@ public:
    half_elem* other_half;
    half_direction direction;
    domino_elem_located* owner;
+//#ifdef RADZIO_WHY
    int loc_x;
    int loc_y;
+//#endif // RADZIO_WHY
 public:
    half_elem()
       : value(0), other_half(0), direction(none), owner(0) { }
    half_elem(domino_elem_value_t value)
       : value(value), other_half(0), direction(none), owner(0) { }
+public:
+
 public:
    friend std::ostream& operator<<(std::ostream& os, const half_elem& domino);
    friend std::ostream& operator<<(std::ostream& os, half_elem* domino);

@@ -1,5 +1,12 @@
 #include "domino_problem_input.h"
 
+
+domino_problem_input::domino_problem_input()
+   : elements(), width(0), height(0), board()
+{
+
+}
+
 domino_problem_input::domino_problem_input(const std::string& path)
    : elements(), width(0), height(0), board()
 {

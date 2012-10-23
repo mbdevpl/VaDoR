@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include <streambuf>
 
 #include <rapidxml.hpp>
 
@@ -23,8 +24,14 @@ protected:
    size_t height;
    // collection of half_elem* that come from 'elements' field
    board_t board;
+protected:
+   domino_problem_input();
 public:
    domino_problem_input(const std::string& path);
+protected:
+   domino_problem_input(const domino_problem_input& input)
+      : elements(input.elements), width(input.width), height(input.height), board(input.board) { }
+public:
    ~domino_problem_input()
    {
       // delete elements!

@@ -90,6 +90,8 @@ class simple_list
 {
 private:
    typedef simple_list<T,L> C;
+
+private:
    // Single element of the list, pointing to the next and previous elements.
    class elem_raw
    {
@@ -186,6 +188,8 @@ public:
         \param value value of the inserted element
         */
       void insertPrev(const T& value);
+      void removeAndBack();
+      void removeBefore();
       /*!
         \brief Releases the memory reserved for this element.
 
@@ -193,6 +197,8 @@ public:
         this method removes the element from the list.
         */
       void remove();
+      void removeAfter();
+      void removeAndForward();
    public:
       static inline void clear(elem& element) { element.clear(); }
 #ifdef DEBUG
@@ -497,6 +503,22 @@ void simple_list<T,L>::elem::insertPrev(const T& value)
 }
 
 template<typename T, typename L>
+void simple_list<T,L>::elem::removeAndBack()
+{
+   elem e(*this);
+   back();
+   e.remove();
+}
+
+template<typename T, typename L>
+void simple_list<T,L>::elem::removeBefore()
+{
+   elem e(*this);
+   e.back();
+   e.remove();
+}
+
+template<typename T, typename L>
 void simple_list<T,L>::elem::remove()
 {
    if(empty())
@@ -517,6 +539,22 @@ void simple_list<T,L>::elem::remove()
          c->last_elem.back();
    }
    delete_and_clear();
+}
+
+template<typename T, typename L>
+void simple_list<T,L>::elem::removeAfter()
+{
+   elem e(*this);
+   e.forward();
+   e.remove();
+}
+
+template<typename T, typename L>
+void simple_list<T,L>::elem::removeAndForward()
+{
+   elem e(*this);
+   forward();
+   e.remove();
 }
 
 template<typename T, typename L>
@@ -776,6 +814,8 @@ std::ostream& simple_list<T,L>::elem::test(std::ostream& s)
    f.insertPrev(0);
 
    f.remove();
+   f.removeBefore();
+   f.removeAfter();
    elem::clear(f);
    f.delete_and_clear();
 
