@@ -41,7 +41,8 @@ private:
    // Single element of the tree, pointing to the root and sub-elements.
    class elem_raw
    {
-      ELEM_RAW_BASIC;
+      ELEM_RAW_BASIC
+      ;
    private:
       // Pointer to the root element.
       elem_raw* ptr_root;
@@ -72,8 +73,10 @@ public:
    // Advanced pointer to the element of the tree, const-correct.
    class elem_const
    {
-      ELEM_CONST_BASIC;
-      ELEM_CONST_TRAVERSE(left,right);
+      ELEM_CONST_BASIC
+      ;
+      ELEM_CONST_TRAVERSE(left,right)
+      ;
    public:
       inline bool hasRoot() const;
       S subCount() const { return e->subCount(); }
@@ -102,8 +105,13 @@ public:
    // Advanced pointer to the element of the tree. Can be used to modify the tree.
    class elem : public elem_const
    {
-      ELEM_BASIC;
-      ELEM_TRAVERSE(left,right);
+      ELEM_BASIC
+      ;
+      ELEM_TRAVERSE(left,right)
+      ;
+   public:
+      // Returns list of all subelements.
+      simple_list<elem,S> subList();
    public:
       // Goes to the root element.
       elem& root();
@@ -119,6 +127,8 @@ public:
       elem& sub();
       // Goes to the sub-element with given index (n-th child).
       elem& sub(S index);
+      // Goes to the last sub-element.
+      elem& lastSub();
    public:
       void insertAbove(const T& value);
       void insertLeftmost(const T& value);
@@ -159,6 +169,14 @@ protected:
 public:
    const simple_list<const T*,S> getHorizontalList(S level) const;
    const simple_list<const T*,S> getVerticalList(S subelemIndex) const;
+public:
+   simple_list<simple_list<typename simple_tree<T,S>::elem,S>,S> find_all_longest_paths(
+         S lengthLimit = 0, typename simple_tree<T,S>::elem startingPoint = elem()) const;
+   simple_list<typename simple_tree<T,S>::elem,S> simple_tree<T,S>::find_first_longest_path(
+         S lengthLimit = 0, typename simple_tree<T,S>::elem startingPoint = elem()) const;
+private:
+   void longest_path(S lengthLimit, typename simple_tree<T,S>::elem currentElem, S length,
+                     simple_list<simple_list<typename simple_tree<T,S>::elem,S>,S>& paths, S index) const;
 #ifdef DEBUG
 public:
    static std::ostream& test(std::ostream& s = std::cout);
@@ -245,6 +263,20 @@ const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::right
 //// simple_tree::elem
 
 template<typename T, typename S>
+typename simple_list<typename simple_tree<T,S>::elem,S> simple_tree<T,S>::elem::subList()
+{
+   simple_list<simple_tree<T,S>::elem_raw*,S> raw_sub = e->subList();
+   simple_list<elem,S> sub_elems;
+   for(simple_list<simple_tree<T,S>::elem_raw*,S>::elem i = raw_sub.first(); i ; ++i)
+   {
+      elem el(*this);
+      el.e = *i;
+      sub_elems.append(el);
+   }
+   return sub_elems;
+}
+
+template<typename T, typename S>
 typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::left()
 {
    if(empty())
@@ -301,6 +333,40 @@ typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::sub()
    return *this;
 }
 
+template<typename T, typename S>
+typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::sub(S index)
+{
+   if(empty())
+      return *this;
+   if(subCount() == 0)
+   {
+      clear();
+      return *this;
+   }
+   simple_list<C::elem_raw*,S>::elem element = e->subList().element(index);
+   if(element.empty())
+   {
+      clear();
+      return *this;
+   }
+   e = element.value_ref();
+   return *this;
+}
+
+
+template<typename T, typename S>
+typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::lastSub()
+{
+   if(empty())
+      return *this;
+   if(subCount() == 0)
+   {
+      clear();
+      return *this;
+   }
+   e = e->subList().last().value_ref();
+   return *this;
+}
 
 //template<typename T, typename S>
 //simple_list<simple_tree<T,S>::elem,S> simple_tree<T,S>::elem::subList()
@@ -472,6 +538,81 @@ const simple_list<const T*,S> simple_tree<T,S>::getVerticalList(S subelemIndex) 
    return elem_ptrs;
 }
 
+template<typename T, typename S>
+simple_list<simple_list<typename simple_tree<T,S>::elem,S>,S> simple_tree<T,S>::find_all_longest_paths(
+      S lengthLimit, typename simple_tree<T,S>::elem startingPoint) const
+{if(lengthLimit == 0)
+      lengthLimit = count();
+   elem start(startingPoint.empty()? root_elem.copy() : startingPoint);
+
+   simple_list<simple_list<simple_tree<T,S>::elem,S>,S> paths;
+   paths.append(simple_list<elem,S>());
+
+   longest_path(lengthLimit, start, 0, paths, 0);
+
+#ifdef DEBUG
+   for(S i=0; i < paths.length(); ++i)
+   {
+      std::cout << paths[i].length() << " ";
+      for(S j=0; j < paths[i].length(); ++j)
+         std::cout << paths[i][j]/*.value_ref().removed_str()*/ << ",";
+      std::cout << "\n";
+   }
+#endif
+
+   S max_len = 0;
+   for(simple_list<simple_list<simple_tree<T,S>::elem,S>,S>::elem i = paths.first();
+       i; ++i)
+   {
+      S len = (*i).length();
+      if(len > max_len)
+         max_len = len;
+   }
+   for(simple_list<simple_list<simple_tree<T,S>::elem,S>,S>::elem i = paths.first();
+       i;)
+      if((*i).length() < max_len)
+         i.removeAndForward();
+      else
+         i.forward();
+
+   return paths;
+}
+
+template<typename T, typename S>
+simple_list<typename simple_tree<T,S>::elem,S> simple_tree<T,S>::find_first_longest_path(
+      S lengthLimit, typename simple_tree<T,S>::elem startingPoint) const
+{
+   simple_list<simple_list<simple_tree<T,S>::elem,S>,S> paths = find_all_longest_paths(lengthLimit, startingPoint);
+   return paths[0];
+}
+
+template<typename T, typename S>
+void simple_tree<T,S>::longest_path(S lengthLimit, typename simple_tree<T,S>::elem currentElem, S length,
+                                    simple_list<simple_list<typename simple_tree<T,S>::elem,S>,S>& paths,
+                                    S index) const
+{
+   paths[index].append(currentElem);
+   length++;
+   S sub_count = currentElem.subCount();
+   if(length >= lengthLimit || sub_count == 0)
+      return;
+   simple_list<elem,S> subs = currentElem.subList();
+   bool first = true;
+   simple_list<elem,S> backup(paths[index]);
+   for(simple_list<elem,S>::elem sub = subs.first(); sub; ++sub)
+   {
+      if(first)
+      {
+         first = false;
+         longest_path(lengthLimit, *sub, length, paths, index);
+         continue;
+      }
+      paths.append(simple_list<elem,S>(backup));
+      longest_path(lengthLimit, *sub, length, paths, paths.length()-1);
+   }
+}
+
+
 #ifdef DEBUG
 
 template<typename T, typename S>
@@ -492,6 +633,15 @@ template<typename T, typename S>
 std::ostream& simple_tree<T,S>::elem::test(std::ostream& s)
 {
    ELEM_BASIC_TEST;
+   elem e;
+   e.left(2);
+   e.left();
+   e.right();
+   e.right(2);
+   e.sub();
+   e.sub(2);
+   e.lastSub();
+   e.hasRoot();
    return s;
 }
 

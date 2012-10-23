@@ -59,7 +59,7 @@ void domino_problem::scan_board()
       domino_elem_located* e = i.value_ref();
       size_t& x = e->x;
       size_t& y = e->y;
-      if(can_be_removed(x, y) && possible.find(e).empty())
+      if(can_be_removed(x, y)/*&& possible.find(e).empty()*/)
          possible.append(e);
    }
 }
@@ -74,6 +74,8 @@ void domino_problem::add_possible_outcomes(simple_list<domino_problem,size_t>& o
       domino_problem& pr = outcomes.last().value_ref();
       domino_elem_located* e = i.value_ref();
       pr.remove_at(e->x, e->y);
+      pr.possible.clear();
+      pr.scan_board();
    }
 }
 
@@ -83,6 +85,13 @@ simple_list<domino_problem,size_t> domino_problem::get_possible_outcomes()
    results_t outcomes;
    add_possible_outcomes(outcomes);
    return outcomes;
+}
+
+bool domino_problem::state_equals(const domino_problem& problem)
+{
+   if(problem.on_board == on_board)
+      return true;
+   return false;
 }
 
 bool domino_problem::can_be_removed(size_t x, size_t y)
@@ -219,6 +228,7 @@ void domino_problem::remove_at(size_t x, size_t y)
 {
    half_elem*& he = board[x][y];
    domino_elem_located* e = he->owner;
+   removed.append(e);
    possible.find(e).remove();
    checked.find(e).remove();
    on_board.find(e).remove();
@@ -229,43 +239,20 @@ void domino_problem::remove_at(size_t x, size_t y)
       board[e->x+1][e->y] = 0;
 }
 
-//simple_list<domino_problem::elements_t,size_t> domino_problem::all_best_soluions()
-//{
-//   simple_list<domino_problem::elem_list,size_t> solutions;
-//   //simple_tree<whole_board,size_t> partial(board);
-
-//   size_t problem_size = width * height;
-
-//   for(size_t i=0; i < problem_size; ++i)
-//   {
-//      elem_loc_ptr_list moves = find_all_possible_moves(board);
-//      //solutions
-
-//      for(size_t i=0; i < problem_size; ++i)
-//      {
-
-//      }
-//   }
-
-//   return solutions;
-//}
-
 #ifdef DEBUG
 
-//void domino_problem::demo_solution()
-//{
-//   std::cout << find_all_possible_moves(board) << std::endl;
-//   //std::cout << str() << std::endl;
+void domino_problem::demo_solution()
+{
+   //std::cout << find_all_possible_moves(board) << std::endl;
+   std::cout << board_str() << std::endl;
+   remove_at(2, 0);
 
-//   removeAt(2, 0, board, elements);
+   //std::cout << find_all_possible_moves(board) << std::endl;
+   std::cout << board_str() << std::endl;
+   remove_at(1, 1);
 
-//   std::cout << find_all_possible_moves(board) << std::endl;
-//   //std::cout << str() << std::endl;
-
-//   removeAt(1, 1, board, elements);
-
-//   std::cout << find_all_possible_moves(board) << std::endl;
-//   //std::cout << str() << std::endl;
-//}
+   //std::cout << find_all_possible_moves(board) << std::endl;
+   std::cout << board_str() << std::endl;
+}
 
 #endif // DEBUG

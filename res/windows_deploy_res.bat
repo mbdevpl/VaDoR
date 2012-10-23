@@ -7,11 +7,13 @@ call rmdir ..\bin\windows\VanishingDominoProblem_debug\pictures /s /q
 call mkdir ..\bin\windows\VanishingDominoProblem_debug\pictures
 call xcopy ..\src\pictures ..\bin\windows\VanishingDominoProblem_debug\pictures /v /f /s /y
 call COPY /Y /B problem1.xml ..\bin\windows\VanishingDominoProblem_debug\problem1.xml
+call COPY /Y /B problem2.txt ..\bin\windows\VanishingDominoProblem_debug\problem2.txt
 
 REM release
 call rmdir ..\bin\windows\VanishingDominoProblem\pictures /s /q
 call mkdir ..\bin\windows\VanishingDominoProblem\pictures
 call xcopy ..\src\pictures ..\bin\windows\VanishingDominoProblem\pictures /v /f /s /y
 call COPY /Y /B problem1.xml ..\bin\windows\VanishingDominoProblem\problem1.xml
+call COPY /Y /B problem2.txt ..\bin\windows\VanishingDominoProblem\problem2.txt
 
 exit /B 0

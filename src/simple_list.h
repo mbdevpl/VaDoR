@@ -95,7 +95,8 @@ private:
    // Single element of the list, pointing to the next and previous elements.
    class elem_raw
    {
-      ELEM_RAW_BASIC;
+      ELEM_RAW_BASIC
+      ;
    private:
       //T elem_value;
       // Pointer to the next element.
@@ -125,8 +126,10 @@ public:
    // Advanced pointer to the element of the list, const-correct.
    class elem_const
    {
-      ELEM_CONST_BASIC;
-      ELEM_CONST_TRAVERSE(back,forward);
+      ELEM_CONST_BASIC
+      ;
+      ELEM_CONST_TRAVERSE(back,forward)
+      ;
    public:
       // Moves back by the specified ammount.
       const elem_const& back(L count) const;
@@ -146,8 +149,10 @@ public:
    // Advanced pointer to the element of the list. Can be used to modify the list.
    class elem : public elem_const
    {
-      ELEM_BASIC;
-      ELEM_TRAVERSE(back,forward);
+      ELEM_BASIC
+      ;
+      ELEM_TRAVERSE(back,forward)
+      ;
    public:
       // Goes to the next element.
       elem& forward();
@@ -266,6 +271,7 @@ public:
    inline simple_list<T,L>& operator=(const simple_list<T,L>& list) { return initFrom(list); }
    // Concatenates two lists.
    inline simple_list<T,L>& operator+=(const simple_list<T,L>& list) { return append(list); }
+   bool operator==(const simple_list<T,L>& list) const;
 public:
 #ifndef SIMPLE_LIST_NOSTRINGS
    std::string str() const;
@@ -752,6 +758,20 @@ typename T& simple_list<T,L>::operator[](const L& index)
    return element(index).value_ref();
 }
 
+template<typename T, typename L>
+bool simple_list<T,L>::operator==(const simple_list<T,L>& list) const
+{
+   if(list.length() != length())
+      return false;
+   for(C::elem_const e1 = first(), e2 = list.first(); e1; ++e1, ++e2)
+   {
+      if(*e1 == *e2)
+         continue;
+      return false;
+   }
+   return true;
+}
+
 #ifndef SIMPLE_LIST_NOSTRINGS
 
 template<typename T, typename L>
@@ -761,7 +781,8 @@ std::string simple_list<T,L>::str() const
    s << '{';
    for(simple_list<T,L>::elem_const e = first(); e; ++e)
    {
-      s << ' ' << *e;
+      s << ' ';
+      s << e.value_ref_const();
       if(e != last())
          s << ',';
    }

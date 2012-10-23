@@ -1,81 +1,84 @@
+
+
+
+// In order to not launch GUI, but only test algorithms in the console,
+// uncomment the following define.
+//
+// In order to run GUI, comment it.
+#define ALGORITHM_TESTING
+
+
+#ifndef ALGORITHM_TESTING
+
 #include <QtGui/QApplication>
+#include "mainwindow.h"
+
+#else // ALGORITHM_TESTING
+
 #include <iostream>
+#include "domino_problem_input.h"
+#include "domino_problem.h"
+#include "domino_problem_solver.h"
+#include "simple_list.h"
+
+#endif // ALGORITHM_TESTING
+
+// needed by all_chars()
 #include <ostream>
 #include <limits>
 #include <iomanip>
 
-#include "domino_problem_input.h"
-#include "domino_problem.h"
-#include "domino_problem_solver.h"
-//#include "simple_container.h"
-//#include "simple_tree.h"
-
-#include "mainwindow.h"
 void all_chars(std::ostream& s);
 
 int main(int argc, char **argv)
 {
    //all_chars(std::cout);
 
-   QApplication app(argc, argv);
-   //   MainWindow w;
-   //   w.show();
-   //   return app.exec();
+#ifndef ALGORITHM_TESTING
 
-   // Radziu, czy mozesz po prostu odkomentowac swoj kod, a to co ponizej
-   // zostawic w spokoju? i tak jak jest "return" to nic dalej sie nie wykona
-   //
-   // z gory dzieki :)
-   //
+   QApplication app(argc, argv);
+   MainWindow w;
+   w.show();
+   return app.exec();
+
+#else // ALGORITHM_TESTING
+
    std::cout << "Vanishing Domino Problem" << std::endl;
    domino_problem_input input("problem1.xml");
 #ifdef DEBUG
    std::cout << input << std::endl;
+#else
+#ifdef RELEASE
+   std::cout << std::endl << "Example input:" << std::endl;
+   std::cout << input.board_str() << std::endl << std::endl;
+#endif // RELEASE
 #endif // DEBUG
+
    domino_problem prob(input);
+   std::cout << "Problem defined!" << std::endl;
+
    domino_problem_solver solver(prob);
+   std::cout << "Solver initialized!" << std::endl;
+
    solver.execute();
 
-   //#ifdef DEBUG
-   //   prob.demo_solution();
-   //#endif // DEBUG
+   std::cout << "Building graph done!" << std::endl;
+   simple_list<domino_problem,size_t> frst = solver.find_first_best_solution();
+   std::cout << std::endl << "Best solution:" << std::endl;
+   for(simple_list<domino_problem,size_t>::elem i = frst.first(); i; ++i)
+      std::cout << i.value_ref().board_str() << std::endl << std::endl;
 
-   //   simple_list<domino_problem::elem_list,size_t> solutions = prob.all_best_soluions();
+   //   simple_list<simple_list<domino_problem,size_t>,size_t> all = solver.find_all_best_solutions();
+   //   std::cout << "List of all best solutions:" << std::endl;
+   //   size_t count = 0;
+   //   for(simple_list<simple_list<domino_problem,size_t>,size_t>::elem list = all.first();
+   //       list; ++list, ++count)
+   //      std::cout << std::endl << "Solution:" << std::endl << list << std::endl;
 
-   //   size_t index = 0;
-   //   for(simple_list<domino_problem::elem_list,size_t>::elem_const i = solutions.first(); i; ++i)
-   //   {
-   //      std::cout << index++ << i.value_ref_const() << std::endl;
-   //   }
-
-#ifdef DEBUG
-   //elem_raw<int>::test();
-   //simple_tree<int,size_t> x;
-   //elem_raw<int,size_t,342> e(256,nullptr);
-   //simple_tree<int,size_t>::test();
-   //e2.subCount();
-#endif // DEBUG
-
-   //   domino_problem::elem_loc_list e;
-   //   e.append(domino_elem_located(2, 1, true, 0, 0));
-   //   e.append(domino_elem_located(3, 2, true, 0, 2));
-   //   e.append(domino_elem_located(1, 0, false, 1, 0));
-   //   e.append(domino_elem_located(3, 0, true, 1, 1));
-   //   e.append(domino_elem_located(0, 0, false, 1, 3));
-   //   e.append(domino_elem_located(1, 1, true, 2, 1));
-   //   e.append(domino_elem_located(3, 3, false, 3, 0));
-   //   e.append(domino_elem_located(0, 2, true, 3, 1));
-   //   e.append(domino_elem_located(2, 2, false, 3, 3));
-   //   e.append(domino_elem_located(4, 4, true, 4, 1));
-
-   //size_t len = row1.length();
-
-   //   domino_problem prob(5, 4, e);
-
-   /*std::cout << *///prob.all_best_soluions();
-
-   //std::cout << prob.str() << std::endl;
    return 0;
+
+#endif // ALGORITHM_TESTING
+
 }
 
 void all_chars(std::ostream& s)

@@ -7,7 +7,7 @@
 class domino_problem_solver : public domino_problem
 {
    typedef simple_tree<domino_problem,size_t> states_t;
-private:
+protected:
    // stores
    states_t states;
 public:
@@ -23,6 +23,9 @@ private:
    void construct_full_tree();
    // constructs a tree until a full solution is found
    void construct_tree();
+public:
+    simple_list<domino_problem,size_t> find_first_best_solution();
+    simple_list<simple_list<domino_problem,size_t>,size_t> find_all_best_solutions();
 };
 
 #endif // DOMINO_PROBLEM_SOLVER_H

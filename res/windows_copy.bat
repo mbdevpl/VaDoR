@@ -10,11 +10,13 @@ call rmdir ..\build_qt481_msvc2010_debug\pictures /s /q
 call mkdir ..\build_qt481_msvc2010_debug\pictures
 call xcopy ..\src\pictures ..\build_qt481_msvc2010_debug\pictures /v /f /s /y
 call COPY /Y /B problem1.xml ..\build_qt481_msvc2010_debug\problem1.xml
+call COPY /Y /B problem2.txt ..\build_qt481_msvc2010_debug\problem2.txt
 
 REM release
 call rmdir ..\build_qt481_msvc2010_release\pictures /s /q
 call mkdir ..\build_qt481_msvc2010_release\pictures
 call xcopy ..\src\pictures ..\build_qt481_msvc2010_release\pictures /v /f /s /y
 call COPY /Y /B problem1.xml ..\build_qt481_msvc2010_release\problem1.xml
+call COPY /Y /B problem2.txt ..\build_qt481_msvc2010_release\problem2.txt
 
 exit /B 0
