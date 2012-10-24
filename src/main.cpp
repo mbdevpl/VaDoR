@@ -44,10 +44,11 @@ int main(int argc, char **argv)
 #else // ALGORITHM_TESTING
 
    std::cout << "Vanishing Domino Problem" << std::endl;
-   domino_problem_input input("problem1.xml");
+   domino_problem_input input("problem2.txt");
 #ifdef DEBUG
    std::cout << input << std::endl;
 #else
+
 #ifdef RELEASE
    std::cout << std::endl << "Example input:" << std::endl;
    std::cout << input.board_str() << std::endl << std::endl;

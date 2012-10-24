@@ -1,7 +1,9 @@
 #ifndef DOMINO_PROBLEM_INPUT_H
 #define DOMINO_PROBLEM_INPUT_H
 
+#include <iostream>
 #include <fstream>
+#include <cstring>
 #include <string>
 #include <streambuf>
 
@@ -11,8 +13,23 @@
 #include "half_elem.h"
 #include "domino_elem_located.h"
 
+using std::cout;
+using std::endl;
+
+using std::ifstream;
+
+const int MAX_CHARS_PER_LINE = 128;
+const int MAX_TOKENS_PER_LINE = 5;
+const char* const DELIMITER = ";";
+
+
+
 class domino_problem_input
 {
+private:
+    void read_xml(const std::string& path);
+    void read_txt(const std::string& path);
+
 protected:
    typedef simple_list<domino_elem_located*,size_t> elements_t;
    typedef simple_list<half_elem*,size_t> column_t;
