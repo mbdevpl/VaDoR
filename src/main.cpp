@@ -15,12 +15,28 @@
 #include <limits>
 #include <iomanip>
 
+#include "binary_hash.h"
+
 void all_chars(std::ostream& s);
 
 int main(int argc, char **argv)
 {
    //all_chars(std::cout);
    //simple_list<int,size_t>::test();
+
+//   binary_hash h(4);
+//   std::cout << h.put(1 << 3) << "\n";
+//   std::cout << h.put(1 << 2) << "\n";
+//   std::cout << h.put(10) << "\n";
+//   std::cout << h.put(5) << "\n";
+//   std::cout << h.put(10) << "\n\n";
+//   std::cout << h.pop(10) << "\n";
+//   std::cout << h.put(10) << "\n\n";
+//   std::cout << h.check(16) << "\n";
+//   std::cout << h.put(0) << "\n";
+//   std::cout << h.check(16) << "\n";
+//   std::cout << h.check(5) << "\n";
+   //return 0;
 
    program_args args(argc, argv);
 

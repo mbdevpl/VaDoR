@@ -57,6 +57,8 @@ private:
    // checks all unresolved pieces to know which cannot be removed at all
    void resolve_elements();
 public:
+   const elements_t::elem_const elements_first() const { return elements->first(); }
+   size_t size() const { return elements->length(); }
    inline domino_elem_located* elem(size_t index) { return elements->element(index).value_ref(); }
    inline size_t w() { return width; }
    inline size_t h() { return height; }

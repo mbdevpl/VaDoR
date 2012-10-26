@@ -38,7 +38,8 @@ HEADERS += \
     approximate_r.h \
     summary_window.h \
     domino_problem_solver.h \
-    program_args.h
+    program_args.h \
+    binary_hash.h
 
 SOURCES += \
     main.cpp \
@@ -52,7 +53,8 @@ SOURCES += \
     approximate_r.cpp \
     summary_window.cpp \
     domino_problem_solver.cpp \
-    program_args.cpp
+    program_args.cpp \
+    binary_hash.cpp
 
 FORMS += \
     mainwindow.ui \

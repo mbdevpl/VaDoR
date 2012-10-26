@@ -30,6 +30,7 @@ protected:
 public:
    domino_problem();
    domino_problem(const domino_problem& problem);
+   domino_problem(const domino_problem& problem, bool copy_possible);
    domino_problem(const domino_problem_input& input);
 public:
    // scans board to find removable pieces
@@ -43,6 +44,7 @@ private:
    size_t distance(size_t x, size_t y, half_direction dir);
    void remove_at(size_t x, size_t y);
 public:
+   const elements_t::elem_const on_board_first() const { return on_board.first(); }
    ull on_board_length() const { return on_board.length(); }
    ull possible_length() const { return possible.length(); }
    ull removed_length() const { return removed.length(); }

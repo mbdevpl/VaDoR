@@ -1,7 +1,7 @@
 #include "domino_problem_solver.h"
 
 domino_problem_solver::domino_problem_solver(const domino_problem& problem)
-   : domino_problem(problem), states(problem)
+   : domino_problem(problem), states(problem), in_tree(problem.size())
 {
    //
 }
@@ -16,7 +16,6 @@ void domino_problem_solver::execute(bool optimized)
 
 void domino_problem_solver::construct_full_tree(bool depthFirst)
 {
-   //typedef simple_list<domino_problem,size_t> outcomes_t;
    solution_t outcomes;
    simple_list<states_t::elem,size_t> new_states;
    new_states.append(states.root());
@@ -42,16 +41,19 @@ void domino_problem_solver::construct_full_tree(bool depthFirst)
    std::cout << std::endl;
    //#endif // DEBUG
 
+   new_states.first().value_ref().value_ref().scan_board();
+
    while(new_states.length() > 0)
    {
       simple_list<states_t::elem,size_t>::elem state_elem
             = depthFirst ? new_states.last() : new_states.first();
       states_t::elem& state = *state_elem;
       domino_problem& problem = *state;
-      problem.scan_board();
-      ull len_before = outcomes.length(); // remember length
+      //problem.scan_board();
+      outcomes.clear();
+      //ull len_before = outcomes.length(); // remember length
       problem.add_possible_outcomes(outcomes);
-      ull len_after = outcomes.length(); // check new length
+      //ull len_after = outcomes.length(); // check new length
 
       //#ifdef DEBUG
       //      //std::cout << "  From:";
@@ -74,22 +76,22 @@ void domino_problem_solver::construct_full_tree(bool depthFirst)
       //      //std::cout << std::endl;
       //#endif // DEBUG
       // iterate over all new possible states
-      for(solution_t::elem i = outcomes.element(len_before); i; ++i)
+      for(solution_t::elem i = outcomes.first()/*element(len_before)*/; i; ++i)
       {
          // if the state is already in the tree, do not add it,
          // but simply connect the current state to the existing one
-         bool already_in_tree = false;
-         domino_problem& pr1 = *i;
-         size_t count = 0;
-         for(solution_t::elem it = outcomes.first(); it && count < len_before; ++it, ++count)
+         ull key = 0;
+         for(elements_t::elem_const el = (*i).elements_first(), on = (*i).on_board_first(); el; ++el)
          {
-            domino_problem& pr2 = *it;
-            if(pr1.state_equals(pr2))
+            key <<= 1;
+            if(on && *el == *on)
             {
-               already_in_tree = true;
-               break;
+               key += 1;
+               ++on;
             }
          }
+         bool already_in_tree = !in_tree.put(key);
+
          if(already_in_tree)
          {
             //#ifdef DEBUG
@@ -105,10 +107,8 @@ void domino_problem_solver::construct_full_tree(bool depthFirst)
          }
          state.appendSub(*i); // add new substate to the tree of states
          new_states.append(state.copy().lastSub());
-         //states_t::elem best_state_maybe = state.copy().lastSub();
-         //if(best_state_maybe best_state.value_ref().on_board_length())
 
-         ++len_before;
+         //++len_before;
          //#ifdef DEBUG
          //std::cout << "Added a new state!\n";
          //#endif // DEBUG
@@ -121,7 +121,6 @@ void domino_problem_solver::construct_full_tree(bool depthFirst)
                    << "; pieces left: " << std::setw(3) << std::setfill(' ') << problem.on_board_length();
          std::cout << std::endl;
       }
-      //states_t::elem best_state_maybe = state_elem.copy();
       if(problem.on_board_length() < best_on_board)
       {
          best_state = state.copy();

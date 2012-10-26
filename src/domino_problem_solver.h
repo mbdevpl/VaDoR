@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iomanip>
 #include "simple_tree.h"
+#include "binary_hash.h"
 
 #ifdef DEBUG
 #endif // DEBUG
@@ -19,6 +20,9 @@ protected:
    // stores the currently known best state (first reached state
    //  with as few domino pieces on board as possible)
    states_t::elem best_state;
+   // hash table backed by binary tree, used to check very very quickly if a
+   // given state is already in the tree
+   binary_hash in_tree;
 public:
    domino_problem_solver(const domino_problem& problem);
 private:

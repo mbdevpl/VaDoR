@@ -5,7 +5,15 @@ domino_problem::domino_problem()
 
 domino_problem::domino_problem(const domino_problem& problem)
    : domino_problem_input(problem), on_board(problem.on_board), possible(problem.possible),
-     removed(problem.removed)/*, checked(problem.checked)*/ { }
+     removed(problem.removed) { }
+
+domino_problem::domino_problem(const domino_problem& problem, bool copy_possible)
+   : domino_problem_input(problem), on_board(problem.on_board),
+     possible(), removed(problem.removed)
+{
+   if(copy_possible)
+      possible.initFrom(problem.possible);
+}
 
 domino_problem::domino_problem(const domino_problem_input& input)
    : domino_problem_input(input), on_board(*elements), possible(), removed()/*, checked()*/
@@ -32,11 +40,11 @@ void domino_problem::add_possible_outcomes(domino_problem::solution_t& outcomes)
       return;
    for (elements_t::elem i = possible.first(); i; ++i)
    {
-      outcomes.append(domino_problem(*this));
+      outcomes.append(domino_problem(*this, false));
       domino_problem& pr = outcomes.last().value_ref();
       domino_elem_located* e = i.value_ref();
       pr.remove_at(e->x, e->y);
-      pr.possible.clear();
+      //pr.possible.clear();
       pr.scan_board();
    }
 }
