@@ -1,55 +1,17 @@
 #include "domino_problem.h"
 
 domino_problem::domino_problem()
-   : domino_problem_input(), on_board(), possible(), removed(),
-     unresolved(), checked(), invalid() { }
+   : domino_problem_input(), on_board(), possible(), removed()/*, checked()*/ { }
 
 domino_problem::domino_problem(const domino_problem& problem)
    : domino_problem_input(problem), on_board(problem.on_board), possible(problem.possible),
-     removed(problem.removed),
-     unresolved(problem.unresolved), checked(problem.checked), invalid(problem.invalid) { }
+     removed(problem.removed)/*, checked(problem.checked)*/ { }
 
 domino_problem::domino_problem(const domino_problem_input& input)
-   : domino_problem_input(input), on_board(elements), possible(), removed(),
-     unresolved(elements), checked(), invalid()
+   : domino_problem_input(input), on_board(*elements), possible(), removed()/*, checked()*/
 {
-   resolve_elements();
-   scan_board();
-}
-
-void domino_problem::resolve_elements()
-{
-   if(unresolved.length() == 0)
-      return;
-   for(elements_t::elem i = unresolved.first(); i; i.removeAndForward())
-   {
-      domino_elem_located* e = i.value_ref();
-      size_t& x = e->x;
-      size_t& y = e->y;
-      domino_elem_value_t v1 = e->h1.value;
-      domino_elem_value_t v2 = e->h2.value;
-
-      if(e->is_vertical)
-      {
-         // up & down
-         // left & right
-         if(v1 > y && v2 >= height - y
-               && (v1 > x || v2 > x) && (v1 >= width - x || v2 >= width - x) )
-            invalid.append(e);
-         else
-            checked.append(e);
-      }
-      else
-      {
-         // left & right
-         // up & down
-         if(v1 > x || v2 >= width - x
-               && (v1 > y || v2 > y) && (v1 >= height - y || v2 >= height - y) )
-            invalid.append(e);
-         else
-            checked.append(e);
-      }
-   }
+   //resolve_elements();
+   //scan_board();
 }
 
 void domino_problem::scan_board()
@@ -59,12 +21,12 @@ void domino_problem::scan_board()
       domino_elem_located* e = i.value_ref();
       size_t& x = e->x;
       size_t& y = e->y;
-      if(can_be_removed(x, y)/*&& possible.find(e).empty()*/)
+      if(can_be_removed(x, y))
          possible.append(e);
    }
 }
 
-void domino_problem::add_possible_outcomes(simple_list<domino_problem,size_t>& outcomes)
+void domino_problem::add_possible_outcomes(domino_problem::solution_t& outcomes)
 {
    if(possible.length() == 0)
       return;
@@ -79,10 +41,10 @@ void domino_problem::add_possible_outcomes(simple_list<domino_problem,size_t>& o
    }
 }
 
-simple_list<domino_problem,size_t> domino_problem::get_possible_outcomes()
+domino_problem::solution_t domino_problem::get_possible_outcomes()
 {
-   typedef simple_list<domino_problem,size_t> results_t;
-   results_t outcomes;
+   //typedef simple_list<domino_problem,size_t> results_t;
+   solution_t outcomes;
    add_possible_outcomes(outcomes);
    return outcomes;
 }

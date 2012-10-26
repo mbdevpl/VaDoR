@@ -1,19 +1,37 @@
 #include "domino_problem_input.h"
 
-
-domino_problem_input::domino_problem_input()
-    : elements(), width(0), height(0), board()
-{
-
-}
-
 domino_problem_input::domino_problem_input(const std::string& path)
-    : elements(), width(0), height(0), board()
+   : elements(new elements_t()), width(0), height(0), board(),
+     invalid(new elements_t()), unresolved(new elements_t()), checked()
 {
     if(path.substr(path.find_last_of(".") + 1) == "xml")
         this->read_xml(path);
      else if (path.substr(path.find_last_of(".") + 1) == "txt")
-        this->read_txt(path);  
+        this->read_txt(path);
+    unresolved->initFrom(*elements);
+    resolve_elements();
+}
+
+domino_problem_input::~domino_problem_input()
+{
+   //if()
+   //delete elements;
+   //delete invalid;
+   //delete unresolved;
+}
+
+domino_problem_input::domino_problem_input()
+    : elements(new elements_t()), width(0), height(0), board(),
+      invalid(new elements_t()), unresolved(new elements_t()), checked()
+{
+   // nothing needed here
+}
+
+domino_problem_input::domino_problem_input(const domino_problem_input& input)
+   : elements(input.elements), width(input.width), height(input.height), board(input.board),
+     invalid(input.invalid), unresolved(input.unresolved), checked(input.checked)
+{
+   // nothing needed here
 }
 
 void domino_problem_input::read_txt(const std::string &path)
@@ -59,7 +77,7 @@ void domino_problem_input::read_txt(const std::string &path)
             value2 = std::atoi(token[2]);
             x = std::atoi(token[3]);
             y = std::atoi(token[4]);
-            elements.append(new domino_elem_located(value1, value2, is_vertical, x, y));
+            elements->append(new domino_elem_located(value1, value2, is_vertical, x, y));
         } else if (n == 2)
         {
             this->width = atoi(token[0]);
@@ -79,7 +97,7 @@ void domino_problem_input::read_txt(const std::string &path)
     {
         for(size_t y = 0; y < height; ++y)
         {
-            elements_t::elem it = elements.first();
+            elements_t::elem it = elements->first();
             //elem_loc_list::elem_const loc_it = dominos.first();
             while(it)
             {
@@ -203,7 +221,7 @@ void domino_problem_input::read_xml(const std::string &path)
         std::cout << std::endl;
 #endif
         // add new domino element
-        elements.append(new domino_elem_located(value1, value2, is_vertical, x, y));
+        elements->append(new domino_elem_located(value1, value2, is_vertical, x, y));
     }
     for(size_t x = 0; x < width; ++x)
     {
@@ -217,7 +235,7 @@ void domino_problem_input::read_xml(const std::string &path)
     {
         for(size_t y = 0; y < height; ++y)
         {
-            elements_t::elem it = elements.first();
+            elements_t::elem it = elements->first();
             //elem_loc_list::elem_const loc_it = dominos.first();
             while(it)
             {
@@ -248,6 +266,40 @@ void domino_problem_input::read_xml(const std::string &path)
     //initial_board = board;
 }
 
+void domino_problem_input::resolve_elements()
+{
+   if(unresolved->length() == 0)
+      return;
+   for(elements_t::elem i = unresolved->first(); i; i.removeAndForward())
+   {
+      domino_elem_located* e = i.value_ref();
+      size_t& x = e->x;
+      size_t& y = e->y;
+      domino_elem_value_t v1 = e->h1.value;
+      domino_elem_value_t v2 = e->h2.value;
+
+      if(e->is_vertical)
+      {
+         // up & down
+         // left & right
+         if(v1 > y && v2 >= height - y
+               && (v1 > x || v2 > x) && (v1 >= width - x || v2 >= width - x) )
+            invalid->append(e);
+         else
+            checked.append(e);
+      }
+      else
+      {
+         // left & right
+         // up & down
+         if(v1 > x || v2 >= width - x
+               && (v1 > y || v2 > y) && (v1 >= height - y || v2 >= height - y) )
+            invalid->append(e);
+         else
+            checked.append(e);
+      }
+   }
+}
 
 std::string domino_problem_input::board_str() const
 {

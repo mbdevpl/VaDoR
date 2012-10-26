@@ -193,6 +193,17 @@ bool simple_tree<T,S>::elem_const::hasRoot() const
    return (e->root() ? true : false);
 }
 
+//template<typename T, typename S>
+//const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::root() const
+//{
+//   if(empty())
+//      return *this;
+//   if(!hasRoot())
+//      return elem_const();
+//   *(elem_raw**)(&e) = e->root();
+//   return *this;
+//}
+
 template<typename T, typename S>
 const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::left(
       S count) const
@@ -200,7 +211,10 @@ const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::left(
    if(!count || empty())
       return *this;
    if(!hasRoot())
-      return elem_const();
+   {
+      clear();
+      return *this;
+   }
    elem_raw* r = e->root();
    elem_raw*& x = *(elem_raw**)(&e);
    simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
@@ -215,7 +229,10 @@ const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::left(
    if(empty())
       return *this;
    if(!hasRoot())
-      return elem_const();
+   {
+      clear();
+      return *this;
+   }
    elem_raw* r = e->root();
    elem_raw*& x = *(elem_raw**)(&e);
    simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
@@ -230,7 +247,10 @@ const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::right
    if(empty())
       return *this;
    if(!hasRoot())
-      return elem_const();
+   {
+      clear();
+      return *this;
+   }
    elem_raw* r = e->root();
    elem_raw*& x = *(elem_raw**)(&e);
    simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
@@ -274,6 +294,20 @@ typename simple_list<typename simple_tree<T,S>::elem,S> simple_tree<T,S>::elem::
       sub_elems.append(el);
    }
    return sub_elems;
+}
+
+template<typename T, typename S>
+typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::root()
+{
+   if(empty())
+      return *this;
+   if(!hasRoot())
+   {
+      clear();
+      return *this;
+   }
+   e = e->root();
+   return *this;
 }
 
 template<typename T, typename S>

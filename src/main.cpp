@@ -1,27 +1,14 @@
 
-
-
-// In order to not launch GUI, but only test algorithms in the console,
-// uncomment the following define.
-//
-// In order to run GUI, comment it.
-#define ALGORITHM_TESTING
-
-
-#ifndef ALGORITHM_TESTING
+#include "program_args.h"
 
 #include <QtGui/QApplication>
 #include "mainwindow.h"
-
-#else // ALGORITHM_TESTING
 
 #include <iostream>
 #include "domino_problem_input.h"
 #include "domino_problem.h"
 #include "domino_problem_solver.h"
 #include "simple_list.h"
-
-#endif // ALGORITHM_TESTING
 
 // needed by all_chars()
 #include <ostream>
@@ -33,53 +20,50 @@ void all_chars(std::ostream& s);
 int main(int argc, char **argv)
 {
    //all_chars(std::cout);
+   //simple_list<int,size_t>::test();
 
-#ifndef ALGORITHM_TESTING
+   program_args args(argc, argv);
 
-   QApplication app(argc, argv);
-   MainWindow w;
-   w.show();
-   return app.exec();
+   if(args.pop("-cmd"))
+   {
+      std::cout << "Vanishing Domino Problem" << std::endl;
+      domino_problem_input input(args.last());
 
-#else // ALGORITHM_TESTING
+      std::cout << std::endl << "Example input:" << std::endl;
+      std::cout << input.board_str() << std::endl << std::endl;
 
-   std::cout << "Vanishing Domino Problem" << std::endl;
-   domino_problem_input input("problem2.txt");
-#ifdef DEBUG
-   std::cout << input << std::endl;
-#else
+      domino_problem prob(input);
+      std::cout << "Problem defined!" << std::endl;
 
-#ifdef RELEASE
-   std::cout << std::endl << "Example input:" << std::endl;
-   std::cout << input.board_str() << std::endl << std::endl;
-#endif // RELEASE
-#endif // DEBUG
+      domino_problem_solver solver(prob);
+      std::cout << "Solver initialized!" << std::endl;
 
-   domino_problem prob(input);
-   std::cout << "Problem defined!" << std::endl;
+      solver.execute();
 
-   domino_problem_solver solver(prob);
-   std::cout << "Solver initialized!" << std::endl;
+      std::cout << "Building graph done!" << std::endl;
+      domino_problem::solution_t frst = solver.find_first_best_solution();
+      std::cout << std::endl << "Best solution:" << std::endl;
+      for(domino_problem::solution_t::elem i = frst.first(); i; ++i)
+         std::cout << i.value_ref().board_str() << std::endl << std::endl;
 
-   solver.execute();
-
-   std::cout << "Building graph done!" << std::endl;
-   simple_list<domino_problem,size_t> frst = solver.find_first_best_solution();
-   std::cout << std::endl << "Best solution:" << std::endl;
-   for(simple_list<domino_problem,size_t>::elem i = frst.first(); i; ++i)
-      std::cout << i.value_ref().board_str() << std::endl << std::endl;
-
-   //   simple_list<simple_list<domino_problem,size_t>,size_t> all = solver.find_all_best_solutions();
-   //   std::cout << "List of all best solutions:" << std::endl;
-   //   size_t count = 0;
-   //   for(simple_list<simple_list<domino_problem,size_t>,size_t>::elem list = all.first();
-   //       list; ++list, ++count)
-   //      std::cout << std::endl << "Solution:" << std::endl << list << std::endl;
+      //   simple_list<simple_list<domino_problem,size_t>,size_t> all = solver.find_all_best_solutions();
+      //   std::cout << "List of all best solutions:" << std::endl;
+      //   size_t count = 0;
+      //   for(simple_list<simple_list<domino_problem,size_t>,size_t>::elem list = all.first();
+      //       list; ++list, ++count)
+      //      std::cout << std::endl << "Solution:" << std::endl << list << std::endl;
+   }
+   else
+   {
+      std::cout << "execute \"vador.exe -cmd file.xml\" to solve file.xml in text mode "
+                << "(also accepts *.txt)" << std::endl;
+      QApplication app(argc, argv);
+      MainWindow w;
+      w.show();
+      return app.exec();
+   }
 
    return 0;
-
-#endif // ALGORITHM_TESTING
-
 }
 
 void all_chars(std::ostream& s)

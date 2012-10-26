@@ -36,31 +36,34 @@ protected:
    typedef simple_list<column_t,size_t> board_t;
 protected:
    // collection of domino_elem*
-   elements_t elements;
+   elements_t* elements;
    size_t width;
    size_t height;
    // collection of half_elem* that come from 'elements' field
    board_t board;
-protected:
-   domino_problem_input();
+   // impossible to remove due to size of the board
+   elements_t* invalid;
+   // algorithm does not know anything about these pieces
+   elements_t* unresolved;
+   // possible to remove if other pieces are placed right
+   elements_t checked;
 public:
    domino_problem_input(const std::string& path);
+   ~domino_problem_input();
 protected:
-   domino_problem_input(const domino_problem_input& input)
-      : elements(input.elements), width(input.width), height(input.height), board(input.board) { }
+   domino_problem_input();
+   domino_problem_input(const domino_problem_input& input);
+private:
+   // checks all unresolved pieces to know which cannot be removed at all
+   void resolve_elements();
 public:
-   ~domino_problem_input()
-   {
-      // delete elements!
-   }
-   inline domino_elem_located* elem(size_t index) { return elements[index]; }
+   inline domino_elem_located* elem(size_t index) { return elements->element(index).value_ref(); }
    inline size_t w() { return width; }
    inline size_t h() { return height; }
-public:
    std::string board_str() const;
    friend std::ostream& operator<<(std::ostream& os, const domino_problem_input& input)
    {
-      os << '[' << input.width << 'x' << input.height << "]: " << input.elements << "\n";
+      os << '[' << input.width << 'x' << input.height << "]: " << *(input.elements) << "\n";
       os << input.board_str();
       return os;
    }

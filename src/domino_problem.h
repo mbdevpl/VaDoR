@@ -17,6 +17,9 @@
 
 class domino_problem : public domino_problem_input
 {
+public:
+   typedef unsigned long long ull;
+   typedef simple_list<domino_problem,ull> solution_t;
 protected:
    // pieces currently on the board
    elements_t on_board;
@@ -24,33 +27,40 @@ protected:
    elements_t possible;
    // not longer on board, removed in the previous turns
    elements_t removed;
-   // algorithm does not know anything about these pieces
-   elements_t unresolved;
-   // possible to remove if other pieces are placed right
-   elements_t checked;
-   // impossible to remove due to size of the board
-   elements_t invalid;
 public:
    domino_problem();
    domino_problem(const domino_problem& problem);
    domino_problem(const domino_problem_input& input);
-private:
-   // checks all unresolved pieces to know which cannot be removed at all
-   void resolve_elements();
+public:
    // scans board to find removable pieces
    void scan_board();
 public:
-   void add_possible_outcomes(simple_list<domino_problem,size_t>& outcomes);
-   simple_list<domino_problem,size_t> get_possible_outcomes();
+   void add_possible_outcomes(domino_problem::solution_t& outcomes);
+   domino_problem::solution_t get_possible_outcomes();
    bool state_equals(const domino_problem& problem);
 private:
    bool can_be_removed(size_t x, size_t y);
    size_t distance(size_t x, size_t y, half_direction dir);
    void remove_at(size_t x, size_t y);
 public:
+   ull on_board_length() const { return on_board.length(); }
+   ull possible_length() const { return possible.length(); }
+   ull removed_length() const { return removed.length(); }
    std::string on_board_str() const { return on_board.str(); }
    std::string possible_str() const { return possible.str(); }
-   std::string removed_str() const { return removed.str(); }
+   std::string removed_str(bool compact = false) const
+   {
+      if(!compact)
+         return removed.str();
+      std::stringstream s;
+      s << "{ ";
+      for(elements_t::elem_const e = removed.first(); e; ++e)
+      {
+         s << e.value_ref_const()->str(true) << ' ';
+      }
+      s << '}';
+      return s.str();
+   }
 #ifdef DEBUG
    void demo_solution();
 #endif // DEBUG

@@ -265,6 +265,11 @@ public:
    simple_list<T,L>& removeLast();
    simple_list<T,L>& clear();
    elem find(const T& value);
+private:
+   void smoothsort_form_heaps(size_t* heaps, L heaps_len, L curr_heap_index/*, bool ignore_left = false*/);
+   void smoothsort_check_left_heap(size_t* heaps, L heaps_len, L curr_heap_index);
+public:
+   void sort();
 public:
    const T& operator[](const L& index) const;
    T& operator[](const L& index);
@@ -747,6 +752,218 @@ typename simple_list<T,L>::elem simple_list<T,L>::find(const T& value)
 }
 
 template<typename T, typename L>
+void simple_list<T,L>::smoothsort_check_left_heap(size_t* heaps, L heaps_len, L curr_heap_index)
+{
+   if(heaps_len == 0 || curr_heap_index == 0)
+      return;
+
+   // Leonardo numbers
+   static const size_t LP[]
+         = { 1, 1, 3, 5, 9, 15, 25, 41, 67, 109,
+             177, 287, 465, 753, 1219, 1973, 3193, 5167, 8361, 13529, 21891,
+             35421, 57313, 92735, 150049, 242785, 392835, 635621, 1028457,
+             1664079, 2692537, 4356617, 7049155, 11405773, 18454929, 29860703,
+             48315633, 78176337, 126491971, 204668309, 331160281, 535828591,
+             866988873 // the next number is > 31 bits.
+           };
+   L left_heap_index = curr_heap_index + 1 - LP[heaps[curr_heap_index]];
+
+   if(left_heap_index == 0)
+      return;
+
+   --left_heap_index;
+
+   elem curr = element(curr_heap_index);
+   elem left = element(left_heap_index);
+
+   bool l_c = *left > *curr;
+   if(!l_c)
+      return;
+   bool do_swap = false;
+
+   if(heaps[curr_heap_index] < 2)
+      do_swap = true;
+   else
+   {
+      //here, there are subnodes to check!!!
+      L prev_heap_index = curr_heap_index - 1;
+      elem prev = element(prev_heap_index);
+      bool l_p = *left > *prev;
+      if(!l_p)
+         return;
+
+      L prevprev_heap_index = prev_heap_index - LP[heaps[prev_heap_index]];
+      elem prevprev = element(prevprev_heap_index);
+      bool l_pp = *left > *prevprev;
+      if(!l_pp)
+         return;
+      do_swap = true;
+   }
+
+   if(!do_swap)
+      return;
+
+   T temp = *curr;
+   *curr = *left;
+   *left = temp;
+#ifdef DEBUG
+   std::cout << "swap left<->curr!" << std::endl;
+#endif // DEBUG
+   smoothsort_check_left_heap(heaps, heaps_len, left_heap_index);
+   //smoothsort_form_heaps(heaps, heaps_len, left_heap_index);
+}
+
+template<typename T, typename L>
+void simple_list<T,L>::smoothsort_form_heaps(size_t* heaps, L heaps_len, L curr_heap_index)
+{
+   if(heaps_len == 0 || curr_heap_index == 0)
+      return;
+
+   // Leonardo numbers
+   static const size_t LP[]
+         = { 1, 1, 3, 5, 9, 15, 25, 41, 67, 109,
+             177, 287, 465, 753, 1219, 1973, 3193, 5167, 8361, 13529, 21891,
+             35421, 57313, 92735, 150049, 242785, 392835, 635621, 1028457,
+             1664079, 2692537, 4356617, 7049155, 11405773, 18454929, 29860703,
+             48315633, 78176337, 126491971, 204668309, 331160281, 535828591,
+             866988873 // the next number is > 31 bits.
+           };
+
+   if(heaps[curr_heap_index] < 2)
+      return;
+
+   L prev_heap_index = curr_heap_index - 1;
+   L prevprev_heap_index = prev_heap_index - LP[heaps[prev_heap_index]];
+
+   elem curr = element(curr_heap_index);
+   elem prev = element(prev_heap_index);
+   elem prevprev = element(prevprev_heap_index);
+
+   bool p_c = *prev > *curr;
+   bool pp_p = *prevprev > *prev;
+   bool pp_c = pp_p && p_c ? true : *prevprev > *curr;
+
+   if(p_c && !pp_p)
+   {
+      T temp = *curr;
+      *curr = *prev;
+      *prev = temp;
+#ifdef DEBUG
+      std::cout << "swap prev<->curr!" << std::endl;
+#endif // DEBUG
+      smoothsort_form_heaps(heaps, heaps_len, prev_heap_index);
+   }
+   else if(pp_c && pp_p)
+   {
+      T temp = *curr;
+      *curr = *prevprev;
+      *prevprev = temp;
+#ifdef DEBUG
+      std::cout << "swap prevprev<->curr!" << std::endl;
+#endif // DEBUG
+      smoothsort_form_heaps(heaps, heaps_len, prevprev_heap_index);
+   }
+}
+
+template<typename T, typename L>
+void simple_list<T,L>::sort()
+{
+#ifdef DEBUG
+   std::cout << "list to be smooth-sorted: ";
+   std::cout << str() << std::endl;
+#endif // DEBUG
+   if(length() < 2)
+      return;
+
+   // Leonardo numbers
+   static const size_t LP[]
+         = { 1, 1, 3, 5, 9, 15, 25, 41, 67, 109,
+             177, 287, 465, 753, 1219, 1973, 3193, 5167, 8361, 13529, 21891,
+             35421, 57313, 92735, 150049, 242785, 392835, 635621, 1028457,
+             1664079, 2692537, 4356617, 7049155, 11405773, 18454929, 29860703,
+             48315633, 78176337, 126491971, 204668309, 331160281, 535828591,
+             866988873 // the next number is > 31 bits.
+           };
+
+   // heaps : for example { 1, 0, 2, 1, 3 }
+   //  indices denote number of the element of the sorted simple_list.
+   //  value n means that that element is a root of a tree of a size LP[n]
+   //  in the example, 3rd element of the list is a root of heap of size LP[2] = 3,
+   //   therefore has two precedeeing elements as its sub-heaps.
+   //  the last (5th) element is a root of heap of size LP[3] = 5, therefore
+   //   it is the main root of all heaps
+   size_t* heaps = new size_t[length()];
+   L heaps_len = 0;
+
+   elem prev = first();
+   elem prevprev = first();
+
+   //this loop creates heaps for the whole list
+   for(elem curr = first(); curr; ++curr)
+   {
+      // place the current element in the tree of heaps:
+
+      // where is the most recent heap
+      L prev_heap_index = heaps_len > 0 ? heaps_len-1 : 0;
+      size_t prev_heap = heaps_len > 0 ? heaps[prev_heap_index] : 0;
+
+      // where is the previous heap
+      L prevprev_heap_index = 0;
+      if(heaps_len > LP[prev_heap])
+         prevprev_heap_index = heaps_len-1-LP[prev_heap];
+      else if(heaps_len > 1)
+         prevprev_heap_index = heaps_len-2;
+      size_t prevprev_heap = heaps_len > 1 ? heaps[prevprev_heap_index] : 0;
+
+      // create a heap depending on sizes of the last two heaps
+      if(heaps_len >= 2 && prev_heap + 1 == prevprev_heap)
+         heaps[heaps_len] = prev_heap + 2;
+      else if(heaps_len >= 1 && prev_heap == 1)
+         heaps[heaps_len] = 0;
+      else if(heaps_len >= 0)
+         heaps[heaps_len] = 1;
+
+      // set current heap variable
+      L curr_heap_index = heaps_len;
+      size_t curr_heap = heaps[curr_heap_index];
+
+      // increase length of list of heaps
+      ++heaps_len;
+
+#ifdef DEBUG
+      std::cout << "heaps: { ";
+      for(size_t i = 0; i < heaps_len; ++i)
+         std::cout << heaps[i] << ' ';
+      std::cout << '}' << std::endl;
+#endif // DEBUG
+
+      //maintain heap property across all heaps affected by
+      // recent operation
+      if(heaps_len > 2)
+      {
+         smoothsort_check_left_heap(heaps, heaps_len, curr_heap_index);
+         if(curr_heap > 1)
+            smoothsort_form_heaps(heaps, heaps_len, curr_heap_index);
+      }
+#ifdef DEBUG
+      std::cout << "current: " << str() << std::endl;
+      std::cout /*<< "next elem...\n"*/ << std::endl;
+#endif // DEBUG
+   }
+#ifdef DEBUG
+   std::cout << "finished building heaps" << std::endl;
+   std::cout << "correct: "
+             << "{ 1, 2, 9, 4, 11, 6, 3, 8, 15, 10, "
+             << "5, 12, 13, 14, 28, 16, 17, 18, 19, 20, "
+             << "21, 22, 23, 24, 32, 26, 7, 27, 29, 30, "
+             << "31, 25, 33, 35, 34 }" << std::endl;
+#endif // DEBUG
+
+#ifdef DEBUG
+#endif // DEBUG
+}
+
+template<typename T, typename L>
 const typename T& simple_list<T,L>::operator[](const L& index) const
 {
    return element(index).value_ref_const();
@@ -888,6 +1105,13 @@ std::ostream& simple_list<T,L>::test(std::ostream& s)
    s << "\n";
 
    test_iteration(s);
+
+   T test_arr[] = {+1,  2, 32, 35, 15,  6, 28,  3,  9, 10,
+                   +5, 12, 13, 14, 11, 16, 17, 18, 19, 20,
+                   21, 22, 23, 24,  8, 26, 27,  7, 29, 30,
+                   31, 25, 33,  4, 34};
+   simple_list<T,L> test_lst(35, test_arr);
+   test_lst.sort();
 
    T a = T();
    T arr[] = {a, ++a, ++a, ++a, ++a};
