@@ -12,10 +12,10 @@ std::string domino_elem_located::str(bool compact) const
 {
    std::stringstream s;
    if(compact)
-      s << value1() << '-' << value2()
+      s << +value1() << '-' << +value2()
         << '@' << x << ',' << y;
    else
-      s << '[' << value1() << ' ' <<value2() << ' '
+      s << '[' << +value1() << ' ' << +value2() << ' '
         << (is_vertical ? "ver" : "hor") << '@' << x << 'x' << y << ']';
    return s.str();
 }

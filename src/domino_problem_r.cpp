@@ -37,10 +37,12 @@ void domino_problem_r::load(QString in_path)
             domino_elem *piece = new domino_elem(atoi( e.attribute("value1", "").toStdString().c_str() ),
                atoi( e.attribute("value2","").toStdString().c_str()),((e.attribute("orientation","")=="vertical")?true:false)
                     );
+#ifdef HALF_LOC
           piece->h1.loc_x = atoi( e.attribute("x", "").toStdString().c_str() );
           piece->h1.loc_y = atoi( e.attribute("y", "").toStdString().c_str() );
           piece->h2.loc_x = piece->h1.loc_x + (piece->is_vertical ? 0 : 1);
           piece->h2.loc_y = piece->h1.loc_y + (piece->is_vertical ? 1 : 0);
+#endif
 
           elem_list.push_back(piece);
         }

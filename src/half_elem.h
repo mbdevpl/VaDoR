@@ -11,10 +11,10 @@ public:
    half_elem* other_half;
    half_direction direction;
    domino_elem_located* owner;
-//#ifdef RADZIO_WHY
+#ifdef HALF_LOC
    int loc_x;
    int loc_y;
-//#endif // RADZIO_WHY
+#endif // HALF_LOC
 public:
    half_elem()
       : value(0), other_half(0), direction(none), owner(0) { }

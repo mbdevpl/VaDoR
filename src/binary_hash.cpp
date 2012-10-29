@@ -1,5 +1,25 @@
 #include "binary_hash.h"
 
+
+binary_hash::~binary_hash()
+{
+   if(!root)
+      return;
+   delete root;
+//   std::queue<hash_t*> q;
+//   q.push(root);
+//   for(hash_t* h = q.front(); !q.empty(); q.pop(), h = q.front())
+//   {
+//      if(h->zero)
+//         q.push(h->zero);
+//      if(h->one)
+//         q.push(h->one);
+//      if(!h)
+//         h = h;
+//      delete h;
+//   }
+}
+
 binary_hash::hash_end** binary_hash::get_leaf(value_t value, bool allocate)
 {
    if(!root)

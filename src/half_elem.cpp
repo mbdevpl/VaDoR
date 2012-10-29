@@ -2,7 +2,7 @@
 
 std::ostream& operator<<(std::ostream& os, const half_elem& domino)
 {
-   os << '[' << domino.value << ' ' << domino.direction << ']';
+   os << '[' << +(domino.value) << ' ' << domino.direction << ']';
    return os;
 }
 

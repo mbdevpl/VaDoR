@@ -3,7 +3,7 @@
 
 class domino_elem;
 
-typedef unsigned int domino_elem_value_t;
+typedef unsigned char domino_elem_value_t;
 
 enum half_direction {
    up,down,left,right,none

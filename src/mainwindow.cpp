@@ -106,8 +106,10 @@ void MainWindow::openFileClicked()
     {
         problem_r.load(s);
         setBoardSize(problem_r.board_width,problem_r.board_height);
+#ifdef HALF_LOC
         foreach (domino_elem* el, problem_r.elem_list)
             addPiece(el->h1.loc_x, el->h1.loc_y, el->is_vertical, el->h1.value, el->h2.value);
+#endif
         setBoardSize(problem_r.board_width,problem_r.board_height);
         ui->progressBar->setValue(100);
     }

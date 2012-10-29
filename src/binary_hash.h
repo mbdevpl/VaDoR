@@ -2,7 +2,7 @@
 #ifndef BINARY_HASH_H
 #define BINARY_HASH_H
 
-#include <stdexcept>
+#include <queue>
 
 class binary_hash
 {
@@ -14,6 +14,13 @@ public:
       hash_t* one;
       hash_t()
          : zero(nullptr), one(nullptr) { }
+      ~hash_t()
+      {
+         if(zero)
+            delete zero;
+         if(one)
+            delete one;
+      }
    };
    struct hash_end : public hash_t
    {
@@ -32,6 +39,7 @@ public:
    {
       //
    }
+   ~binary_hash();
 private:
    hash_end** get_leaf(value_t value, bool allocate);
 public:

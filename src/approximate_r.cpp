@@ -16,8 +16,10 @@ approximate_r::approximate_r(domino_problem_r &problem_r)
             board[i][j] = NULL;
     // Assign half_elem to a corresponding cell in the array
     foreach (domino_elem* el, problem_r.elem_list){
+#ifdef HALF_LOC
         board[el->h1.loc_x][el->h1.loc_y] = &el->h1;
         board[el->h2.loc_x][el->h2.loc_y] = &el->h2;
+#endif
     }
     setPieceByPiece(false);
 }
@@ -115,11 +117,16 @@ bool approximate_r::isRemovable(int x, int y)
 void approximate_r::remove_piece(int x, int y)
 {
     for(int i =0; i < present->size();i++)
+#ifdef HALF_LOC
         if ((present->at(i)->h1.loc_x==x && present->at(i)->h1.loc_y==y)||
-                (present->at(i)->h2.loc_x==x && present->at(i)->h2.loc_y==y)){
+                (present->at(i)->h2.loc_x==x && present->at(i)->h2.loc_y==y))
+#endif
+        {
+#ifdef HALF_LOC
             emit threadRemovePiece(present->at(i)->h1.loc_y,present->at(i)->h1.loc_x);
             board[present->at(i)->h1.loc_x][present->at(i)->h1.loc_y] = NULL;
             board[present->at(i)->h2.loc_x][present->at(i)->h2.loc_y] = NULL;
+#endif
             removed.push_back(present->at(i));
             present->remove(i);
             break;

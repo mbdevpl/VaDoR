@@ -16,7 +16,7 @@ domino_elem::domino_elem(domino_elem_value_t val1, domino_elem_value_t val2,
 
 std::ostream& operator<<(std::ostream& os, const domino_elem& domino)
 {
-   os << '[' << domino.h1.value << ' ' << domino.h2.value << ' '
+   os << '[' << +(domino.h1.value) << ' ' << +(domino.h2.value) << ' '
       << (domino.is_vertical ? "ver" : "hor") << ']';
    return os;
 }

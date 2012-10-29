@@ -22,8 +22,6 @@ const int MAX_CHARS_PER_LINE = 128;
 const int MAX_TOKENS_PER_LINE = 5;
 const char* const DELIMITER = ";";
 
-
-
 class domino_problem_input
 {
 private:
@@ -50,6 +48,30 @@ protected:
 public:
    domino_problem_input(const std::string& path);
    ~domino_problem_input();
+   void release()
+   {
+      if(invalid)
+      {
+         delete invalid;
+         invalid = nullptr;
+      }
+      if(unresolved)
+      {
+         delete unresolved;
+         unresolved = nullptr;
+      }
+      if(elements)
+      {
+         for(elements_t::elem e = elements->first(); e; ++e)
+            delete *e;
+         delete elements;
+         elements = nullptr;
+      }
+      //for(board_t::elem col = board.first(); col; ++col)
+      //   for(column_t::elem half = (*col).first(); half; ++half)
+      //      if()
+
+   }
 protected:
    domino_problem_input();
    domino_problem_input(const domino_problem_input& input);
