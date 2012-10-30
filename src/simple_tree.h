@@ -58,11 +58,14 @@ private:
       ELEM_RAW_DESTR { ELEM_RAW_DESTR_T ptr_root = nullptr; subelems_list.clear(); }
       void release()
       {
+
          for(simple_list<elem_raw*,S>::elem sub = subelems_list.first(); sub; ++sub)
          {
             (*sub)->release();
             delete *sub;
+            *sub = 0;
          }
+         subelems_list.clear();
       }
    public:
       inline elem_raw*& root() { return ptr_root; }
@@ -176,6 +179,8 @@ public:
    S count() const { return elem_count; }
 protected:
    simple_tree<T,S>& initFrom(const T& value);
+public:
+   void clear();
 private:
    void release();
 public:
@@ -544,22 +549,47 @@ simple_tree<T,S>& simple_tree<T,S>::initFrom(const T& value)
    root_elem.insertRight(value);
    return *this;
 }
+
+template<typename T, typename S>
+void simple_tree<T,S>::clear()
+{
+   if(elem_count == 0)
+      return;
+   release();
+
+   //((elem_raw*)root_elem)->release();
+   //delete ((elem_raw*)root_elem);
+   root_elem = elem();
+   root_elem.connectTo(this);
+   elem_count = 0;
+}
+
 template<typename T, typename S>
 void simple_tree<T,S>::release()
 {
-   if(!root_elem.empty())
+   if(root_elem.empty())
+      return;
+
+   simple_list<elem,S> queue;
+   queue.append(root_elem);
+   for(simple_list<elem,S>::elem e = queue.first(); e; e.removeAndForward())
    {
-      elem_raw* raw = (elem_raw*)root_elem;
-      raw->release();
+      queue.append((*e).subList());
+      elem_raw* raw = (elem_raw*)(*e);
       delete raw;
-//      elem_raw* temp = raw;
-//      while(temp)
-//      {
-//         raw = raw->next();
-//         delete temp;
-//         temp = raw;
-//      }
    }
+
+   //elem_raw* raw = (elem_raw*)root_elem;
+   //raw->release();
+   //delete raw;
+   //      elem_raw* temp = raw;
+   //      while(temp)
+   //      {
+   //         raw = raw->next();
+   //         delete temp;
+   //         temp = raw;
+   //      }
+
    //root_elem = elem();
 }
 

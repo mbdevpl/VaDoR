@@ -32,6 +32,7 @@ public:
    domino_problem(const domino_problem& problem);
    domino_problem(const domino_problem& problem, bool copy_possible);
    domino_problem(const domino_problem_input& input);
+   ~domino_problem();
 public:
    // scans board to find removable pieces
    void scan_board();

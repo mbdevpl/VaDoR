@@ -22,6 +22,11 @@ domino_problem::domino_problem(const domino_problem_input& input)
    //scan_board();
 }
 
+domino_problem::~domino_problem()
+{
+   //this->~domino_problem_input();
+}
+
 void domino_problem::scan_board()
 {
    for(elements_t::elem i = checked.first(); i; ++i)

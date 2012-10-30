@@ -24,18 +24,23 @@ protected:
    // given state is already in the tree
    binary_hash in_tree;
 public:
+   domino_problem_solver();
+   //domino_problem_solver(const std::string& path);
    domino_problem_solver(const domino_problem& problem);
+   ~domino_problem_solver();
 private:
    domino_problem_solver(const domino_problem_solver& solver);
    domino_problem_solver& operator=(const domino_problem_solver& solver);
 public:
-   void execute(bool optimized = false);
+   void execute(bool approximate = false);
 private:
-   // constructs a full tree of states, until all possible ways
-   //  of removing pieces are served
+   // constructs a full tree of states, until either:
+   //  1) all possible ways of removing pieces are served, or
+   //  2) complete solution is found
    void construct_full_tree(bool depthFirst = false);
-   // constructs a tree until a full solution is found
-   void construct_tree();
+   // constructs a path until a full solution is found or
+   //  a dead-end is reached
+   void construct_path();
 public:
     solution_t find_first_best_solution();
     simple_list<solution_t,ull> find_all_best_solutions();

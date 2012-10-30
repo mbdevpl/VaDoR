@@ -34,6 +34,11 @@ private:
    size_t size;
    hash_t* root;
 public:
+   binary_hash()
+      : size(1), root(0)
+   {
+      //
+   }
    binary_hash(size_t size)
       : size(size-1), root(0)
    {

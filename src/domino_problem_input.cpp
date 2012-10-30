@@ -125,6 +125,9 @@ void domino_problem_input::read_txt(const std::string &path)
 
 void domino_problem_input::read_xml(const std::string &path)
 {
+#ifdef DEBUG
+   bool verbose = false;
+#endif // DEBUG
    std::ifstream t(path);
    std::stringstream buffer;
    buffer << t.rdbuf();
@@ -150,15 +153,17 @@ void domino_problem_input::read_xml(const std::string &path)
    if(!node || node_domino_board.compare(node->name()))
       throw std::runtime_error("wrong XML tag: domino_board expected");
 #ifdef DEBUG
-   std::cout << node->name() << ": ";
-#endif
+   if(verbose)
+      std::cout << node->name() << ": ";
+#endif // DEBUG
    for (rapidxml::xml_attribute<> *attr = node->first_attribute();
         attr; attr = attr->next_attribute())
    {
       // reading attributes of main node
 #ifdef DEBUG
-      std::cout << "  " << attr->name() << "=" << attr->value();
-#endif
+      if(verbose)
+         std::cout << "  " << attr->name() << "=" << attr->value();
+#endif // DEBUG
       if(!attr_width.compare(attr->name()))
          width = std::atoi(attr->value());
       else if(!attr_height.compare(attr->name()))
@@ -167,8 +172,9 @@ void domino_problem_input::read_xml(const std::string &path)
          throw std::runtime_error("wrong XML attribute: width/height expected");
    }
 #ifdef DEBUG
-   std::cout << std::endl;
-#endif
+   if(verbose)
+      std::cout << std::endl;
+#endif // DEBUG
    if(width == 0 || height == 0)
       throw std::runtime_error("invalid XML data: width or height is zero");
 
@@ -176,8 +182,9 @@ void domino_problem_input::read_xml(const std::string &path)
    for( rapidxml::xml_node<> *n = node->first_node(); n; n = n->next_sibling())
    {
 #ifdef DEBUG
-      std::cout << "  " << n->name() << ": ";
-#endif
+      if(verbose)
+         std::cout << "  " << n->name() << ": ";
+#endif // DEBUG
       if(node_domino_piece.compare(n->name()))
          throw std::runtime_error("wrong XML tag: piece expected");
 
@@ -190,8 +197,9 @@ void domino_problem_input::read_xml(const std::string &path)
            att; att = att->next_attribute())
       {
 #ifdef DEBUG
-         std::cout << "  " << att->name() << "=" << att->value();
-#endif
+         if(verbose)
+            std::cout << "  " << att->name() << "=" << att->value();
+#endif // DEBUG
          if(!attr_x.compare(att->name()))
             x = std::atoi(att->value());
          else if(!attr_y.compare(att->name()))
@@ -215,8 +223,9 @@ void domino_problem_input::read_xml(const std::string &path)
                                      " y, orientation, value1, value2");
       }
 #ifdef DEBUG
-      std::cout << std::endl;
-#endif
+      if(verbose)
+         std::cout << std::endl;
+#endif // DEBUG
       // add new domino element
       elements->append(new domino_elem_located(value1, value2, is_vertical, x, y));
    }
@@ -233,12 +242,9 @@ void domino_problem_input::read_xml(const std::string &path)
       for(size_t y = 0; y < height; ++y)
       {
          elements_t::elem it = elements->first();
-         //elem_loc_list::elem_const loc_it = dominos.first();
          while(it)
          {
-            //domino_elem& el = *(it.value_ref());
             domino_elem_located& el = *(it.value_ref());
-            //const domino_elem_located& loc_el = loc_it.value_ref_const();
             if(el.x == x && el.y == y)
             {
                // found element that starts at current point
@@ -255,12 +261,10 @@ void domino_problem_input::read_xml(const std::string &path)
                break;
             }
             ++it;
-            //++loc_it;
          }
 
       }
    }
-   //initial_board = board;
 }
 
 void domino_problem_input::resolve_elements()

@@ -1,15 +1,25 @@
 #include "domino_problem_solver.h"
 
+domino_problem_solver::domino_problem_solver()
+   :  domino_problem(), states(), in_tree() { }
+
 domino_problem_solver::domino_problem_solver(const domino_problem& problem)
    : domino_problem(problem), states(problem), in_tree(problem.size())
 {
    //
 }
 
-void domino_problem_solver::execute(bool optimized)
+domino_problem_solver::~domino_problem_solver()
 {
-   if(optimized)
-      construct_tree();
+   //~domino_problem();
+   states.clear();
+   //release();
+}
+
+void domino_problem_solver::execute(bool approximate)
+{
+   if(approximate)
+      construct_path();
    else
       construct_full_tree(true);
 }
@@ -138,7 +148,7 @@ void domino_problem_solver::construct_full_tree(bool depthFirst)
    std::cout << std::endl;
 }
 
-void domino_problem_solver::construct_tree()
+void domino_problem_solver::construct_path()
 {
    // nothing yet
 }
