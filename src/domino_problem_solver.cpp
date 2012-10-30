@@ -16,10 +16,21 @@ domino_problem_solver::~domino_problem_solver()
 
 void domino_problem_solver::execute(bool approximate)
 {
-   if(approximate)
-      construct_path();
-   else
-      construct_full_tree(true);
+   int* filler = nullptr;
+   try
+   {
+      filler = new int[500000];
+      if(approximate)
+         construct_path();
+      else
+         construct_full_tree(true);
+   }
+   catch(std::bad_alloc& ba)
+   {
+      delete filler;
+      std::cout << "Exception: no more memory available to allocate the tree."
+                << std::endl << ba.what() << std::endl;
+   }
 }
 
 void domino_problem_solver::construct_full_tree(bool depthFirst)

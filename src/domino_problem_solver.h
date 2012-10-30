@@ -4,6 +4,7 @@
 #include "domino_problem.h"
 #include <iostream>
 #include <iomanip>
+#include <new> // for bad_alloc
 #include "simple_tree.h"
 #include "binary_hash.h"
 
