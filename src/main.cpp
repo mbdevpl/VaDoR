@@ -28,6 +28,7 @@ int main(int argc, char **argv)
 
    if(args.pop("-cmd"))
    {
+      //while(true)
       main_cmd(args);
    }
    else
@@ -71,8 +72,6 @@ int main_cmd(program_args& args)
    //   for(simple_list<simple_list<domino_problem,size_t>,size_t>::elem list = all.first();
    //       list; ++list, ++count)
    //      std::cout << std::endl << "Solution:" << std::endl << list << std::endl;
-
-   input.release();
 
    return 0;
 }

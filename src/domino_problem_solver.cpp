@@ -11,9 +11,7 @@ domino_problem_solver::domino_problem_solver(const domino_problem& problem)
 
 domino_problem_solver::~domino_problem_solver()
 {
-   //~domino_problem();
    states.clear();
-   //release();
 }
 
 void domino_problem_solver::execute(bool approximate)

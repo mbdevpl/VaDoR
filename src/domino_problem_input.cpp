@@ -1,7 +1,20 @@
 #include "domino_problem_input.h"
 
+domino_problem_input::domino_problem_input()
+//   : alloc(true), elements(new elements_t()), width(0), height(0), board(),
+//     invalid(new elements_t()), unresolved(new elements_t()), checked() { }
+   : alloc(true), elements(nullptr), width(0), height(0), board(),
+     invalid(nullptr), unresolved(nullptr), checked() { }
+
+domino_problem_input::domino_problem_input(const domino_problem_input& input)
+   : elements(input.elements), width(input.width), height(input.height), board(input.board),
+     invalid(input.invalid), unresolved(input.unresolved), checked(input.checked)
+{
+   alloc = false;
+}
+
 domino_problem_input::domino_problem_input(const std::string& path)
-   : elements(new elements_t()), width(0), height(0), board(),
+   : alloc(true), elements(new elements_t()), width(0), height(0), board(),
      invalid(new elements_t()), unresolved(new elements_t()), checked()
 {
    if(path.substr(path.find_last_of(".") + 1) == "xml")
@@ -14,25 +27,40 @@ domino_problem_input::domino_problem_input(const std::string& path)
 
 domino_problem_input::~domino_problem_input()
 {
-   // release();
+   if(alloc)
+      release(); // do not dealloc unless this object created the variables
 }
 
-domino_problem_input::domino_problem_input()
-   : elements(new elements_t()), width(0), height(0), board(),
-     invalid(new elements_t()), unresolved(new elements_t()), checked()
+void domino_problem_input::release()
 {
-   // nothing needed here
-}
-
-domino_problem_input::domino_problem_input(const domino_problem_input& input)
-   : elements(input.elements), width(input.width), height(input.height), board(input.board),
-     invalid(input.invalid), unresolved(input.unresolved), checked(input.checked)
-{
-   // nothing needed here
+   if(invalid)
+   {
+      delete invalid;
+      invalid = nullptr;
+   }
+   if(unresolved)
+   {
+      delete unresolved;
+      unresolved = nullptr;
+   }
+   if(elements)
+   {
+      for(elements_t::elem e = elements->first(); e; ++e)
+         delete *e;
+      delete elements;
+      elements = nullptr;
+   }
+   //for(board_t::elem col = board.first(); col; ++col)
+   //   for(column_t::elem half = (*col).first(); half; ++half)
+   //      if(true) ;
 }
 
 void domino_problem_input::read_txt(const std::string &path)
 {
+   static const int MAX_CHARS_PER_LINE = 128;
+   static const int MAX_TOKENS_PER_LINE = 5;
+   static const char* const DELIMITER = ";";
+
    size_t x = 0;
    size_t y = 0;
    bool is_vertical = false;
@@ -40,7 +68,7 @@ void domino_problem_input::read_txt(const std::string &path)
    domino_elem_value_t value2 = 0;
 
    // create a file-reading object
-   ifstream fin;
+   std::ifstream fin;
    fin.open(path); // open a file
    if (!fin.good())
       throw std::runtime_error("Error: *.txt file not found");
@@ -81,46 +109,7 @@ void domino_problem_input::read_txt(const std::string &path)
          this->height = atoi(token[1]);
       }
    }
-
-   for(size_t x = 0; x < width; ++x)
-   {
-      column_t col;
-      for(size_t y = 0; y < height; ++y)
-         col.append(0);
-      board.append(col);
-   }
-
-   for(size_t x = 0; x < width; ++x)
-   {
-      for(size_t y = 0; y < height; ++y)
-      {
-         elements_t::elem it = elements->first();
-         //elem_loc_list::elem_const loc_it = dominos.first();
-         while(it)
-         {
-            //domino_elem& el = *(it.value_ref());
-            domino_elem_located& el = *(it.value_ref());
-            //const domino_elem_located& loc_el = loc_it.value_ref_const();
-            if(el.x == x && el.y == y)
-            {
-               // found element that starts at current point
-               board[x][y] = &(el.h1);
-               half_direction& dir = el.h1.direction;
-               if(dir == up)
-                  board[x][y-1] = &(el.h2);
-               else if(dir == right)
-                  board[x+1][y] = &(el.h2);
-               else if(dir == down)
-                  board[x][y+1] = &(el.h2);
-               else if(dir == left)
-                  board[x-1][y] = &(el.h2);
-               break;
-            }
-            ++it;
-            //++loc_it;
-         }
-      }
-   }
+   init_board();
 }
 
 void domino_problem_input::read_xml(const std::string &path)
@@ -229,6 +218,11 @@ void domino_problem_input::read_xml(const std::string &path)
       // add new domino element
       elements->append(new domino_elem_located(value1, value2, is_vertical, x, y));
    }
+   init_board();
+}
+
+void domino_problem_input::init_board()
+{
    for(size_t x = 0; x < width; ++x)
    {
       column_t col;
@@ -293,7 +287,7 @@ void domino_problem_input::resolve_elements()
       {
          // left & right
          // up & down
-         if(v1 > x || v2 >= width - x
+         if(v1 > x && v2 >= width - x
                && (v1 > y || v2 > y) && (v1 >= height - y || v2 >= height - y) )
             invalid->append(e);
          else
