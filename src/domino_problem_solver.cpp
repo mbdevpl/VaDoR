@@ -46,6 +46,7 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst, bo
 
    // current number of scanned states (i.e. states for which the children are known)
    ull state_count = 0;
+   long long temp_state_count = STATE_COUNT_DELAY;
    // maximum number of states that can be reached theoretically
    ull max_states = ((ull)1) << elements->length();
    // currently known best state
@@ -61,14 +62,19 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst, bo
                 << (elements->length() >= 64 ? "... a lot" : std::to_string(max_states))
                 << "\n\n";
       std::cout << "Construction in progress, current number of states:\n";
-      std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << 0
-                << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count()
-                << "; pieces left: " << std::setw(3) << std::setfill(' ') << on_board_length();
+      std::cout << " scanned: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << 0
+                << "; in tree: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << states.count()
+                << "; new states: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << new_states.length()
+                << "; pieces left: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << on_board_length();
       std::cout << std::endl;
    }
    //#endif // DEBUG
 
    new_states.first().value_ref().value_ref().scan_board();
+
+   static std::string timer_format("h:m.s");
+   program_timer timer;
+   timer.start();
 
    while(new_states.length() > 0)
    {
@@ -139,18 +145,22 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst, bo
             new_states.append(state.copy().lastSub());
          }
       }
-
-      ++state_count;
       if(output)
       {
-         if(state_count % 500 == 0) {
-            std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << state_count
-                      << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count()
-                      << "; new states: " << std::setw(6) << std::setfill(' ') << new_states.length();
+         ++state_count;
+         --temp_state_count;
+         if(!temp_state_count) {
+            timer.stop();
+            temp_state_count = STATE_COUNT_DELAY;
+            std::cout << " scanned: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << state_count
+                      << "; in tree: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << states.count()
+                      << "; new states: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << new_states.length()
+                      << "; " << timer.str(timer_format);
             if(!depthFirst)
                std::cout << "; pieces left: "
-                         << std::setw(3) << std::setfill(' ') << problem.on_board_length();
+                         << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << problem.on_board_length();
             std::cout << std::endl;
+            timer.start();
          }
       }
       if(problem.on_board_length() < best_on_board)
@@ -238,10 +248,12 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst, bo
    }
    if(output)
    {
-      std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << state_count
-                << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count();
+      timer.stop();
+      std::cout << " scanned: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << state_count
+                << "; in tree: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << states.count()
+                << "; " << timer.str(timer_format);
       //if(!depthFirst)
-      std::cout << "; pieces left: " << std::setw(3) << std::setfill(' ') << best_on_board;
+      std::cout << "; pieces left: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << best_on_board;
       std::cout << std::endl;
    }
 }

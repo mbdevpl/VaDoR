@@ -7,9 +7,13 @@
 #include <new> // for bad_alloc
 #include "simple_tree.h"
 #include "binary_hash.h"
+#include "program_timer.h"
 
 #ifdef DEBUG
 #endif // DEBUG
+
+#define STATE_COUNT_DELAY 100000
+#define OUTPUT_NUMBER_LEN 10
 
 class domino_problem_solver : public domino_problem
 {
