@@ -1,7 +1,7 @@
 #include "domino_problem.h"
 
 domino_problem::domino_problem()
-   : domino_problem_input(), on_board(), possible(), removed()/*, checked()*/ { }
+   : domino_problem_input(), on_board(), possible(), removed() { }
 
 domino_problem::domino_problem(const domino_problem& problem)
    : domino_problem_input(problem), on_board(problem.on_board), possible(problem.possible),
@@ -13,10 +13,12 @@ domino_problem::domino_problem(const domino_problem& problem, bool copy_possible
 {
    if(copy_possible)
       possible.initFrom(problem.possible);
+   if(problem.is_compact)
+      throw std::runtime_error("cannot copy packed object, use expand() first");
 }
 
 domino_problem::domino_problem(const domino_problem_input& input)
-   : domino_problem_input(input), on_board(*elements), possible(), removed()/*, checked()*/
+   : domino_problem_input(input), on_board(*elements), possible(), removed()
 {
    //resolve_elements();
    //scan_board();
@@ -24,7 +26,12 @@ domino_problem::domino_problem(const domino_problem_input& input)
 
 domino_problem::~domino_problem()
 {
-   //this->~domino_problem_input();
+   //   if(!is_compact)
+   //   {
+   //      on_board.clear();
+   //      possible.clear();
+   //      removed.clear();
+   //   }
 }
 
 void domino_problem::scan_board()
@@ -41,6 +48,8 @@ void domino_problem::scan_board()
 
 void domino_problem::add_possible_outcomes(domino_problem::solution_t& outcomes)
 {
+   if(is_compact)
+      throw std::runtime_error("use expand() first");
    if(possible.length() == 0)
       return;
    for (elements_t::elem i = possible.first(); i; ++i)
@@ -64,6 +73,8 @@ domino_problem::solution_t domino_problem::get_possible_outcomes()
 
 bool domino_problem::state_equals(const domino_problem& problem)
 {
+   if(is_compact)
+      throw std::runtime_error("use expand() first");
    if(problem.on_board == on_board)
       return true;
    return false;
@@ -71,6 +82,8 @@ bool domino_problem::state_equals(const domino_problem& problem)
 
 bool domino_problem::can_be_removed(size_t x, size_t y)
 {
+   if(is_compact)
+      throw std::runtime_error("use expand() first");
    domino_elem_located* e = board[x][y]->owner;
    size_t dist_up = distance(e->x, e->y, up);
    size_t dist_left = distance(e->x, e->y, left);
@@ -104,6 +117,8 @@ bool domino_problem::can_be_removed(size_t x, size_t y)
 
 size_t domino_problem::distance(size_t x, size_t y, half_direction dir)
 {
+   if(is_compact)
+      throw std::runtime_error("use expand() first");
    if(dir == up)
    {
       // check up
@@ -201,6 +216,8 @@ size_t domino_problem::distance(size_t x, size_t y, half_direction dir)
 
 void domino_problem::remove_at(size_t x, size_t y)
 {
+   if(is_compact)
+      throw std::runtime_error("use expand() first");
    half_elem*& he = board[x][y];
    domino_elem_located* e = he->owner;
    removed.append(e);
@@ -212,6 +229,74 @@ void domino_problem::remove_at(size_t x, size_t y)
       board[e->x][e->y+1] = 0;
    else
       board[e->x+1][e->y] = 0;
+}
+
+void domino_problem::pack()
+{
+   if(is_compact)
+      return;
+
+   on_board_key = 0;
+   possible_key = 0;
+   //removed_key = 0;  // this is in fact equal to bitwise !(on_board_key)
+   //  but order also has to be stored, therefore I can't see how to encode this, yet
+   for(elements_t::elem_const el = elements->first(), on = on_board.first(),
+       po = possible.first()/*, re = removed.first()*/; el; ++el)
+   {
+      on_board_key <<= 1;
+      if(on && *el == *on)
+      {
+         on_board_key += 1;
+         ++on;
+      }
+      possible_key <<= 1;
+      if(po && *el == *po)
+      {
+         possible_key += 1;
+         ++po;
+      }
+      //      re = removed.find(*el);
+      //      removed_key <<= 1;
+      //      if(re && *el == *re)
+      //      {
+      //         removed_key += 1;
+      //         //re;
+      //      }
+   }
+   on_board.clear();
+   possible.clear();
+   //removed.clear();
+
+   domino_problem_input::pack();
+
+   is_compact = true;
+}
+
+void domino_problem::expand()
+{
+   if(!is_compact)
+      return;
+
+   if(on_board.length() > 0 || possible.length() > 0)
+      throw std::runtime_error("error: problem was modified while packed");
+
+   domino_problem_input::expand();
+
+   for(elements_t::elem_const el = elements->last()/*, on = on_board.first(),
+           po = possible.first(), re = removed.first()*/; el; --el)
+   {
+      if(on_board_key & 1)
+      {
+         on_board.insertFirst(*el);
+      }
+      on_board_key >>= 1;
+      if(possible_key & 1)
+      {
+         possible.insertFirst(*el);
+      }
+      possible_key >>= 1;
+   }
+   is_compact = false;
 }
 
 #ifdef DEBUG

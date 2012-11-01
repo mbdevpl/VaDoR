@@ -1,39 +1,44 @@
 #include "domino_problem_solver.h"
 
 domino_problem_solver::domino_problem_solver()
-   :  domino_problem(), states(), in_tree() { }
+   :  domino_problem(), states(), in_tree(), best_path(), best_state() { }
 
 domino_problem_solver::domino_problem_solver(const domino_problem& problem)
-   : domino_problem(problem), states(problem), in_tree(problem.size())
-{
-   //
-}
+   : domino_problem(problem), states(problem), in_tree(problem.size()),
+     best_path(), best_state() { }
 
 domino_problem_solver::~domino_problem_solver()
 {
    states.clear();
 }
 
-void domino_problem_solver::execute(bool approximate)
+void domino_problem_solver::execute(bool output, bool approximate)
 {
-   int* filler = nullptr;
+   ull* filler = nullptr;
    try
    {
-      filler = new int[500000];
+      // memory needed in case of bad alloc
+      filler = new ull[262144]; // 262144 * 64 bits = 2MB
       if(approximate)
          construct_path();
       else
-         construct_full_tree(true);
+         construct_full_tree(output, true);
+      if(filler)
+      {
+         delete filler;
+         filler = nullptr;
+      }
    }
    catch(std::bad_alloc& ba)
    {
       delete filler;
+      filler = nullptr;
       std::cout << "Exception: no more memory available to allocate the tree."
                 << std::endl << ba.what() << std::endl;
    }
 }
 
-void domino_problem_solver::construct_full_tree(bool depthFirst)
+void domino_problem_solver::construct_full_tree(bool output, bool depthFirst)
 {
    solution_t outcomes;
    simple_list<states_t::elem,size_t> new_states;
@@ -44,20 +49,23 @@ void domino_problem_solver::construct_full_tree(bool depthFirst)
    // maximum number of states that can be reached theoretically
    ull max_states = ((ull)1) << elements->length();
    // currently known best state
-   /*states_t::elem*/ best_state = states.root();
+   best_state = states.root();
    ull best_on_board = best_state.value_ref().on_board_length();
 
    //#ifdef DEBUG
-   std::cout << "Started constructing tree...\n";
-   std::cout << "Total number of theoretically possible states:"
-             << " 2^" << elements->length() << " = "
-             << (elements->length() >= 64 ? "... a lot" : std::to_string(max_states))
-             << "\n\n";
-   std::cout << "Construction in progress, current number of states:\n";
-   std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << 0
-             << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count()
-             << "; pieces left: " << std::setw(3) << std::setfill(' ') << on_board_length();
-   std::cout << std::endl;
+   if(output)
+   {
+      std::cout << "Started constructing tree...\n";
+      std::cout << "Total number of theoretically possible states:"
+                << " 2^" << elements->length() << " = "
+                << (elements->length() >= 64 ? "... a lot" : std::to_string(max_states))
+                << "\n\n";
+      std::cout << "Construction in progress, current number of states:\n";
+      std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << 0
+                << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count()
+                << "; pieces left: " << std::setw(3) << std::setfill(' ') << on_board_length();
+      std::cout << std::endl;
+   }
    //#endif // DEBUG
 
    new_states.first().value_ref().value_ref().scan_board();
@@ -97,6 +105,7 @@ void domino_problem_solver::construct_full_tree(bool depthFirst)
       // iterate over all new possible states
       for(solution_t::elem i = outcomes.first()/*element(len_before)*/; i; ++i)
       {
+         //(*i).pack();
          // if the state is already in the tree, do not add it,
          // but simply connect the current state to the existing one
          ull key = 0;
@@ -109,6 +118,7 @@ void domino_problem_solver::construct_full_tree(bool depthFirst)
                ++on;
             }
          }
+         //(*i).key = key;
          bool already_in_tree = !in_tree.put(key);
 
          if(already_in_tree)
@@ -134,27 +144,50 @@ void domino_problem_solver::construct_full_tree(bool depthFirst)
       }
 
       ++state_count;
-      if(state_count % 500 == 0) {
-         std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << state_count
-                   << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count()
-                   << "; pieces left: " << std::setw(3) << std::setfill(' ') << problem.on_board_length();
-         std::cout << std::endl;
+      if(output)
+      {
+         if(state_count % 500 == 0) {
+            std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << state_count
+                      << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count()
+                      << "; pieces left: " << std::setw(3) << std::setfill(' ') << problem.on_board_length();
+            std::cout << std::endl;
+         }
       }
       if(problem.on_board_length() < best_on_board)
       {
          best_state = state.copy();
          best_on_board = problem.on_board_length();
-         std::cout << " new best solution, removed " << problem.removed_length() << ":\n"
-                   << problem.removed_str(true);
-         std::cout << std::endl;
+         if(output)
+         {
+            std::cout << " new best solution, removed " << problem.removed_length() << ":\n"
+                      << problem.removed_str(true);
+            std::cout << std::endl;
+         }
       }
+
+      states_t::elem right = state_elem.copy().value().right();
+      if(right.valid())
+      {
+         rebuild_best_path();
+         if(best_path.find(right).valid())
+         {
+            //
+         }
+         // future optimization to check:
+         // state_elem.copy().right().removeRecursive(); // except longest found path
+      }
+
       state_elem.remove();
+      problem.pack();
       if(best_on_board == 0)
          break;
    }
-   std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << state_count
-             << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count();
-   std::cout << std::endl;
+   if(output)
+   {
+      std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << state_count
+                << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count();
+      std::cout << std::endl;
+   }
 }
 
 void domino_problem_solver::construct_path()
@@ -162,14 +195,19 @@ void domino_problem_solver::construct_path()
    // nothing yet
 }
 
+void domino_problem_solver::rebuild_best_path()
+{
+   best_path.clear();
+   for(states_t::elem e = best_state.copy(); e; e.root())
+      best_path.insertFirst(e.copy());
+}
+
 domino_problem::solution_t domino_problem_solver::find_first_best_solution()
 {
    solution_t sol;
-
-   simple_list<states_t::elem,ull> path;
    for(states_t::elem e = best_state.copy(); e; e.root())
    {
-      path.insertFirst(e.copy());
+      (*e).expand();
       sol.insertFirst(*e);
    }
    return sol;

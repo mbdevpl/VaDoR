@@ -27,14 +27,25 @@ protected:
    elements_t possible;
    // not longer on board, removed in the previous turns
    elements_t removed;
+
+   ull on_board_key;
+
+   ull possible_key;
+
+   ull removed_key;
 public:
+   // Default constructor.
    domino_problem();
+   // Copy constructor.
    domino_problem(const domino_problem& problem);
+   // Creates a copy with or without copying 'possible' field.
    domino_problem(const domino_problem& problem, bool copy_possible);
+   // Creates a problem from a problem input.
    domino_problem(const domino_problem_input& input);
+   // Destructor.
    ~domino_problem();
 public:
-   // scans board to find removable pieces
+   // Scans board to find removable pieces.
    void scan_board();
 public:
    void add_possible_outcomes(domino_problem::solution_t& outcomes);
@@ -45,6 +56,10 @@ private:
    size_t distance(size_t x, size_t y, half_direction dir);
    void remove_at(size_t x, size_t y);
 public:
+   // Packs the object, decreasing memory usage.
+   void pack();
+   // Unpacks the object, increasing memory usage.
+   void expand();
    const elements_t::elem_const on_board_first() const { return on_board.first(); }
    ull on_board_length() const { return on_board.length(); }
    ull possible_length() const { return possible.length(); }

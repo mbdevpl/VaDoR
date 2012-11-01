@@ -34,6 +34,10 @@ protected:
    elements_t* unresolved;
    // Possible to remove if other pieces are placed right.
    elements_t checked;
+
+   unsigned long long checked_key;
+
+   bool is_compact;
 protected:
    domino_problem_input();
    domino_problem_input(const domino_problem_input& input);
@@ -48,6 +52,10 @@ private:
    // checks all unresolved pieces to know which cannot be removed at all
    void resolve_elements();
 public:
+   // Packs the object, decreasing memory usage.
+   void pack();
+   // Unpacks the object, increasing memory usage.
+   void expand();
    const elements_t::elem_const elements_first() const { return elements->first(); }
    size_t size() const { return elements->length(); }
    inline domino_elem_located* elem(size_t index) { return elements->element(index).value_ref(); }

@@ -28,6 +28,7 @@ int main(int argc, char **argv)
 
    if(args.pop("-cmd"))
    {
+      //for(int i=0;i<930;++i) long long* a = new long long[262144];
       //while(true)
       main_cmd(args);
    }
@@ -46,25 +47,37 @@ int main(int argc, char **argv)
 
 int main_cmd(program_args& args)
 {
-   std::cout << "Vanishing Domino Problem" << std::endl;
+   static bool output = !args.pop("-nocout");
+   if(output)
+      std::cout << "Vanishing Domino Problem" << std::endl;
    domino_problem_input input(args.last());
 
-   std::cout << std::endl << "Input:" << std::endl;
-   std::cout << input.board_str() << std::endl << std::endl;
+   if(output)
+   {
+      std::cout << std::endl << "Input:" << std::endl;
+      std::cout << input.board_str() << std::endl << std::endl;
+   }
 
    domino_problem prob(input);
-   std::cout << "Problem defined!" << std::endl;
+   if(output)
+      std::cout << "Problem defined!" << std::endl;
 
    domino_problem_solver solver(prob);
-   std::cout << "Solver initialized!" << std::endl;
 
-   solver.execute();
+   if(output)
+      std::cout << "Solver initialized!" << std::endl;
 
-   std::cout << "Building graph done!" << std::endl;
+   solver.execute(output);
+
+   if(output)
+      std::cout << "Building graph done!" << std::endl;
    domino_problem::solution_t frst = solver.find_first_best_solution();
-   std::cout << std::endl << "Best solution:" << std::endl;
-   for(domino_problem::solution_t::elem i = frst.first(); i; ++i)
-      std::cout << i.value_ref().board_str() << std::endl << std::endl;
+   if(output)
+   {
+      std::cout << std::endl << "Best solution:" << std::endl;
+      for(domino_problem::solution_t::elem i = frst.first(); i; ++i)
+         std::cout << i.value_ref().board_str() << std::endl << std::endl;
+   }
 
    //   simple_list<simple_list<domino_problem,size_t>,size_t> all = solver.find_all_best_solutions();
    //   std::cout << "List of all best solutions:" << std::endl;

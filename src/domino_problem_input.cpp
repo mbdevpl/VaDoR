@@ -4,18 +4,20 @@ domino_problem_input::domino_problem_input()
 //   : alloc(true), elements(new elements_t()), width(0), height(0), board(),
 //     invalid(new elements_t()), unresolved(new elements_t()), checked() { }
    : alloc(true), elements(nullptr), width(0), height(0), board(),
-     invalid(nullptr), unresolved(nullptr), checked() { }
+     invalid(nullptr), unresolved(nullptr), checked(), is_compact(false) { }
 
 domino_problem_input::domino_problem_input(const domino_problem_input& input)
    : elements(input.elements), width(input.width), height(input.height), board(input.board),
-     invalid(input.invalid), unresolved(input.unresolved), checked(input.checked)
+     invalid(input.invalid), unresolved(input.unresolved), checked(input.checked), is_compact(false)
 {
    alloc = false;
+   if(input.is_compact)
+      throw std::runtime_error("cannot copy packed object, use expand() first");
 }
 
 domino_problem_input::domino_problem_input(const std::string& path)
    : alloc(true), elements(new elements_t()), width(0), height(0), board(),
-     invalid(new elements_t()), unresolved(new elements_t()), checked()
+     invalid(new elements_t()), unresolved(new elements_t()), checked(), is_compact(false)
 {
    if(path.substr(path.find_last_of(".") + 1) == "xml")
       read_xml(path);
@@ -27,8 +29,15 @@ domino_problem_input::domino_problem_input(const std::string& path)
 
 domino_problem_input::~domino_problem_input()
 {
+   //   if(!is_compact)
+   //   {
+   //      checked.clear();
+   //   }
    if(alloc)
+   {
+      //elements->clear();
       release(); // do not dealloc unless this object created the variables
+   }
 }
 
 void domino_problem_input::release()
@@ -294,6 +303,47 @@ void domino_problem_input::resolve_elements()
             checked.append(e);
       }
    }
+}
+
+
+void domino_problem_input::pack()
+{
+   if(is_compact)
+      return;
+
+   checked_key = 0;
+   for(elements_t::elem_const el = elements->first(), ch = checked.first(); el; ++el)
+   {
+      checked_key <<= 1;
+      if(ch && *el == *ch)
+      {
+         checked_key += 1;
+         ++ch;
+      }
+   }
+   checked.clear();
+
+   is_compact = true;
+}
+
+void domino_problem_input::expand()
+{
+   if(!is_compact)
+      return;
+
+   if(checked.length() > 0)
+      throw std::runtime_error("error: problem was modified while packed");
+
+   for(elements_t::elem_const el = elements->last(); el; --el)
+   {
+      if(checked_key & 1)
+      {
+         checked.insertFirst(*el);
+      }
+      checked_key >>= 1;
+   }
+
+   is_compact = false;
 }
 
 std::string domino_problem_input::board_str() const
