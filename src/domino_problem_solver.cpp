@@ -22,7 +22,7 @@ void domino_problem_solver::execute(bool output, bool approximate)
       if(approximate)
          construct_path();
       else
-         construct_full_tree(output, true);
+         construct_full_tree(output, true, true);
       if(filler)
       {
          delete filler;
@@ -38,7 +38,7 @@ void domino_problem_solver::execute(bool output, bool approximate)
    }
 }
 
-void domino_problem_solver::construct_full_tree(bool output, bool depthFirst)
+void domino_problem_solver::construct_full_tree(bool output, bool depthFirst, bool purgeUseless)
 {
    solution_t outcomes;
    simple_list<states_t::elem,size_t> new_states;
@@ -102,45 +102,42 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst)
       //      //   std::cout << "  No new possible states...";
       //      //std::cout << std::endl;
       //#endif // DEBUG
-      // iterate over all new possible states
-      for(solution_t::elem i = outcomes.first()/*element(len_before)*/; i; ++i)
+
+      bool new_outcomes = false;
+      if(outcomes.length() > 0)
       {
-         //(*i).pack();
-         // if the state is already in the tree, do not add it,
-         // but simply connect the current state to the existing one
-         ull key = 0;
-         for(elements_t::elem_const el = (*i).elements_first(), on = (*i).on_board_first(); el; ++el)
+         new_outcomes = true;
+         // iterate over all new possible states
+         for(solution_t::elem i = outcomes.first(); i; ++i)
          {
-            key <<= 1;
-            if(on && *el == *on)
+            //(*i).pack();
+            // if the state is already in the tree, do not add it,
+            // but simply connect the current state to the existing one
+            ull key = 0;
+            for(elements_t::elem_const el = (*i).elements_first(), on = (*i).on_board_first(); el; ++el)
             {
-               key += 1;
-               ++on;
+               key <<= 1;
+               if(on && *el == *on)
+               {
+                  key += 1;
+                  ++on;
+               }
             }
-         }
-         //(*i).key = key;
-         bool already_in_tree = !in_tree.put(key);
+            bool already_in_tree = !in_tree.put(key);
 
-         if(already_in_tree)
-         {
-            //#ifdef DEBUG
-            //std::cout << "Found a state that already exists in the tree.\n";
-            //#endif // DEBUG
-            // find where exactly in the tree the state is
-            //            states_t::elem found = states.find(pr1);
-            // connect the current state to the existing one, forming an edge
-            //  between two already existing states.
-            //  this step is crucial to achieve complexity 2^n, which is better than n!
-            //            state.appendSub(found);
-            continue;
+            if(already_in_tree)
+            {
+               // find where exactly in the tree the state is
+               //            states_t::elem found = states.find(pr1);
+               // connect the current state to the existing one, forming an edge
+               //  between two already existing states.
+               //  this step is crucial to achieve complexity 2^n, which is better than n!
+               //            state.appendSub(found);
+               continue;
+            }
+            state.appendSub(*i); // add new substate to the tree of states
+            new_states.append(state.copy().lastSub());
          }
-         state.appendSub(*i); // add new substate to the tree of states
-         new_states.append(state.copy().lastSub());
-
-         //++len_before;
-         //#ifdef DEBUG
-         //std::cout << "Added a new state!\n";
-         //#endif // DEBUG
       }
 
       ++state_count;
@@ -149,7 +146,10 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst)
          if(state_count % 500 == 0) {
             std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << state_count
                       << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count()
-                      << "; pieces left: " << std::setw(3) << std::setfill(' ') << problem.on_board_length();
+                      << "; new states: " << std::setw(6) << std::setfill(' ') << new_states.length();
+            if(!depthFirst)
+               std::cout << "; pieces left: "
+                         << std::setw(3) << std::setfill(' ') << problem.on_board_length();
             std::cout << std::endl;
          }
       }
@@ -159,24 +159,78 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst)
          best_on_board = problem.on_board_length();
          if(output)
          {
-            std::cout << " new best solution, removed " << problem.removed_length() << ":\n"
+            std::cout << " new best solution, (" << best_on_board << " pieces left) removed " << problem.removed_length() << ":\n"
                       << problem.removed_str(true);
             std::cout << std::endl;
          }
-      }
 
-      states_t::elem right = state_elem.copy().value().right();
-      if(right.valid())
-      {
          rebuild_best_path();
-         if(best_path.find(right).valid())
+         if(purgeUseless)
          {
-            //
+            if(depthFirst)
+            {
+               //purging is currently only supported for depth-first search
+               for(states_t::elem e = *(best_path.last()); e; e.root())
+               {
+                  while(true)
+                  {
+                     states_t::elem copy(e);
+                     copy.right();
+                     if(copy.valid())
+                        copy.removeRecursive();
+                     else
+                        break;
+                  }
+               }
+            }
          }
-         // future optimization to check:
-         // state_elem.copy().right().removeRecursive(); // except longest found path
       }
-
+      else
+      {
+         if(purgeUseless)
+         {
+            if(depthFirst)
+            {
+               //purging is currently only supported for depth-first search
+               for(states_t::elem e(state); e; e.root())
+               {
+                  while(true)
+                  {
+                     states_t::elem copy(e);
+                     copy.right();
+                     if(copy.empty())
+                        break;
+                     if(best_path.find(copy))
+                        break;
+                     if(copy.valid())
+                        copy.removeRecursive();
+                     else
+                        break;
+                  }
+               }
+            }
+         }
+      }
+      //      states_t::elem right = state_elem.copy().value().right();
+      //      if(right.valid())
+      //      {
+      //         rebuild_best_path();
+      //         simple_list<states_t::elem,ull>::elem on_best_path_elem = best_path.find(right);
+      //         if(on_best_path_elem.valid())
+      //         {
+      //            //states_t::elem,ull>::elem on_best_path_elem = best_path.find(right);
+      //            for(states_t::elem e = *(best_path.last()); e; e.root())
+      //            {
+      //               e.copy().right().removeRecursive();
+      //            }
+      //         }
+      //         else
+      //         {
+      //            best_path.first();
+      //         }
+      //         // future optimization to check:
+      //         // state_elem.copy().right().removeRecursive(); // except longest found path
+      //      }
       state_elem.remove();
       problem.pack();
       if(best_on_board == 0)
@@ -186,6 +240,8 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst)
    {
       std::cout << " scanned: " << std::setw(6) << std::setfill(' ') << state_count
                 << "; in tree: " << std::setw(6) << std::setfill(' ') << states.count();
+      //if(!depthFirst)
+      std::cout << "; pieces left: " << std::setw(3) << std::setfill(' ') << best_on_board;
       std::cout << std::endl;
    }
 }

@@ -58,21 +58,32 @@ private:
          : elem_value(value), ptr_root(root) { }
       // Destructor.
       ELEM_RAW_DESTR { ELEM_RAW_DESTR_T ptr_root = nullptr; subelems_list.clear(); }
-      void release()
-      {
-         for(subelems_list_t::elem sub = subelems_list.first(); sub; sub.removeAndForward())
-         {
-            (*sub)->release();
-            delete *sub;
-            *sub = 0;
-         }
-         subelems_list.clear();
-      }
+      //      void release()
+      //      {
+      //         for(subelems_list_t::elem sub = subelems_list.first(); sub; sub.removeAndForward())
+      //         {
+      //            (*sub)->release();
+      //            delete *sub;
+      //            *sub = 0;
+      //         }
+      //         subelems_list.clear();
+      //      }
    public:
       inline elem_raw*& root() { return ptr_root; }
       inline subelems_list_t& subList() { return subelems_list; }
       inline typename subelems_list_t::elem sub(S index) { return subelems_list.element(index); }
       inline typename subelems_list_t::elem findSub(elem_raw*& e) { return subelems_list.find(e); }
+      inline void disconnectSub(elem_raw*& e)
+      {
+         for(subelems_list_t::elem sub = subelems_list.first(); sub; ++sub)
+         {
+            if(*sub == e)
+            {
+               sub.remove();
+               return;
+            }
+         }
+      }
       inline S subCount() const { return subelems_list.length(); }
 #ifdef DEBUG
    public:
@@ -382,6 +393,11 @@ typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::left()
    elem_raw* r = e->root();
    simple_list<C::elem_raw*,S>::elem this_as_sub = r->findSub(e);
    this_as_sub.back();
+   if(this_as_sub.empty())
+   {
+      clear();
+      return *this;
+   }
    e = this_as_sub.value_ref();
    // as one line command:
    //e = r->subList().find(e).back().value_ref();
@@ -565,6 +581,26 @@ void simple_tree<T,S>::elem::insertLastSub(const T& value)
 
 template<typename T, typename S>
 void simple_tree<T,S>::elem::appendSub(const T& value) { insertLastSub(value); }
+
+template<typename T, typename S>
+void simple_tree<T,S>::elem::removeRecursive()
+{
+   if(empty() || !connected())
+      return;
+
+   simple_list<elem,S> subs = subList();
+   for(simple_list<elem,S>::elem el = subs.last(); el; --el)
+      (*el).removeRecursive();
+
+   if(hasRoot())
+   {
+      e->root()->disconnectSub(e);
+   }
+
+   delete e;
+   c->elem_count -= 1;
+   clear();
+}
 
 //// simple_tree
 

@@ -40,7 +40,8 @@ private:
    // constructs a full tree of states, until either:
    //  1) all possible ways of removing pieces are served, or
    //  2) complete solution is found
-   void construct_full_tree(bool output = true, bool depthFirst = false);
+   void construct_full_tree(bool output = true, bool depthFirst = false,
+                            bool purgeUseless = false);
    // constructs a path until a full solution is found or
    //  a dead-end is reached
    void construct_path();
