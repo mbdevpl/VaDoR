@@ -12,7 +12,8 @@ domino_problem_solver::~domino_problem_solver()
    states.clear();
 }
 
-void domino_problem_solver::execute(bool output, bool approximate)
+void domino_problem_solver::execute(bool output, long long delay, bool approximate, size_t mode,
+                                    bool purgeUseless)
 {
    ull* filler = nullptr;
    try
@@ -22,7 +23,8 @@ void domino_problem_solver::execute(bool output, bool approximate)
       if(approximate)
          construct_path();
       else
-         construct_full_tree(output, true, true);
+         construct_full_tree(output, delay, (mode == DEPTH_LAST || mode == DEPTH_FIRST),
+                             purgeUseless, (mode == DEPTH_LAST ? true : false));
       if(filler)
       {
          delete filler;
@@ -38,7 +40,8 @@ void domino_problem_solver::execute(bool output, bool approximate)
    }
 }
 
-void domino_problem_solver::construct_full_tree(bool output, bool depthFirst, bool purgeUseless)
+void domino_problem_solver::construct_full_tree(bool output, long long delay, bool depthFirst,
+                                                bool purgeUseless, bool startFromRight)
 {
    solution_t outcomes;
    simple_list<states_t::elem,size_t> new_states;
@@ -46,7 +49,7 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst, bo
 
    // current number of scanned states (i.e. states for which the children are known)
    ull state_count = 0;
-   long long temp_state_count = STATE_COUNT_DELAY;
+   long long temp_state_count = delay;
    // maximum number of states that can be reached theoretically
    ull max_states = ((ull)1) << elements->length();
    // currently known best state
@@ -114,7 +117,8 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst, bo
       {
          new_outcomes = true;
          // iterate over all new possible states
-         for(solution_t::elem i = outcomes.first(); i; ++i)
+         solution_t::elem i = startFromRight ? outcomes.first() : outcomes.last();
+         while(i)
          {
             //(*i).pack();
             // if the state is already in the tree, do not add it,
@@ -139,10 +143,16 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst, bo
                //  between two already existing states.
                //  this step is crucial to achieve complexity 2^n, which is better than n!
                //            state.appendSub(found);
-               continue;
             }
-            state.appendSub(*i); // add new substate to the tree of states
-            new_states.append(state.copy().lastSub());
+            else
+            {
+               state.appendSub(*i); // add new substate to the tree of states
+               new_states.append(state.copy().lastSub());
+            }
+            if(startFromRight)
+               ++i;
+            else
+               --i;
          }
       }
       if(output)
@@ -151,7 +161,7 @@ void domino_problem_solver::construct_full_tree(bool output, bool depthFirst, bo
          --temp_state_count;
          if(!temp_state_count) {
             timer.stop();
-            temp_state_count = STATE_COUNT_DELAY;
+            temp_state_count = delay;
             std::cout << " scanned: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << state_count
                       << "; in tree: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << states.count()
                       << "; new states: " << std::setw(OUTPUT_NUMBER_LEN) << std::setfill(' ') << new_states.length()

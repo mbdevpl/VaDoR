@@ -12,6 +12,10 @@
 #ifdef DEBUG
 #endif // DEBUG
 
+#define DEPTH_LAST 1
+#define DEPTH_FIRST 2
+#define BREADTH 3
+
 #define STATE_COUNT_DELAY 100000
 #define OUTPUT_NUMBER_LEN 10
 
@@ -39,13 +43,14 @@ private:
    domino_problem_solver(const domino_problem_solver& solver);
    domino_problem_solver& operator=(const domino_problem_solver& solver);
 public:
-   void execute(bool output = true, bool approximate = false);
+   void execute(bool output = true, long long delay = STATE_COUNT_DELAY, bool approximate = false,
+                size_t mode = BREADTH, bool purgeUseless = false);
 private:
    // constructs a full tree of states, until either:
    //  1) all possible ways of removing pieces are served, or
    //  2) complete solution is found
-   void construct_full_tree(bool output = true, bool depthFirst = false,
-                            bool purgeUseless = false);
+   void construct_full_tree(bool output = true, long long delay = STATE_COUNT_DELAY, bool depthFirst = false,
+                            bool purgeUseless = false, bool startFromRight = false);
    // constructs a path until a full solution is found or
    //  a dead-end is reached
    void construct_path();

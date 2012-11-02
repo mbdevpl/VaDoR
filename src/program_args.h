@@ -3,6 +3,7 @@
 
 #include "simple_list.h"
 #include <string>
+#include <cstdlib>
 
 #ifdef DEBUG
 #include <iostream>
@@ -20,6 +21,7 @@ public:
    program_args(int argc, char **argv);
    void restore();
    bool pop(const arg_t& command);
+   long long pop_number(const arg_t& command);
    arg_t first() { return *(args.first()); }
    arg_t last() { return *(args.last()); }
    arg_t element(size_t index) { return *(args.element(index)); }
