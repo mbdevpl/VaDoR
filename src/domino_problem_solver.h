@@ -14,10 +14,10 @@
 
 #define DEPTH_LAST 1
 #define DEPTH_FIRST 2
-#define BREADTH 3
+#define DEPTH_SORT 4
+#define BREADTH 8
 
 #define STATE_COUNT_DELAY 100000
-#define OUTPUT_NUMBER_LEN 10
 
 class domino_problem_solver : public domino_problem
 {
@@ -50,10 +50,14 @@ private:
    //  1) all possible ways of removing pieces are served, or
    //  2) complete solution is found
    void construct_full_tree(bool output = true, long long delay = STATE_COUNT_DELAY, bool depthFirst = false,
-                            bool purgeUseless = false, bool startFromRight = false);
+                            bool purgeUseless = false, bool startFromRight = false, bool doOutcomeSort = false);
    // constructs a path until a full solution is found or
    //  a dead-end is reached
    void construct_path();
+   void cout_status(unsigned long long scanned_states, unsigned long long not_scanned_states,
+                    program_timer& timer, bool show_pieces,
+                    unsigned long long pieces_left = 0);
+   void purge_right_side(states_t::elem startElem, bool stopAtBestPath);
    void rebuild_best_path();
 public:
     solution_t find_first_best_solution();

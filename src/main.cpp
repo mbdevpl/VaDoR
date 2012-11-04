@@ -22,17 +22,33 @@ void all_chars(std::ostream& s);
 /*!
   \brief main function
 
-  \param argv
+  \param argc number of command line options
+  \param argv command line options
+
+  output/gui related options:
+
   -cmd : runs application in text mode
   -nocout : no text output is generated (nonsense when combined with -cmd)
   -fullsol : prints all boards of the final solution, instead of ordered sequence of removed
      pieces and the final board
+
+  algorithm related options:
+
+  -approx=# : currently not working; in the future it will launch approximate algorithm number #
   -depthfirst : depth-first search done through left branch first
-  -depthlast : depth-first search done through right branch first (ignored if combined with -depthfirst)
+  -depthlast : depth-first search done through right branch first (option is ignored
+     if combined with -depthfirst or -approx)
+  -depthgreedy : depth-first search done through most promising branch first, i.e. the branches with most
+     possibilities are explored first
+     (option is ignored if combined with any of above 3 options)
   -purge : tree of (ignored if search is not depth-first i.e. if neither -depthfirst 
-     nor -depthlast are set)
-  -approx : currently not working; in the future it will launch approximate algorithm
+     nor -depthlast nor -depthgreedy are set)
   -delay=### : ### should be a positive number, means that report is printed each ### scanned states
+
+  command line options used for testing:
+
+  -testmem
+  -testloop
   */
 int main(int argc, char **argv)
 {
@@ -43,9 +59,17 @@ int main(int argc, char **argv)
 
    if(args.pop("-cmd"))
    {
-      //for(int i=0;i<930;++i) long long* a = new long long[262144];
-      //while(true)
-      main_cmd(args);
+      if(args.pop("-testmem"))
+      {
+         long long* ptr;
+         for(int i=0;i<930;++i) ptr = new long long[262144];
+         ptr = nullptr;
+      }
+      if(args.pop("-testloop"))
+         while(true)
+            main_cmd(args);
+      else
+         main_cmd(args);
    }
    else
    {
@@ -67,7 +91,8 @@ int main_cmd(program_args& args)
    static bool approx = args.pop("-approx");
    static bool purge = approx ? false : args.pop("-purge");
    static bool depthfirst = approx ? false : args.pop("-depthfirst");
-   static bool depthlast = depthfirst || approx ? false : args.pop("-depthlast");
+   static bool depthlast = (depthfirst || approx) ? false : args.pop("-depthlast");
+   static bool depthsort = (depthfirst || depthlast || approx) ? false : args.pop("-depthsort");
    static long long delay = args.pop_number("-delay");
    if(delay <= 0)
       delay = 100000;
@@ -79,18 +104,29 @@ int main_cmd(program_args& args)
    {
       std::cout << std::endl << "Input:" << std::endl;
       std::cout << input.board_str() << std::endl << std::endl;
+
+      std::cout << " pieces that cannot be removed: " << input.invalid_length() << std::endl;
+      if(input.invalid_length())
+         std::cout /*<< ""*/ << input.invalid_str() << std::endl;
+      std::cout << " pieces that can be removed: " << input.checked_length() << std::endl;
+      if(input.invalid_length())
+         std::cout /*<< ""*/ << input.checked_str() << std::endl;
    }
 
    domino_problem prob(input);
    if(output)
+   {
       std::cout << "Problem defined!" << std::endl;
+   }
 
    domino_problem_solver solver(prob);
 
    if(output)
       std::cout << "Solver initialized!" << std::endl;
 
-   solver.execute(output, delay, approx, depthfirst ? DEPTH_FIRST : (depthlast ? DEPTH_LAST : BREADTH ), purge);
+   size_t mode = depthfirst ? DEPTH_FIRST : ( depthlast ? DEPTH_LAST : (depthsort ? DEPTH_SORT : BREADTH) );
+
+   solver.execute(output, delay, approx, mode, purge);
 
    if(output)
       std::cout << "Building graph done!" << std::endl;

@@ -1,7 +1,7 @@
 #include "program_timer.h"
 
 program_timer::program_timer(bool local)
-   : local(local), start_time(), stop_time() { }
+   : local(local), running(false), start_time(), stop_time() { }
 
 void program_timer::start()
 {
@@ -9,6 +9,7 @@ void program_timer::start()
    if(local) GetLocalTime(&start_time);
    else GetSystemTime(&start_time);
 #endif // WINDOWS
+   running = true;
 }
 
 void program_timer::stop()
@@ -17,6 +18,7 @@ void program_timer::stop()
    if(local) GetLocalTime(&stop_time);
    else GetSystemTime(&stop_time);
 #endif // WINDOWS
+   running = false;
 }
 
 std::string program_timer::str(const std::string& format)
@@ -26,14 +28,17 @@ std::string program_timer::str(const std::string& format)
 #ifdef WINDOWS
    s << systemtime_str(format, start_time);
 #endif // WINDOWS
-   s << " stop=";
+   if(!running)
+   {
+      s << " stop=";
 #ifdef WINDOWS
-   s << systemtime_str(format, stop_time);
+      s << systemtime_str(format, stop_time);
 #endif // WINDOWS
-   s << " delta=";
+      s << " diff=";
 #ifdef WINDOWS
-   s << delta(start_time, stop_time) / 10000000 << "s";
+      s << delta(start_time, stop_time) / 10000000 << "s";
 #endif // WINDOWS
+   }
    return s.str();
 }
 

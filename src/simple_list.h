@@ -162,6 +162,8 @@ public:
       elem& back();
       // Moves back by the specified ammount.
       elem& back(L count);
+      // Swaps two elements of the list by moving pointers, not data.
+      elem& swapWith(elem& element);
    private:
       inline void delete_and_clear();
    public:
@@ -270,6 +272,8 @@ private:
    void smoothsort_check_left_heap(size_t* heaps, L heaps_len, L curr_heap_index);
 public:
    void sort();
+   void sort_smoothsort();
+   void sort_bubblesort();
 public:
    const T& operator[](const L& index) const;
    T& operator[](const L& index);
@@ -424,6 +428,67 @@ typename simple_list<T,L>::elem& simple_list<T,L>::elem::back(L count)
       return *this;
    for(;count > 0; --count)
       e = e->prev();
+   return *this;
+}
+
+
+template<typename T, typename L>
+typename simple_list<T,L>::elem& simple_list<T,L>::elem::swapWith(typename simple_list<T,L>::elem& element)
+{
+   if(empty() || !connected())
+      return *this;
+   if(element.empty() || !element.connected() || c != element.c)
+   {
+      clear();
+      return *this;
+   }
+   //C::elem_raw* this_e = e;
+   C::elem_raw* element_e = (C::elem_raw*)element;
+   if(e == element_e)
+      return *this;
+
+   C::elem_raw* temp;
+
+   temp = e->next();
+   if(element_e->next() != e)
+      e->next() = element_e->next();
+   else
+      e->next() = element_e;
+   if(temp != element_e)
+      element_e->next() = temp;
+   else
+      element_e->next() = e;
+
+   temp = e->prev();
+   if(element_e->prev() != e)
+      e->prev() = element_e->prev();
+   else
+      e->prev() = element_e;
+   if(temp != element_e)
+      element_e->prev() = temp;
+   else
+      element_e->prev() = e;
+
+   if(e->prev())
+      e->prev()->next() = e;
+   if(e->next())
+      e->next()->prev() = e;
+
+   if(element_e->prev())
+      element_e->prev()->next() = element_e;
+   if(element_e->next())
+      element_e->next()->prev() = element_e;
+
+   if(e == (C::elem_raw*)c->first_elem)
+      c->first_elem = element;
+   else if(element_e == (C::elem_raw*)c->first_elem)
+      c->first_elem = *this;
+
+   if(e == (C::elem_raw*)c->last_elem)
+      c->last_elem = element;
+   else if(element_e == (C::elem_raw*)c->last_elem)
+      c->last_elem = *this;
+
    return *this;
 }
 
@@ -868,6 +933,12 @@ void simple_list<T,L>::smoothsort_form_heaps(size_t* heaps, L heaps_len, L curr_
 template<typename T, typename L>
 void simple_list<T,L>::sort()
 {
+   sort_smoothsort();
+}
+
+template<typename T, typename L>
+void simple_list<T,L>::sort_smoothsort()
+{
 #ifdef DEBUG
    std::cout << "list to be smooth-sorted: ";
    std::cout << str() << std::endl;
@@ -961,6 +1032,32 @@ void simple_list<T,L>::sort()
 
 #ifdef DEBUG
 #endif // DEBUG
+}
+
+template<typename T, typename L>
+void simple_list<T,L>::sort_bubblesort()
+{
+   if(list_length < 2)
+      return;
+   bool swapped;
+   L i_max, j_max = list_length - 1;
+   for(L j = 0; j < j_max; ++j)
+   {
+      swapped = false;
+      i_max = list_length - j;
+      for(L i = 1; i < i_max; ++i)
+      {
+         elem e1 = element(i-1);
+         elem e2 = element(i);
+         if(*e1 > *e2)
+         {
+            e1.swapWith(e2);
+            swapped = true;
+         }
+      }
+      if(!swapped)
+         break;
+   }
 }
 
 template<typename T, typename L>

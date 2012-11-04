@@ -43,7 +43,7 @@ public:
    // Creates a problem from a problem input.
    domino_problem(const domino_problem_input& input);
    // Destructor.
-   ~domino_problem();
+   // ~domino_problem();
 public:
    // Scans board to find removable pieces.
    void scan_board();
@@ -51,6 +51,8 @@ public:
    void add_possible_outcomes(domino_problem::solution_t& outcomes);
    domino_problem::solution_t get_possible_outcomes();
    bool state_equals(const domino_problem& problem);
+   bool operator<(const domino_problem& problem);
+   bool operator>(const domino_problem& problem);
 private:
    bool can_be_removed(size_t x, size_t y);
    size_t distance(size_t x, size_t y, half_direction dir);
@@ -61,9 +63,9 @@ public:
    // Unpacks the object, increasing memory usage.
    void expand();
    const elements_t::elem_const on_board_first() const { return on_board.first(); }
-   ull on_board_length() const { return on_board.length(); }
-   ull possible_length() const { return possible.length(); }
-   ull removed_length() const { return removed.length(); }
+   size_t on_board_length() const { return on_board.length(); }
+   size_t possible_length() const { return possible.length(); }
+   size_t removed_length() const { return removed.length(); }
    std::string on_board_str() const { return on_board.str(); }
    std::string possible_str() const { return possible.str(); }
    std::string removed_str(bool compact = false) const

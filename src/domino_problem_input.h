@@ -13,6 +13,10 @@
 #include "half_elem.h"
 #include "domino_elem_located.h"
 
+//#ifdef DEBUG
+//#define _CRT_SECURE_NO_WARNINGS 1
+//#endif // DEBUG
+
 class domino_problem_input
 {
 protected:
@@ -43,14 +47,15 @@ protected:
    domino_problem_input(const domino_problem_input& input);
 public:
    domino_problem_input(const std::string& path);
-   ~domino_problem_input();
+   /*virtual*/ ~domino_problem_input();
    void release();
 private:
    void read_txt(const std::string& path);
    void read_xml(const std::string& path);
    void init_board();
    // checks all unresolved pieces to know which cannot be removed at all
-   void resolve_elements();
+   void resolve_elements_by_board_size();
+   void resolve_elements_by_possible_distances_to_other_elements();
 public:
    // Packs the object, decreasing memory usage.
    void pack();
@@ -59,6 +64,10 @@ public:
    const elements_t::elem_const elements_first() const { return elements->first(); }
    size_t size() const { return elements->length(); }
    inline domino_elem_located* elem(size_t index) { return elements->element(index).value_ref(); }
+   size_t invalid_length() const { return invalid->length(); }
+   size_t checked_length() const { return checked.length(); }
+   std::string invalid_str() const { return invalid->str(); }
+   std::string checked_str() const { return checked.str(); }
    inline size_t w() { return width; }
    inline size_t h() { return height; }
    std::string board_str() const;

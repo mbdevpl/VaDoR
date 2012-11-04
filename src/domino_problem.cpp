@@ -24,15 +24,15 @@ domino_problem::domino_problem(const domino_problem_input& input)
    //scan_board();
 }
 
-domino_problem::~domino_problem()
-{
+//domino_problem::~domino_problem()
+//{
    //   if(!is_compact)
    //   {
    //      on_board.clear();
    //      possible.clear();
    //      removed.clear();
    //   }
-}
+//}
 
 void domino_problem::scan_board()
 {
@@ -58,9 +58,14 @@ void domino_problem::add_possible_outcomes(domino_problem::solution_t& outcomes)
       domino_problem& pr = outcomes.last().value_ref();
       domino_elem_located* e = i.value_ref();
       pr.remove_at(e->x, e->y);
-      //pr.possible.clear();
+//#ifdef DEBUG
+//      std::cout << pr.board_str();
+//#endif
       pr.scan_board();
    }
+//#ifdef DEBUG
+//      std::cout << possible.length();
+//#endif
 }
 
 domino_problem::solution_t domino_problem::get_possible_outcomes()
@@ -73,18 +78,60 @@ domino_problem::solution_t domino_problem::get_possible_outcomes()
 
 bool domino_problem::state_equals(const domino_problem& problem)
 {
-   if(is_compact)
-      throw std::runtime_error("use expand() first");
+   if(is_compact || problem.is_compact)
+      throw std::runtime_error("cannot compare packed objects");
+
    if(problem.on_board == on_board)
       return true;
    return false;
 }
 
+bool domino_problem::operator<(const domino_problem& problem)
+{
+   if(is_compact || problem.is_compact)
+      throw std::runtime_error("cannot compare packed objects");
+
+   if(on_board.length() < problem.on_board.length())
+      return true;
+   if(on_board.length() > problem.on_board.length())
+      return false;
+
+   if(possible.length() > problem.possible.length())
+      return true;
+   return false;
+}
+
+bool domino_problem::operator>(const domino_problem& problem)
+{
+   if(is_compact || problem.is_compact)
+      throw std::runtime_error("cannot compare packed objects");
+
+   if(on_board.length() > problem.on_board.length())
+      return true;
+   if(on_board.length() < problem.on_board.length())
+      return false;
+
+   if(possible.length() < problem.possible.length())
+      return true;
+   return false;
+
+}
+
 bool domino_problem::can_be_removed(size_t x, size_t y)
 {
    if(is_compact)
-      throw std::runtime_error("use expand() first");
-   domino_elem_located* e = board[x][y]->owner;
+      throw std::runtime_error("use expand() before checking if a piece can be removed");
+   half_elem* h = board[x][y];
+#ifdef DEBUG
+   if(h == nullptr)
+   {
+      //std::cout << board_str();
+      return false;
+   }
+#endif // DEBUG
+   domino_elem_located* e = h->owner;
+   if(e == nullptr)
+      throw std::runtime_error("owner of half_elem must be set");
    size_t dist_up = distance(e->x, e->y, up);
    size_t dist_left = distance(e->x, e->y, left);
    if(e->is_vertical)
@@ -218,17 +265,33 @@ void domino_problem::remove_at(size_t x, size_t y)
 {
    if(is_compact)
       throw std::runtime_error("use expand() first");
-   half_elem*& he = board[x][y];
+   half_elem* he = board[x][y];
+   if(he == nullptr)
+      return;
    domino_elem_located* e = he->owner;
+   if(e == nullptr)
+      throw std::runtime_error("owner of half_elem must be set");
    removed.append(e);
    possible.find(e).remove();
    checked.find(e).remove();
    on_board.find(e).remove();
-   board[e->x][e->y] = 0;
    if(e->is_vertical)
-      board[e->x][e->y+1] = 0;
+   {
+#ifdef DEBUG
+      if(board[e->x][(e->y)+1]->owner != board[e->x][e->y]->owner)
+         throw std::runtime_error("owner mismatch");
+#endif // DEBUG
+      board[e->x][(e->y)+1] = 0;
+   }
    else
-      board[e->x+1][e->y] = 0;
+   {
+#ifdef DEBUG
+      if(board[(e->x)+1][e->y]->owner != board[e->x][e->y]->owner)
+         throw std::runtime_error("owner mismatch");
+#endif // DEBUG
+      board[(e->x)+1][e->y] = 0;
+   }
+   board[e->x][e->y] = 0;
 }
 
 void domino_problem::pack()
@@ -243,6 +306,11 @@ void domino_problem::pack()
    for(elements_t::elem_const el = elements->first(), on = on_board.first(),
        po = possible.first()/*, re = removed.first()*/; el; ++el)
    {
+      if(invalid->find(*el))
+      {
+         ++on;
+         continue;
+      }
       on_board_key <<= 1;
       if(on && *el == *on)
       {
@@ -283,7 +351,7 @@ void domino_problem::expand()
    domino_problem_input::expand();
 
    for(elements_t::elem_const el = elements->last()/*, on = on_board.first(),
-           po = possible.first(), re = removed.first()*/; el; --el)
+               po = possible.first(), re = removed.first()*/; el; --el)
    {
       if(on_board_key & 1)
       {

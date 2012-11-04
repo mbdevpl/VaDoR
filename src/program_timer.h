@@ -13,6 +13,7 @@ class program_timer
 {
 private:
    bool local;
+   bool running;
 #ifdef WINDOWS
    SYSTEMTIME start_time;
    SYSTEMTIME stop_time;

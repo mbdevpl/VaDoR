@@ -24,7 +24,14 @@ domino_problem_input::domino_problem_input(const std::string& path)
    else if (path.substr(path.find_last_of(".") + 1) == "txt")
       read_txt(path);
    unresolved->initFrom(*elements);
-   resolve_elements();
+   resolve_elements_by_board_size();
+   if(unresolved->length() > 0)
+      throw std::runtime_error("resolving by board size did not end completely");
+   unresolved->append(checked);
+   checked.clear();
+   resolve_elements_by_possible_distances_to_other_elements();
+   if(unresolved->length() > 0)
+      throw std::runtime_error("resolving by possible distances did not end completely");
 }
 
 domino_problem_input::~domino_problem_input()
@@ -270,13 +277,13 @@ void domino_problem_input::init_board()
    }
 }
 
-void domino_problem_input::resolve_elements()
+void domino_problem_input::resolve_elements_by_board_size()
 {
    if(unresolved->length() == 0)
       return;
    for(elements_t::elem i = unresolved->first(); i; i.removeAndForward())
    {
-      domino_elem_located* e = i.value_ref();
+      domino_elem_located* e = *i;
       size_t& x = e->x;
       size_t& y = e->y;
       domino_elem_value_t v1 = e->h1.value;
@@ -305,6 +312,393 @@ void domino_problem_input::resolve_elements()
    }
 }
 
+void domino_problem_input::resolve_elements_by_possible_distances_to_other_elements()
+{
+   if(unresolved->length() == 0)
+      return;
+   bool discovered_new_invalid = false;
+   for(elements_t::elem i = unresolved->first(); i; i.removeAndForward())
+   {
+      domino_elem_located* e = *i;
+      size_t x = e->x;
+      size_t y = e->y;
+      domino_elem_value_t v1 = e->value1();
+      domino_elem_value_t v2 = e->value2();
+
+      bool correct_distance_is_impossible = true;
+      half_elem* curr_h = nullptr;
+      domino_elem_located* curr_elem = nullptr;
+      if(e->is_vertical)
+      {
+         // up
+         if(y > 0)
+         {
+            if(v1 == 0 && board[x][y-1])
+               correct_distance_is_impossible = false;
+            else
+               for(size_t yy = y-1; yy >= 0; --yy)
+               {
+                  curr_h = board[x][yy];
+                  if(!curr_h)
+                     continue;
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical && curr_h->direction == up)
+                     --yy;
+                  if(y-yy == v1)
+                  {
+                     correct_distance_is_impossible = false;
+                     break;
+                  }
+                  if(yy == 0)
+                     break;
+               }
+         }
+         if(v1 == y)
+            correct_distance_is_impossible = false;
+
+         // down
+         if(correct_distance_is_impossible && y < height-1)
+         {
+            if(v2 == 0 && board[x][y+2])
+               correct_distance_is_impossible = false;
+            else
+               for(size_t yy = y+2; yy < height; ++yy)
+               {
+                  curr_h = board[x][yy];
+                  if(!curr_h)
+                     continue;
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical && curr_h->direction == down)
+                     ++yy;
+                  if(yy-(y+1) == v2)
+                  {
+                     correct_distance_is_impossible = false;
+                     break;
+                  }
+               }
+         }
+         if(v2 == height-1-(y+1))
+            correct_distance_is_impossible = false;
+
+         // left
+         if(correct_distance_is_impossible && x > 0)
+         {
+            bool half_impossible = true;
+            // upper half
+            if(v1 == 0 && board[x-1][y])
+               half_impossible = false;
+            else
+               for(size_t xx = x-1; xx >= 0; --xx)
+               {
+                  curr_h = board[xx][y];
+                  if(!curr_h)
+                     continue;
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical == false && curr_h->direction == left)
+                     --xx;
+                  if(x-xx == v1)
+                  {
+                     half_impossible = false;
+                     break;
+                  }
+                  if(xx == 0)
+                     break;
+               }
+            if(v1 == x)
+               half_impossible = false;
+            // lower half
+            if(!half_impossible)
+            {
+               if(v2 == 0 && board[x-1][y+1])
+                  correct_distance_is_impossible = false;
+               else
+                  for(size_t xx = x-1; xx >= 0; --xx)
+                  {
+                     curr_h = board[xx][y+1];
+                     if(!curr_h)
+                        continue;
+                     curr_elem = curr_h->owner;
+                     if(invalid->find(curr_elem))
+                        break;
+                     if(curr_elem->is_vertical == false && curr_h->direction == left)
+                        --xx;
+                     if(x-xx == v2)
+                     {
+                        correct_distance_is_impossible = false;
+                        break;
+                     }
+                     if(xx == 0)
+                        break;
+                  }
+               if(v2 == x)
+                  correct_distance_is_impossible = false;
+            }
+         }
+         if(v1 == x && v2 == x)
+            correct_distance_is_impossible = false;
+
+         // right
+         if(correct_distance_is_impossible && x < width-1)
+         {
+            bool half_impossible = true;
+            // upper half
+            if(v1 == 0 && board[x+1][y])
+               half_impossible = false;
+            else
+               for(size_t xx = x+1; xx < width; ++xx)
+               {
+                  curr_h = board[xx][y];
+                  if(!curr_h)
+                     continue;
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical == false && curr_h->direction == right)
+                     ++xx;
+                  if(xx-x == v1)
+                  {
+                     half_impossible = false;
+                     break;
+                  }
+               }
+            if(v1 == width-1-x)
+               half_impossible = false;
+            // lower half
+            if(!half_impossible)
+            {
+               if(v2 == 0 && board[x+1][y+1])
+                  correct_distance_is_impossible = false;
+               else
+                  for(size_t xx = x+1; xx < width; ++xx)
+                  {
+                     curr_h = board[xx][y+1];
+                     if(!curr_h)
+                        continue;
+                     curr_elem = curr_h->owner;
+                     if(invalid->find(curr_elem))
+                        break;
+                     if(curr_elem->is_vertical == false && curr_h->direction == right)
+                        ++xx;
+                     if(xx-x == v2)
+                     {
+                        correct_distance_is_impossible = false;
+                        break;
+                     }
+                  }
+               if(v2 == width-1-x)
+                  correct_distance_is_impossible = false;
+            }
+         }
+         if(v1 == width-1-x && v2 == width-1-x)
+            correct_distance_is_impossible = false;
+
+         if(correct_distance_is_impossible)
+         {
+            invalid->append(e);
+            discovered_new_invalid = true;
+         }
+         else
+            checked.append(e);
+      }
+      else
+      {
+         // left
+         if(x > 0)
+         {
+            if(v1 == 0 && board[x-1][y])
+               correct_distance_is_impossible = false;
+            else
+               for(size_t xx = x-1; xx >= 0; --xx)
+               {
+                  curr_h = board[xx][y];
+                  if(!curr_h)
+                     continue;
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical == false && curr_h->direction == left)
+                     --xx;
+                  if(x-xx == v1)
+                  {
+                     correct_distance_is_impossible = false;
+                     break;
+                  }
+                  if(xx == 0)
+                     break;
+               }
+         }
+         if(v1 == x)
+            correct_distance_is_impossible = false;
+
+         // right
+         if(correct_distance_is_impossible && x < width-1)
+         {
+            if(v1 == 0 && board[x+2][y])
+               correct_distance_is_impossible = false;
+            else
+               for(size_t xx = x+2; xx < width; ++xx)
+               {
+                  curr_h = board[xx][y];
+                  if(!curr_h)
+                     continue;
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical == false && curr_h->direction == right)
+                     ++xx;
+                  if(xx-(x+1) == v1)
+                  {
+                     correct_distance_is_impossible = false;
+                     break;
+                  }
+               }
+         }
+         if(v1 == width-1-(x+1))
+            correct_distance_is_impossible = false;
+
+         // up
+         if(y > 0)
+         {
+            bool half_impossible = true;
+            // left half
+            if(v1 == 0 && board[x][y-1])
+               half_impossible = false;
+            else
+               for(size_t yy = y-1; yy >= 0; --yy)
+               {
+                  curr_h = board[x][yy];
+                  if(!curr_h)
+                     continue;
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical && curr_h->direction == up)
+                     --yy;
+                  if(y-yy == v1)
+                  {
+                     half_impossible = false;
+                     break;
+                  }
+                  //else if(y-yy > v1)
+                  //   break;
+                  if(yy == 0)
+                     break;
+               }
+            if(v1 == y)
+               half_impossible = false;
+            // right half
+            if(!half_impossible)
+            {
+               if(v2 == 0 && board[x+1][y-1])
+                  correct_distance_is_impossible = false;
+               else
+                  for(size_t yy = y-1; yy >= 0; --yy)
+                  {
+                     curr_h = board[x+1][yy];
+                     if(!curr_h)
+                        continue;
+                     curr_elem = curr_h->owner;
+                     if(invalid->find(curr_elem))
+                        break;
+                     if(curr_elem->is_vertical && curr_h->direction == up)
+                        --yy;
+                     if(y-yy == v2)
+                     {
+                        correct_distance_is_impossible = false;
+                        break;
+                     }
+                     //else if(y-yy > v2)
+                     //   break;
+                     if(yy == 0)
+                        break;
+                  }
+               if(v2 == y)
+                  correct_distance_is_impossible = false;
+            }
+         }
+         if(v1 == y && v2 == y)
+            correct_distance_is_impossible = false;
+
+         // down
+         if(correct_distance_is_impossible && y < height-1)
+         {
+            bool half_impossible = true;
+            // left half
+            if(v1 == 0 && board[x][y+1])
+               half_impossible = false;
+            else
+               for(size_t yy = y+1; yy < height; ++yy)
+               {
+                  curr_h = board[x][yy];
+                  if(!curr_h)
+                     continue;
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical && curr_h->direction == down)
+                     ++yy;
+                  if(yy-y == v1)
+                  {
+                     half_impossible = false;
+                     break;
+                  }
+               }
+            if(v1 == height-1-y)
+               half_impossible = false;
+            // right half
+            if(!half_impossible)
+            {
+               if(v2 == 0 && board[x+1][y+1])
+                  correct_distance_is_impossible = false;
+               else
+                  for(size_t yy = y+1; yy < height; ++yy)
+                  {
+                     curr_h = board[x+1][yy];
+                     if(!curr_h)
+                        continue;
+                     curr_elem = curr_h->owner;
+                     if(invalid->find(curr_elem))
+                        break;
+                     if(curr_elem->is_vertical && curr_h->direction == down)
+                        ++yy;
+                     if(yy-y == v2)
+                     {
+                        correct_distance_is_impossible = false;
+                        break;
+                     }
+                  }
+               if(v2 == height-1-y)
+                  correct_distance_is_impossible = false;
+            }
+         }
+         if(v1 == height-1-y && v2 == height-1-y)
+            correct_distance_is_impossible = false;
+
+         if(correct_distance_is_impossible)
+         {
+            invalid->append(e);
+            discovered_new_invalid = true;
+         }
+         else
+            checked.append(e);
+      }
+   }
+
+   // if any new invalid elements are discovered, the algorithm will need to run once
+   //  more, because invalid pieces form a new set of board limits for unresolved pieces
+   if(discovered_new_invalid)
+   {
+      unresolved->initFrom(checked);
+      checked.clear();
+      resolve_elements_by_possible_distances_to_other_elements();
+   }
+}
 
 void domino_problem_input::pack()
 {
@@ -314,6 +708,10 @@ void domino_problem_input::pack()
    checked_key = 0;
    for(elements_t::elem_const el = elements->first(), ch = checked.first(); el; ++el)
    {
+      if(invalid->find(*el))
+      {
+         continue;
+      }
       checked_key <<= 1;
       if(ch && *el == *ch)
       {
