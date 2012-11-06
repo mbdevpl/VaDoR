@@ -59,6 +59,8 @@ int main(int argc, char **argv)
 
    if(args.pop("-cmd"))
    {
+      try
+      {
       if(args.pop("-testmem"))
       {
          long long* ptr;
@@ -70,6 +72,11 @@ int main(int argc, char **argv)
             main_cmd(args);
       else
          main_cmd(args);
+      }
+      catch(std::runtime_error& er)
+      {
+         std::cout << er.what() << std::endl;
+      }
    }
    else
    {
