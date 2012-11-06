@@ -52,37 +52,43 @@ void all_chars(std::ostream& s);
   */
 int main(int argc, char **argv)
 {
-    //all_chars(std::cout);
-    //simple_list<int,size_t>::test();
+   //all_chars(std::cout);
+   //simple_list<int,size_t>::test();
 
-    program_args args(argc, argv);
+   program_args args(argc, argv);
 
-
-
-    if(args.pop("-cmd"))
-    {
-        if(args.pop("-testmem"))
-        {
-            long long* ptr;
-            for(int i=0;i<930;++i) ptr = new long long[262144];
-            ptr = nullptr;
-        }
-        if(args.pop("-testloop"))
-            while(true)
-                main_cmd(args);
-        else
+   if(args.pop("-cmd"))
+   {
+      try
+      {
+      if(args.pop("-testmem"))
+      {
+         long long* ptr;
+         for(int i=0;i<930;++i) ptr = new long long[262144];
+         ptr = nullptr;
+      }
+      if(args.pop("-testloop"))
+         while(true)
             main_cmd(args);
-    }
-    else
-    {
-        std::cout << "execute \"vador.exe -cmd file.xml\" to solve file.xml in text mode "
-                  << "(also accepts *.txt)" << std::endl;
-        QApplication app(argc, argv);
-        MainWindow w;
-        w.show();
-        return app.exec();
-    }
-    return 0;
+      else
+         main_cmd(args);
+      }
+      catch(std::runtime_error& er)
+      {
+         std::cout << er.what() << std::endl;
+      }
+   }
+   else
+   {
+      std::cout << "execute \"vador.exe -cmd file.xml\" to solve file.xml in text mode "
+                << "(also accepts *.txt)" << std::endl;
+      QApplication app(argc, argv);
+      MainWindow w;
+      w.show();
+      return app.exec();
+   }
+
+   return 0;
 }
 
 int main_cmd(program_args& args)
