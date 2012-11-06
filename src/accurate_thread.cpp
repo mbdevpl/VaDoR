@@ -3,11 +3,19 @@
 accurate_thread::accurate_thread(domino_problem_input &input) : input(nullptr)
 {
    this->input = &input;
+   present = new QVector<domino_elem_located*>();
+}
+
+accurate_thread::~accurate_thread()
+{
+   if(present != nullptr)
+      delete present;
 }
 
 void accurate_thread::run()
 {
-    //QVector<domino_elem_located>
+   if(input == nullptr || present == nullptr)
+      throw std::runtime_error("cannot run algorithm for undefined input and/or without allocated list");
    domino_problem prob(*input);
    domino_problem_solver solver(prob);
    myTimer.start();
@@ -20,7 +28,11 @@ void accurate_thread::run()
       size_t x = (*e)->x;
       size_t y = (*e)->y;
       emit threadRemovePiece((int)y,(int)x);
+      removed.append(*e);
    }
+   for(domino_problem::elements_t::elem_const e = best_state.on_board_first(); e; ++e)
+      present->append(*e);
+   //present and removed are ready below this line
 
   // emit threadComputationOver(timeElapsed,NULL,NULL);
 }

@@ -71,6 +71,7 @@ void MainWindow::setGuiForAccurate(bool value)
 
 MainWindow::~MainWindow()
 {
+    //delete input; // maybe other clean-up?
     delete ui;
 }
 

@@ -20,8 +20,10 @@ signals:
     void threadComputationOver(int time,QVector<domino_elem_located*>* present,QVector<domino_elem_located*> removed);
 
 public:
-    accurate_thread():input(nullptr){}
+    accurate_thread()
+       : present(nullptr), input(nullptr) { }
     accurate_thread(domino_problem_input& input);
+    ~accurate_thread();
 private:
     half_elem*** board;
     QVector<domino_elem_located*>* present;
