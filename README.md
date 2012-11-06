@@ -1,8 +1,9 @@
 ﻿VAnishing DOmino pRoblem
 ========================
 
-Solution to the problem defined at:
+This is a solution of the problem defined at:
 http://alpha.mini.pw.edu.pl/~lucknerm/downloads/AC/domino.pdf
+
 The above file is mirrored in this repository.
 
 VAnishing DOmino pRoblem -> VADOR
@@ -11,9 +12,14 @@ VAnishing DOmino pRoblem -> VADOR
 Current main features
 ---------------------
 
-The program is able to solve the above-defined problem in exponential time: O(n^2). Currently, it is able to analyze around 16500000 states (possible domino pieces configurations) before running out of memory. In such case, the program provides partial solution.
+The program is able to solve the above-defined problem in exponential time: O(n^2). Currently, 
+it is able to analyze around 16500000 states (possible domino pieces configurations) before 
+running out of memory. In such case, the program provides partial solution.
 
-The program accepts two input formats: XML and txt. XML format is described in detail in initial documentation, and txt in a separate document. You can find all documentation in the repository. Where? See "Where is everything" chapter of this readme file.
+The program accepts two input formats: XML and txt. XML format is described in detail in initial 
+documentation, and txt in a separate document. You can find all documentation in the repository. 
+Where? See *Where is everything* chapter of this readme file.
+
 
 Command line options
 --------------------
@@ -30,9 +36,9 @@ In text mode, you have many more command line options. For example:
 
 <code>vador.exe -cmd -delay=200 problem3.xml -depthsort -purge</code>
 
-Will solve problem3.xml using greedy depth-first search, with purging of useless results in runtime.
+will solve problem3.xml using greedy depth-first search, with purging of useless results in runtime.
 
-For details, please see comments for main() function in main.cpp
+For details, please see comments for <code>main()</code> function in <code>main.cpp</code>
 
 
 Where is everything

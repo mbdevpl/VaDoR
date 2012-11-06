@@ -1,4 +1,4 @@
-call vador.exe -cmd -delay=300 -purge problem3.xml -depthlast
+call vador.exe -cmd -delay=300 problem3.xml -depthlast -purge
 
 pause
 

@@ -208,7 +208,7 @@ void domino_problem_solver::construct_full_tree(bool output, long long delay, bo
 void domino_problem_solver::construct_path(bool output, long long delay, bool stopOnFirstDeadEnd,
                                            long long maxStatesChecked)
 {
-   construct_full_tree(output, delay, true, false, true, true, stopOnFirstDeadEnd, maxStatesChecked);
+   construct_full_tree(output, delay, true, false, false, true, stopOnFirstDeadEnd, maxStatesChecked);
 
 }
 
