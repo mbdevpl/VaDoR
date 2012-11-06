@@ -40,7 +40,8 @@ HEADERS += \
     domino_problem_solver.h \
     program_args.h \
     binary_hash.h \
-    program_timer.h
+    program_timer.h \
+    accurate_thread.h
 
 SOURCES += \
     main.cpp \
@@ -56,7 +57,8 @@ SOURCES += \
     domino_problem_solver.cpp \
     program_args.cpp \
     binary_hash.cpp \
-    program_timer.cpp
+    program_timer.cpp \
+    accurate_thread.cpp
 
 FORMS += \
     mainwindow.ui \

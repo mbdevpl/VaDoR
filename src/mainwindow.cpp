@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     selectedAlgorithm = accurate;
-    setGuiForAccurate(false);
+    setGuiForAccurate(true);
     ui->progressBar->setValue(0);
     this->elemCurr = 0;
     scrollLayout = new QGridLayout;
@@ -77,6 +77,12 @@ void MainWindow::runClicked()
         {
             switch (selectedAlgorithm){
             case accurate:
+                accThread = new accurate_thread(*input);
+                QObject::connect(accThread, SIGNAL(threadRemovePiece(int,int)), this, SLOT(removePiece(int,int)), Qt::QueuedConnection);
+                QObject::connect(accThread, SIGNAL(threadComputationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), this, SLOT(computationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), Qt::QueuedConnection);
+                accThread->start();
+
+                setGuiEnabledWhileComputing(false,false);
                 break;
             case mateusz:
                 break;

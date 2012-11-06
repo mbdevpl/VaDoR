@@ -16,6 +16,7 @@
 #include "approximate_r.h"
 #include "domino_problem_input.h"
 #include "domino_problem_solver.h"
+#include "accurate_thread.h"
 
 #define HALF_PIECE_DIM 65
 
@@ -36,6 +37,7 @@ private:
     domino_problem_input *input;
     QWidget *viewport;
     approximate_r *apprThread_r;
+    accurate_thread *accThread;
     QMessageBox msgBox;
     current_algorithm selectedAlgorithm;
 
