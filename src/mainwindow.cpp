@@ -8,12 +8,14 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     selectedAlgorithm = accurate;
+    setGuiForAccurate(true);
     ui->progressBar->setValue(0);
     this->elemCurr = 0;
     scrollLayout = new QGridLayout;
     viewport = new QWidget;
     viewport->setLayout(scrollLayout);
     ui->boardScrollArea->setWidget(viewport);
+    qRegisterMetaType< QVector<domino_elem_located*> >("QVector<domino_elem_located*>");
 
     connect( ui->ExitMenu, SIGNAL(triggered()), this, SLOT( exitApplicationClicked() ) );
     connect( ui->OpenMenu, SIGNAL(triggered()), this, SLOT( openFileClicked() ) );
@@ -33,13 +35,31 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::algorithmChanged()
 {
     if (ui->accurateAlgRadioBox->isChecked())
+    {
         selectedAlgorithm = accurate;
+        setGuiForAccurate(true);
+    }
     else if (ui->matiAlgRadioBox->isChecked())
+    {
         selectedAlgorithm = mateusz;
+        setGuiForAccurate(false);
+    }
     else if (ui->radekAlgRadioBox->isChecked())
+    {
         selectedAlgorithm = radek;
+        setGuiForAccurate(false);
+    }
     else if (ui->stanislawAlgRadioBox->isChecked())
+    {
         selectedAlgorithm = stanislaw;
+        setGuiForAccurate(false);
+    }
+}
+
+void MainWindow::setGuiForAccurate(bool value)
+{
+    ui->groupBox_3->setEnabled(!value);
+    ui->tabWidget->setTabEnabled(1,!value);
 }
 
 MainWindow::~MainWindow()
@@ -57,6 +77,12 @@ void MainWindow::runClicked()
         {
             switch (selectedAlgorithm){
             case accurate:
+                accThread = new accurate_thread(*input);
+                QObject::connect(accThread, SIGNAL(threadRemovePiece(int,int)), this, SLOT(removePiece(int,int)), Qt::QueuedConnection);
+                QObject::connect(accThread, SIGNAL(threadComputationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), this, SLOT(computationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), Qt::QueuedConnection);
+                accThread->start();
+
+                setGuiEnabledWhileComputing(false,false);
                 break;
             case mateusz:
                 break;
@@ -64,7 +90,7 @@ void MainWindow::runClicked()
                 apprThread_r = new approximate_r(problem_r);
                 if (ui->isDelayCheckBox->isChecked() && ui->spinBox->value()>0) apprThread_r->setDelay(ui->spinBox->value());
                 QObject::connect(apprThread_r, SIGNAL(threadRemovePiece(int,int)), this, SLOT(removePiece(int,int)), Qt::QueuedConnection);
-                  QObject::connect(apprThread_r, SIGNAL(threadComputationOver(int,int)), this, SLOT(computationOver(int,int)), Qt::QueuedConnection);
+                QObject::connect(apprThread_r, SIGNAL(threadComputationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), this, SLOT(computationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), Qt::QueuedConnection);
                 apprThread_r->start();
                 setGuiEnabledWhileComputing(false,false);
                 break;
@@ -84,7 +110,7 @@ void MainWindow::runClicked()
                 apprThread_r = new approximate_r(problem_r);
                 apprThread_r->setPieceByPiece(true);
                 QObject::connect(apprThread_r, SIGNAL(threadRemovePiece(int,int)), this, SLOT(removePiece(int,int)), Qt::QueuedConnection);
-                QObject::connect(apprThread_r, SIGNAL(threadComputationOver(int,int)), this, SLOT(computationOver(int,int)), Qt::QueuedConnection);
+                QObject::connect(apprThread_r, SIGNAL(threadComputationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), this, SLOT(computationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), Qt::QueuedConnection);
                 apprThread_r->start();
                 setGuiEnabledWhileComputing(false,true);
                 break;
@@ -101,15 +127,15 @@ void MainWindow::runClicked()
 
 void MainWindow::openFileClicked()
 {
-    QString s = QFileDialog::getOpenFileName(this, tr("Open File"),"", tr("Files (*.xml)"));
+    QString s = QFileDialog::getOpenFileName(this, tr("Open File"),"", tr("Vador files (*.xml *.txt)"));
+
     if (!s.isEmpty())
     {
         problem_r.load(s);
+        input = new domino_problem_input(s.toStdString());
         setBoardSize(problem_r.board_width,problem_r.board_height);
-#ifdef HALF_LOC
         foreach (domino_elem* el, problem_r.elem_list)
-            addPiece(el->h1.loc_x, el->h1.loc_y, el->is_vertical, el->h1.value, el->h2.value);
-#endif
+            addPiece(el->h1.loc_x(), el->h1.loc_y(), el->is_vertical, el->h1.value, el->h2.value);
         setBoardSize(problem_r.board_width,problem_r.board_height);
         ui->progressBar->setValue(100);
     }
@@ -228,9 +254,10 @@ void MainWindow::addPiece(int loc_x, int loc_y, bool isVertical, int val1, int v
     ui->piecesCurrLcdNumber->display(this->elemCurr);
 }
 
-void MainWindow::computationOver(int time, int objectId)
+void MainWindow::computationOver(int time, QVector<domino_elem_located*>* present, QVector<domino_elem_located*> removed)
 {
     summary_win.show();
+    summary_win.publishResults(time,*present,removed);
 }
 
 void MainWindow::setGuiEnabledWhileComputing(bool value, bool isPieceByPiece)

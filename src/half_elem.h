@@ -15,18 +15,16 @@ public:
    half_direction direction;
    // Pointer to the owner of this half.
    domino_elem_located* owner;
-#ifdef HALF_LOC
-   int loc_x;
-   int loc_y;
-#endif // HALF_LOC
+
 public:
    half_elem();
    half_elem(domino_elem_value_t value);
    half_elem(const half_elem& half);
    half_elem& operator=(const half_elem& half);
+
 public:
-   //size_t loc_x();
-   //size_t loc_y();
+   size_t loc_x();
+   size_t loc_y();
 public:
    friend std::ostream& operator<<(std::ostream& os, const half_elem& half);
    friend std::ostream& operator<<(std::ostream& os, half_elem* half);

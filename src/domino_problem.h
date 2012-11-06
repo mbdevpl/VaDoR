@@ -26,7 +26,7 @@ protected:
    // possible to remove in the next turn
    elements_t possible;
    // not longer on board, removed in the previous turns
-   elements_t removed;
+
 
    ull on_board_key;
 
@@ -34,6 +34,7 @@ protected:
 
    ull removed_key;
 public:
+   elements_t removed;
    // Default constructor.
    domino_problem();
    // Copy constructor.

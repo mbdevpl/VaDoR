@@ -34,6 +34,7 @@ domino_problem::domino_problem(const domino_problem_input& input)
    //   }
 //}
 
+
 void domino_problem::scan_board()
 {
    for(elements_t::elem i = checked.first(); i; ++i)
@@ -85,6 +86,7 @@ bool domino_problem::state_equals(const domino_problem& problem)
       return true;
    return false;
 }
+
 
 bool domino_problem::operator<(const domino_problem& problem)
 {
