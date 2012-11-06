@@ -3,7 +3,7 @@
 
 approximate_r::approximate_r(domino_problem_r &problem_r)
 {
-    present = new QVector<domino_elem*>(problem_r.elem_list);
+    present = new QVector<domino_elem_located*>(problem_r.elem_list);
     this->board_height = problem_r.board_height;
     this->board_width = problem_r.board_width;
     // Create 2D array of pointers:
@@ -15,13 +15,12 @@ approximate_r::approximate_r(domino_problem_r &problem_r)
         for (int j = 0; j < this->board_height; j++)
             board[i][j] = NULL;
     // Assign half_elem to a corresponding cell in the array
-    foreach (domino_elem* el, problem_r.elem_list){
-#ifdef HALF_LOC
-        board[el->h1.loc_x][el->h1.loc_y] = &el->h1;
-        board[el->h2.loc_x][el->h2.loc_y] = &el->h2;
-#endif
+    foreach (domino_elem_located* el, problem_r.elem_list){
+        board[el->h1.loc_x()][el->h1.loc_y()] = &el->h1;
+        board[el->h2.loc_x()][el->h2.loc_y()] = &el->h2;
     }
     setPieceByPiece(false);
+    isDelay=false;
 }
 
 void approximate_r::print_out() //prints out the board matrix on std o
@@ -117,16 +116,12 @@ bool approximate_r::isRemovable(int x, int y)
 void approximate_r::remove_piece(int x, int y)
 {
     for(int i =0; i < present->size();i++)
-#ifdef HALF_LOC
-        if ((present->at(i)->h1.loc_x==x && present->at(i)->h1.loc_y==y)||
-                (present->at(i)->h2.loc_x==x && present->at(i)->h2.loc_y==y))
-#endif
+        if ((present->at(i)->h1.loc_x()==x && present->at(i)->h1.loc_y()==y)||
+                (present->at(i)->h2.loc_x()==x && present->at(i)->h2.loc_y()==y))
         {
-#ifdef HALF_LOC
-            emit threadRemovePiece(present->at(i)->h1.loc_y,present->at(i)->h1.loc_x);
-            board[present->at(i)->h1.loc_x][present->at(i)->h1.loc_y] = NULL;
-            board[present->at(i)->h2.loc_x][present->at(i)->h2.loc_y] = NULL;
-#endif
+            emit threadRemovePiece(present->at(i)->h1.loc_y(),present->at(i)->h1.loc_x());
+            board[present->at(i)->h1.loc_x()][present->at(i)->h1.loc_y()] = NULL;
+            board[present->at(i)->h2.loc_x()][present->at(i)->h2.loc_y()] = NULL;
             removed.push_back(present->at(i));
             present->remove(i);
             break;
@@ -155,9 +150,12 @@ void approximate_r::stopExecution(){
 
 void approximate_r::run()
 {
+    int time = 0;
     int iterPiecesRemoved = 0;
     workFlag=true;
     mutex.lock();
+
+    if (!isPieceByPiece&&!isDelay) myTimer.start();
 
     do {
         for (int y = 0; y < this->board_height ; y++)
@@ -174,6 +172,8 @@ void approximate_r::run()
                  } else break;
     } while (iterPiecesRemoved > 0);
 
-    emit threadComputationOver(0,0);
+    if (!isPieceByPiece&&!isDelay) time=myTimer.elapsed();
+
+    emit threadComputationOver(time,present,removed);
 }
 

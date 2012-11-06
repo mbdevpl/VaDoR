@@ -2,11 +2,15 @@
 #define DOMINO_PROBLEM_R_H
 
 #include<iostream>
+#include <fstream>
+#include <cstring>
+#include <string>
+#include <streambuf>
 #include<QVector>
 #include<QDomDocument>
 #include<QFile>
 #include<QString>
-#include "domino_elem.h"
+#include "domino_elem_located.h"
 #include "half_elem.h"
 
 
@@ -18,10 +22,12 @@ private:
 public:
     int board_width;
     int board_height;
-    QVector<domino_elem*> elem_list;
+    QVector<domino_elem_located*> elem_list;
 
     domino_problem_r(){}
     void load(QString in_path);
+    void load_xml(QString in_path);
+    void load_txt(const std::string &path);
 };
 
 #endif // DOMINO_PROBLEM_R_H

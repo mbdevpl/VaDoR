@@ -5,6 +5,7 @@
 #include<QVector>
 #include<QThread>
 #include<QMutex>
+#include<QTime>
 #include "domino_elem_fwd.h"
 
 class approximate_r : public QThread
@@ -12,12 +13,12 @@ class approximate_r : public QThread
     Q_OBJECT
 signals:
     void threadRemovePiece(int x,int y);
-    void threadComputationOver(int time,int objectId);
+    void threadComputationOver(int time,QVector<domino_elem_located*>* present,QVector<domino_elem_located*> removed);
 
 private:
     half_elem*** board;
-    QVector<domino_elem*>* present;
-    QVector<domino_elem*> removed;
+    QVector<domino_elem_located*>* present;
+    QVector<domino_elem_located*> removed;
     int board_width;
     int board_height;
 
@@ -26,6 +27,8 @@ private:
 
     bool isDelay;
     int delay;
+
+    QTime myTimer;
 
     void print_out();
     bool isRemovable(int x, int y);

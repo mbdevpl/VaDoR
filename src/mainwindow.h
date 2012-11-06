@@ -14,6 +14,8 @@
 #include "domino_problem_r.h"
 #include "summary_window.h"
 #include "approximate_r.h"
+#include "domino_problem_input.h"
+#include "domino_problem_solver.h"
 
 #define HALF_PIECE_DIM 65
 
@@ -31,21 +33,23 @@ private:
     QList<QPushButton*> buttonPieces;
     QGridLayout *scrollLayout;
     domino_problem_r problem_r;
+    domino_problem_input *input;
     QWidget *viewport;
     approximate_r *apprThread_r;
     QMessageBox msgBox;
     current_algorithm selectedAlgorithm;
+
     int elemCurr;
     void setBoardSize(int,int);
     void addPiece(int loc_x, int loc_y, bool isVertical, int val1, int val2);
     void setGuiEnabledWhileComputing(bool value, bool isPieceByPiece);
-
+    void setGuiForAccurate(bool value);
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 public slots:
-    void computationOver(int time, int threadId);
+    void computationOver(int time, QVector<domino_elem_located*>* present, QVector<domino_elem_located*> removed);
     void removePiece(int loc_x, int loc_y);
     void exitApplicationClicked();
     void openFileClicked();
