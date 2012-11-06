@@ -19,8 +19,9 @@
 
 class domino_problem_input
 {
-protected:
+public:
    typedef simple_list<domino_elem_located*,size_t> elements_t;
+protected:
    typedef simple_list<half_elem*,size_t> column_t;
    typedef simple_list<column_t,size_t> board_t;
 protected:
@@ -38,9 +39,9 @@ protected:
    elements_t* unresolved;
    // Possible to remove if other pieces are placed right.
    elements_t checked;
-
+   // sequence of zeros and ones, with ones when a given element from 'elements' is checked
    unsigned long long checked_key;
-
+   // true if this object has all lists empty and encoded in keys representing them
    bool is_compact;
 protected:
    domino_problem_input();

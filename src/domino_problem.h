@@ -26,15 +26,15 @@ protected:
    // possible to remove in the next turn
    elements_t possible;
    // not longer on board, removed in the previous turns
-
-
+   elements_t removed;
+   // sequence of zeros and ones, with ones when a given element from 'elements' is on board
    ull on_board_key;
-
+   // sequence of zeros and ones, with ones when a given element from 'elements'
+   //  can be removed in current situation
    ull possible_key;
-
+   // sequence of zeros and ones, with ones when a given element from 'elements' is removed
    ull removed_key;
 public:
-   elements_t removed;
    // Default constructor.
    domino_problem();
    // Copy constructor.
@@ -64,6 +64,7 @@ public:
    // Unpacks the object, increasing memory usage.
    void expand();
    const elements_t::elem_const on_board_first() const { return on_board.first(); }
+   const elements_t::elem_const removed_first() const { return removed.first(); }
    size_t on_board_length() const { return on_board.length(); }
    size_t possible_length() const { return possible.length(); }
    size_t removed_length() const { return removed.length(); }
