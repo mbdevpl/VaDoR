@@ -41,11 +41,15 @@ private:
     QMessageBox msgBox;
     current_algorithm selectedAlgorithm;
 
+    // current list of members of scrollLayout
+    QList<QWidget*> scrollLayoutMembers;
+
     int elemCurr;
     void setBoardSize(int,int);
     void addPiece(int loc_x, int loc_y, bool isVertical, int val1, int val2);
     void setGuiEnabledWhileComputing(bool value, bool isPieceByPiece);
     void setGuiForAccurate(bool value);
+public slots:
     void clearBoard();
 public:
     explicit MainWindow(QWidget *parent = 0);

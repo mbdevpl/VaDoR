@@ -48,8 +48,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>499</width>
-         <height>466</height>
+         <width>501</width>
+         <height>461</height>
         </rect>
        </property>
       </widget>
@@ -1189,7 +1189,7 @@
      <x>0</x>
      <y>0</y>
      <width>725</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1197,7 +1197,7 @@
      <string>File</string>
     </property>
     <addaction name="OpenMenu"/>
-    <addaction name="separator"/>
+    <addaction name="actionClearBoard"/>
     <addaction name="separator"/>
     <addaction name="ExitMenu"/>
    </widget>
@@ -1223,6 +1223,11 @@
   <action name="ExitMenu">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionClearBoard">
+   <property name="text">
+    <string>Clear board</string>
    </property>
   </action>
  </widget>

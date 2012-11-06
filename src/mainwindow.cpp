@@ -3,7 +3,7 @@
 
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
+    QMainWindow(parent), scrollLayoutMembers(),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect( ui->radekAlgRadioBox, SIGNAL(clicked()), this, SLOT( algorithmChanged()) );
     connect( ui->stanislawAlgRadioBox, SIGNAL(clicked()), this, SLOT( algorithmChanged()) );
     QObject::connect(&summary_win, SIGNAL(reloadGUI()), this, SLOT(resetGUI()), Qt::QueuedConnection);
+    QObject::connect(ui->actionClearBoard, SIGNAL(triggered()), this, SLOT(clearBoard()));
 }
 
 
@@ -137,6 +138,7 @@ void MainWindow::openFileClicked()
 
     if (!s.isEmpty())
     {
+        problem_r = domino_problem_r();
         problem_r.load(s);
         input = new domino_problem_input(s.toStdString());
         clearBoard(); // here is the place, where clearing the board should appear, but i am not shure if the trouble lies in not removed pieces ;/
@@ -240,7 +242,41 @@ void MainWindow::setBoardSize(int width, int height)
 
 void MainWindow::clearBoard()
 {
-  //  scrollLayout->children().clear();
+//   QLayoutItem *child;
+//   while ((child = scrollLayout->takeAt(0)) != 0) {
+//      child->hide()
+//     delete child;
+//   }
+   if(elemCurr > 0)
+   {
+      elemCurr = 0;
+      ui->piecesInitLcdNumber->display(this->elemCurr);
+      ui->piecesCurrLcdNumber->display(this->elemCurr);
+   }
+
+   if(scrollLayoutMembers.isEmpty())
+      return;
+
+   QList<QWidget*>::Iterator it = scrollLayoutMembers.begin();
+   for(; it != scrollLayoutMembers.end(); ++it)
+   {
+      QWidget* widg = *it;
+      widg->hide();
+      scrollLayout->removeWidget(widg);
+      //delete widg;
+   }
+   scrollLayoutMembers.clear();
+   scrollLayout->invalidate();
+
+   QList<QPushButton*>::Iterator i = buttonPieces.begin();
+   for(; i != buttonPieces.end(); ++i)
+   {
+      (*i)->hide();
+      delete *i;
+   }
+   buttonPieces.clear();
+
+   //scrollLayout->children().clear();
 }
 
 void MainWindow::addPiece(int loc_x, int loc_y, bool isVertical, int val1, int val2)
@@ -250,20 +286,24 @@ void MainWindow::addPiece(int loc_x, int loc_y, bool isVertical, int val1, int v
     QPushButton *piece = new QPushButton;
     piece->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
     piece->setFlat(true);
-    if (isVertical){
+    if (isVertical)
+    {
         scrollLayout->addWidget(piece,loc_y,loc_x,2,1,0);
         piece->setFixedSize(HALF_PIECE_DIM,HALF_PIECE_DIM*2);
         piece->setStyleSheet("QPushButton{ background:url(pictures/blankpiecevert.png) no-repeat center; }");
         piece->setText(str1+"\n\n\n\n\n"+str2);
-        buttonPieces.push_back(piece);
+        //buttonPieces.push_back(piece);
     }
-    else{
+    else
+    {
         scrollLayout->addWidget(piece,loc_y,loc_x,1,2,0);
         piece->setFixedSize(2*HALF_PIECE_DIM,HALF_PIECE_DIM);
         piece->setStyleSheet("QPushButton{ background:url(pictures/blankpiecehor.png) no-repeat center; }");
         piece->setText(str1+"             "+str2);
-        buttonPieces.push_back(piece);
     }
+    buttonPieces.push_back(piece);
+    scrollLayoutMembers.append(piece);
+
     this->elemCurr+=1;
     ui->piecesInitLcdNumber->display(this->elemCurr);
     ui->piecesCurrLcdNumber->display(this->elemCurr);
