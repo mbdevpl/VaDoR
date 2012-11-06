@@ -1,4 +1,4 @@
-call vador.exe -cmd -delay=100000 -purge problem2.txt -depthfirst
+call vador.exe -cmd -delay=100000 problem2.txt -depthfirst -purge
 
 pause
 
