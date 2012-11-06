@@ -13,7 +13,10 @@ class summary_window;
 class summary_window : public QDialog
 {
     Q_OBJECT
-    
+
+signals:
+    void reloadGUI();
+
 public:
     explicit summary_window(QWidget *parent = 0);
     ~summary_window();

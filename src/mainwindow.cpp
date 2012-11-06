@@ -13,8 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->elemCurr = 0;
     scrollLayout = new QGridLayout;
     viewport = new QWidget;
-    viewport->setLayout(scrollLayout);
     ui->boardScrollArea->setWidget(viewport);
+    viewport->setLayout(scrollLayout);
     qRegisterMetaType< QVector<domino_elem_located*> >("QVector<domino_elem_located*>");
 
     connect( ui->ExitMenu, SIGNAL(triggered()), this, SLOT( exitApplicationClicked() ) );
@@ -29,6 +29,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect( ui->matiAlgRadioBox, SIGNAL(clicked()), this, SLOT( algorithmChanged()) );
     connect( ui->radekAlgRadioBox, SIGNAL(clicked()), this, SLOT( algorithmChanged()) );
     connect( ui->stanislawAlgRadioBox, SIGNAL(clicked()), this, SLOT( algorithmChanged()) );
+    QObject::connect(&summary_win, SIGNAL(reloadGUI()), this, SLOT(resetGUI()), Qt::QueuedConnection);
+}
+
+
+void MainWindow::resetGUI()
+{
 
 }
 
@@ -133,6 +139,7 @@ void MainWindow::openFileClicked()
     {
         problem_r.load(s);
         input = new domino_problem_input(s.toStdString());
+        clearBoard(); // here is the place, where clearing the board should appear, but i am not shure if the trouble lies in not removed pieces ;/
         setBoardSize(problem_r.board_width,problem_r.board_height);
         foreach (domino_elem* el, problem_r.elem_list)
             addPiece(el->h1.loc_x(), el->h1.loc_y(), el->is_vertical, el->h1.value, el->h2.value);
@@ -226,9 +233,15 @@ void MainWindow::setBoardSize(int width, int height)
        scrollLayout->setColumnStretch(i,1);
        scrollLayout->setColumnMinimumWidth(i,1);
    }
+   scrollLayout->invalidate();
+
 }
 
 
+void MainWindow::clearBoard()
+{
+  //  scrollLayout->children().clear();
+}
 
 void MainWindow::addPiece(int loc_x, int loc_y, bool isVertical, int val1, int val2)
 {
@@ -242,12 +255,14 @@ void MainWindow::addPiece(int loc_x, int loc_y, bool isVertical, int val1, int v
         piece->setFixedSize(HALF_PIECE_DIM,HALF_PIECE_DIM*2);
         piece->setStyleSheet("QPushButton{ background:url(pictures/blankpiecevert.png) no-repeat center; }");
         piece->setText(str1+"\n\n\n\n\n"+str2);
+        buttonPieces.push_back(piece);
     }
     else{
         scrollLayout->addWidget(piece,loc_y,loc_x,1,2,0);
         piece->setFixedSize(2*HALF_PIECE_DIM,HALF_PIECE_DIM);
         piece->setStyleSheet("QPushButton{ background:url(pictures/blankpiecehor.png) no-repeat center; }");
         piece->setText(str1+"             "+str2);
+        buttonPieces.push_back(piece);
     }
     this->elemCurr+=1;
     ui->piecesInitLcdNumber->display(this->elemCurr);

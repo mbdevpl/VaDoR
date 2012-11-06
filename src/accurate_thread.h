@@ -8,6 +8,7 @@
 #include<QTime>
 #include "domino_elem_fwd.h"
 #include "domino_problem.h"
+#include "domino_elem_located.h"
 #include "domino_problem_solver.h"
 #include "simple_list.h"
 

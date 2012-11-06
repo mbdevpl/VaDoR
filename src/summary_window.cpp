@@ -17,6 +17,7 @@ summary_window::~summary_window()
 void summary_window::closeClicked()
 {
     this->hide();
+    emit reloadGUI();
 }
 
 void summary_window::publishResults(int time, QVector<domino_elem_located *> present, QVector<domino_elem_located *> removed)

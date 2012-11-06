@@ -46,6 +46,7 @@ private:
     void addPiece(int loc_x, int loc_y, bool isVertical, int val1, int val2);
     void setGuiEnabledWhileComputing(bool value, bool isPieceByPiece);
     void setGuiForAccurate(bool value);
+    void clearBoard();
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -60,6 +61,7 @@ public slots:
     void runClicked();
     void stopClicked();
     void removeNextPieceClicked();
+    void resetGUI();
 };
 
 #endif // MAINWINDOW_H
