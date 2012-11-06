@@ -41,7 +41,7 @@ void all_chars(std::ostream& s);
   -depthgreedy : depth-first search done through most promising branch first, i.e. the branches with most
      possibilities are explored first
      (option is ignored if combined with any of above 3 options)
-  -purge : tree of (ignored if search is not depth-first i.e. if neither -depthfirst 
+  -purge : tree of (ignored if search is not depth-first i.e. if neither -depthfirst
      nor -depthlast nor -depthgreedy are set)
   -delay=### : ### should be a positive number, means that report is printed each ### scanned states
 
@@ -61,17 +61,17 @@ int main(int argc, char **argv)
    {
       try
       {
-      if(args.pop("-testmem"))
-      {
-         long long* ptr;
-         for(int i=0;i<930;++i) ptr = new long long[262144];
-         ptr = nullptr;
-      }
-      if(args.pop("-testloop"))
-         while(true)
+         if(args.pop("-testmem"))
+         {
+            long long* ptr;
+            for(int i=0;i<930;++i) ptr = new long long[262144];
+            ptr = nullptr;
+         }
+         if(args.pop("-testloop"))
+            while(true)
+               main_cmd(args);
+         else
             main_cmd(args);
-      else
-         main_cmd(args);
       }
       catch(std::runtime_error& er)
       {
@@ -148,7 +148,7 @@ int main_cmd(program_args& args)
       {
          domino_problem::solution_t::elem i = frst.last();
          std::cout << (*i).removed_str() << std::endl
-               << (*i).board_str() << std::endl << std::endl;
+                   << (*i).board_str() << std::endl << std::endl;
       }
    }
 

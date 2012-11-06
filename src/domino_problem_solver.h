@@ -50,18 +50,20 @@ private:
    //  1) all possible ways of removing pieces are served, or
    //  2) complete solution is found
    void construct_full_tree(bool output = true, long long delay = STATE_COUNT_DELAY, bool depthFirst = false,
-                            bool purgeUseless = false, bool startFromRight = false, bool doOutcomeSort = false);
+                            bool purgeUseless = false, bool startFromRight = false, bool doOutcomeSort = false,
+                            bool stopOnFirstDeadEnd = false, long long maxStatesChecked = -1);
    // constructs a path until a full solution is found or
    //  a dead-end is reached
-   void construct_path();
+   void construct_path(bool output = true, long long delay = STATE_COUNT_DELAY, bool stopOnFirstDeadEnd = false,
+                       long long maxStatesChecked = -1);
    void cout_status(unsigned long long scanned_states, unsigned long long not_scanned_states,
                     program_timer& timer, bool show_pieces,
                     unsigned long long pieces_left = 0);
    void purge_right_side(states_t::elem startElem, bool stopAtBestPath);
    void rebuild_best_path();
 public:
-    solution_t find_first_best_solution();
-    simple_list<solution_t,ull> find_all_best_solutions();
+   solution_t find_first_best_solution();
+   simple_list<solution_t,ull> find_all_best_solutions();
 };
 
 #endif // DOMINO_PROBLEM_SOLVER_H

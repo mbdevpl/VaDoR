@@ -21,10 +21,10 @@ void domino_problem_solver::execute(bool output, long long delay, bool approxima
       // memory needed in case of bad alloc
       filler = new ull[262144]; // 262144 * 64 bits = 2MB
       if(approximate)
-         construct_path();
+         construct_path(output, delay, false, size()*size());
       else
          construct_full_tree(output, delay, (mode == DEPTH_LAST || mode == DEPTH_FIRST || mode == DEPTH_SORT),
-                             purgeUseless, mode == DEPTH_LAST, mode == DEPTH_SORT);
+                             purgeUseless, mode == DEPTH_LAST, mode == DEPTH_SORT, false, -1);
    }
    catch(std::runtime_error& ex)
    {
@@ -46,7 +46,9 @@ void domino_problem_solver::execute(bool output, long long delay, bool approxima
 }
 
 void domino_problem_solver::construct_full_tree(bool output, long long delay, bool depthFirst,
-                                                bool purgeUseless, bool startFromRight, bool doOutcomeSort)
+                                                bool purgeUseless, bool startFromRight,
+                                                bool doOutcomeSort, bool stopOnFirstDeadEnd,
+                                                long long maxStatesChecked)
 {
    // current number of scanned states (i.e. states for which the children are known)
    unsigned long long state_count = 0;
@@ -190,6 +192,10 @@ void domino_problem_solver::construct_full_tree(bool output, long long delay, bo
       problem.pack();
       if(best_on_board == invalid->length())
          break;
+      if(maxStatesChecked != -1 && state_count >= (ull)maxStatesChecked)
+         break;
+      if(stopOnFirstDeadEnd && !new_possibilities)
+         break;
    }
    if(output)
    {
@@ -199,9 +205,11 @@ void domino_problem_solver::construct_full_tree(bool output, long long delay, bo
    }
 }
 
-void domino_problem_solver::construct_path()
+void domino_problem_solver::construct_path(bool output, long long delay, bool stopOnFirstDeadEnd,
+                                           long long maxStatesChecked)
 {
-   // nothing yet
+   construct_full_tree(output, delay, true, false, true, true, stopOnFirstDeadEnd, maxStatesChecked);
+
 }
 
 void domino_problem_solver::cout_status(unsigned long long scanned_states, unsigned long long not_scanned_states,
