@@ -16,7 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->boardScrollArea->setWidget(viewport);
     viewport->setLayout(scrollLayout);
     qRegisterMetaType< QVector<domino_elem_located*> >("QVector<domino_elem_located*>");
-
+    summary_win.setWindowFlags( ( (summary_win.windowFlags() | Qt::CustomizeWindowHint)
+                                   & ~Qt::WindowCloseButtonHint) );
     connect( ui->ExitMenu, SIGNAL(triggered()), this, SLOT( exitApplicationClicked() ) );
     connect( ui->OpenMenu, SIGNAL(triggered()), this, SLOT( openFileClicked() ) );
     connect( ui->runDirectButton, SIGNAL(clicked()), this, SLOT( runClicked() ) );
@@ -41,13 +42,16 @@ void MainWindow::resetGUI()
        foreach (domino_elem* el, problem_r.elem_list)
            addPiece(el->h1.loc_x(), el->h1.loc_y(), el->is_vertical, el->h1.value, el->h2.value);
        setBoardSize(problem_r.board_width,problem_r.board_height);
-       ui->progressBar->setValue(100);
+       ui->progressBar->setValue(0);
 
        ui->frame->setEnabled(true);
        ui->runDirectButton->setEnabled(true);
        ui->runPieceByPieceButton->setEnabled(true);
        ui->tabWidget->setTabEnabled(0,true);
        ui->tabWidget->setTabEnabled(1,true);
+       if (ui->accurateAlgRadioBox->isChecked())
+           setGuiForAccurate(true);
+
 }
 
 void MainWindow::algorithmChanged()
@@ -158,7 +162,7 @@ void MainWindow::openFileClicked()
         foreach (domino_elem* el, problem_r.elem_list)
             addPiece(el->h1.loc_x(), el->h1.loc_y(), el->is_vertical, el->h1.value, el->h2.value);
         setBoardSize(problem_r.board_width,problem_r.board_height);
-        ui->progressBar->setValue(100);
+        ui->progressBar->setValue(0);
     }
 }
 
@@ -225,7 +229,7 @@ void MainWindow::removePiece(int loc_x, int loc_y)
     this->elemCurr-=1;
     ui->piecesCurrLcdNumber->display(this->elemCurr);
     double val = (this->elemCurr/ui->piecesInitLcdNumber->value())*100;
-    ui->progressBar->setValue(val+((int)((val-floor(val))>0.5)?1:0));
+    ui->progressBar->setValue(100 - (val+((int)((val-floor(val))>0.5)?1:0)));
 }
 
 void MainWindow::setBoardSize(int width, int height)

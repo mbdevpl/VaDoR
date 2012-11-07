@@ -150,14 +150,14 @@ void approximate_r::stopExecution(){
 
 void approximate_r::run()
 {
-    int time = 0;
+    int timeElapsed = 0;
     int iterPiecesRemoved = 0;
     workFlag=true;
     mutex.lock();
-
     if (!isPieceByPiece&&!isDelay) myTimer.start();
 
     do {
+        iterPiecesRemoved = 0;
         for (int y = 0; y < this->board_height ; y++)
             for (int x = 0; x < this->board_width; x++)
                 if (workFlag)
@@ -165,15 +165,14 @@ void approximate_r::run()
                     if (present->size() > 0 && isRemovable(x,y))
                     {
                         remove_piece(x,y);
-                        iterPiecesRemoved += iterPiecesRemoved;
+                        iterPiecesRemoved += 1;
                         if (delay>0) this->msleep(this->delay);
                         else if (isPieceByPiece) mutex.lock();
                     }
                  } else break;
     } while (iterPiecesRemoved > 0);
 
-    if (!isPieceByPiece&&!isDelay) time=myTimer.elapsed();
-
-    emit threadComputationOver(time,present,removed);
+    if (!isPieceByPiece && !isDelay) timeElapsed=myTimer.elapsed();
+    emit threadComputationOver(timeElapsed,present,removed);
 }
 

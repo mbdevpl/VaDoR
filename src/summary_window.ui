@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Computation Summary</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>pictures/icon.png</normaloff>pictures/icon.png</iconset>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" rowspan="2">
     <widget class="QTextEdit" name="infoTextEdit">
