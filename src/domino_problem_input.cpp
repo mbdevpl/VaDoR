@@ -748,92 +748,74 @@ void domino_problem_input::expand()
    is_compact = false;
 }
 
+std::string domino_problem_input::board_line(
+      size_t line, char before_line, const std::string& middle, bool value_mode,
+      half_direction dir, const std::string& after_if_dir, const std::string& after_otherwise,
+      const std::string& middle_if_empty, const std::string& after,
+      const std::string& after_line) const
+{
+   std::stringstream s;
+   s << before_line;
+   for(size_t x = 0; x < width; ++x)
+   {
+      half_elem* h_elem = board[x][line];
+      if(h_elem)
+      {
+         if(value_mode)
+            s << middle << +(h_elem->value) << middle;
+         else
+            s << middle;
+         if(h_elem->direction == dir)
+            s << after_if_dir;
+         else
+            s << after_otherwise;
+      }
+      else
+         s << middle_if_empty;
+      s << after;
+   }
+   s << after_line;
+   return s.str();
+}
+
 std::string domino_problem_input::board_str() const
 {
-   //size_t len = elements.length();
    std::stringstream s;
 
-   char fill = -79;
+   static char sep_ver = -77;
+   static char sep_hor = -60;
+   static char sep_cross = -59;
+
+   static char normal = -79;
+   static char fill = normal;
+
+   std::stringstream ss_hor;
+   ss_hor << sep_hor << sep_hor << sep_hor;
+
+   static std::string s_hor = ss_hor.str();
+   static std::string s_ver = std::string(&sep_ver,1);
+   static std::string s_cross = std::string(&sep_cross,1);
 
    //above board
-   s << '+';
-   for(size_t i = 0; i < width; ++i)
-      s << "---+";
-   s << "\n";
+   s << board_line(0, sep_cross, s_hor, false, right, "", "", s_hor, s_cross, "\n");
 
    for(size_t y = 0; y < height; ++y)
    {
       // above domino number
-      s << '|';
-      for(size_t x = 0; x < width; ++x)
-      {
-         half_elem* h_elem = board[x][y];
-         if(h_elem)
-         {
-            s << fill << fill << fill;
-            if(h_elem->direction == right)
-               s << fill;
-            else
-               s << '|';
-         }
-         else
-            s << "    ";
-      }
-      s << "\n";
+      std::stringstream ss;
+      ss << fill << fill << fill;
+      s << board_line(y, sep_ver, ss.str(), false, right, std::string(&fill,1), s_ver, "    ", "", "\n");
 
       // domino number
-      s << '|';
-      for(size_t x = 0; x < width; ++x)
-      {
-         half_elem* h_elem = board[x][y];
-         if(h_elem)
-         {
-            s << fill << +(h_elem->value) << fill;
-            if(h_elem->direction == right)
-               s << fill;
-            else
-               s << '|';
-         }
-         else
-            s << "    ";
-      }
-      s << "\n";
+      std::stringstream ss2;
+      ss2 << fill;
+      s << board_line(y, sep_ver, ss2.str(), true, right, std::string(&fill,1), s_ver, "    ", "", "\n");
 
       // below domino number
-      s << '|';
-      for(size_t x = 0; x < width; ++x)
-      {
-         half_elem* h_elem = board[x][y];
-         if(h_elem)
-         {
-            s << fill << fill << fill;
-            if(h_elem->direction == right)
-               s << fill;
-            else
-               s << '|';
-         }
-         else
-            s << "    ";
-      }
-      s << "\n";
+      s << board_line(y, sep_ver, ss.str(), false, right, std::string(&fill,1), s_ver, "    ", "", "\n");
 
       // line between dominos
-      s << '+';
-      for(size_t x = 0; x < width; ++x)
-      {
-         half_elem* h_elem = board[x][y];
-         if(h_elem)
-         {
-            if(h_elem->direction == down)
-               s << fill << fill << fill;
-            else
-               s << "---";
-         }
-         else
-            s << "   ";
-         s << '+';
-      }
-      s << "\n";
+      s << board_line(y, sep_cross, "", false, down, ss.str(), s_hor, "   ", s_cross, "\n");
    }
    return s.str();
 }

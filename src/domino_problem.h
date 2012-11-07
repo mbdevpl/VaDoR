@@ -83,9 +83,11 @@ public:
       s << '}';
       return s.str();
    }
-#ifdef DEBUG
-   void demo_solution();
-#endif // DEBUG
+   std::string board_line(
+         size_t line, char before_line, bool fill_middle, bool value_mode,
+         half_direction dir, bool three_chars_after_if_dir, const std::string& after_otherwise,
+         const std::string& middle_if_empty, const std::string& after, bool no_default_spaces = false) const;
+   std::string board_str() const;
 };
 
 #endif // DOMINO_PROBLEM_H

@@ -811,7 +811,7 @@ template<typename T, typename L>
 typename simple_list<T,L>::elem simple_list<T,L>::find(const T& value)
 {
    for(simple_list<T,L>::elem e = first(); e; ++e)
-      if(e.value_ref() == value)
+      if(e.value_ref_const() == value)
          return e;
    return elem();
 }

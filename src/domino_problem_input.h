@@ -71,6 +71,13 @@ public:
    std::string checked_str() const { return checked.str(); }
    inline size_t w() { return width; }
    inline size_t h() { return height; }
+protected:
+   std::string board_line(
+         size_t line, char before_line, const std::string& middle, bool value_mode,
+         half_direction dir, const std::string& after_if_dir, const std::string& after_otherwise,
+         const std::string& middle_if_empty = "    ", const std::string& after = "",
+         const std::string& after_line = "\n") const;
+public:
    std::string board_str() const;
    friend std::ostream& operator<<(std::ostream& os, const domino_problem_input& input)
    {

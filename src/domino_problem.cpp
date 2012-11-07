@@ -26,14 +26,13 @@ domino_problem::domino_problem(const domino_problem_input& input)
 
 //domino_problem::~domino_problem()
 //{
-   //   if(!is_compact)
-   //   {
-   //      on_board.clear();
-   //      possible.clear();
-   //      removed.clear();
-   //   }
+//   if(!is_compact)
+//   {
+//      on_board.clear();
+//      possible.clear();
+//      removed.clear();
+//   }
 //}
-
 
 void domino_problem::scan_board()
 {
@@ -59,14 +58,14 @@ void domino_problem::add_possible_outcomes(domino_problem::solution_t& outcomes)
       domino_problem& pr = outcomes.last().value_ref();
       domino_elem_located* e = i.value_ref();
       pr.remove_at(e->x, e->y);
-//#ifdef DEBUG
-//      std::cout << pr.board_str();
-//#endif
+      //#ifdef DEBUG
+      //      std::cout << pr.board_str();
+      //#endif
       pr.scan_board();
    }
-//#ifdef DEBUG
-//      std::cout << possible.length();
-//#endif
+   //#ifdef DEBUG
+   //      std::cout << possible.length();
+   //#endif
 }
 
 domino_problem::solution_t domino_problem::get_possible_outcomes()
@@ -86,7 +85,6 @@ bool domino_problem::state_equals(const domino_problem& problem)
       return true;
    return false;
 }
-
 
 bool domino_problem::operator<(const domino_problem& problem)
 {
@@ -353,13 +351,8 @@ void domino_problem::expand()
    domino_problem_input::expand();
 
    for(elements_t::elem_const el = elements->last()/*, on = on_board.first(),
-               po = possible.first(), re = removed.first()*/; el; --el)
+                           po = possible.first(), re = removed.first()*/; el; --el)
    {
-      if(possible_key & 1)
-      {
-         possible.insertFirst(*el);
-      }
-      possible_key >>= 1;
       if(invalid->find(*el))
       {
          on_board.insertFirst(*el);
@@ -370,24 +363,123 @@ void domino_problem::expand()
          on_board.insertFirst(*el);
       }
       on_board_key >>= 1;
+      if(possible_key & 1)
+      {
+         possible.insertFirst(*el);
+      }
+      possible_key >>= 1;
    }
    is_compact = false;
 }
 
-#ifdef DEBUG
-
-void domino_problem::demo_solution()
+std::string domino_problem::board_line(
+      size_t line, char before_line, bool fill_middle, bool value_mode,
+      half_direction dir, bool three_chars_after_if_dir, const std::string& after_otherwise,
+      const std::string& middle_if_empty, const std::string& after, bool no_default_spaces) const
 {
-   //std::cout << find_all_possible_moves(board) << std::endl;
-   std::cout << board_str() << std::endl;
-   remove_at(2, 0);
+   static char sep_ver = -77;
+   static char sep_hor = -60;
+   static char sep_cross = -59;
 
-   //std::cout << find_all_possible_moves(board) << std::endl;
-   std::cout << board_str() << std::endl;
-   remove_at(1, 1);
+   static char on_board_ch = -79;
+   static char possible_ch = -80;
+   static char invalid_ch = -98;
+   static char fill = on_board_ch;
 
-   //std::cout << find_all_possible_moves(board) << std::endl;
-   std::cout << board_str() << std::endl;
+   std::stringstream s;
+   s << before_line;
+   for(size_t x = 0; x < width; ++x)
+   {
+      half_elem* h_elem = board[x][line];
+      if(h_elem)
+      {
+         elements_t* pos = (elements_t*)&possible;
+         typedef domino_elem_located* del_p;
+         const del_p own = h_elem->owner;
+         if(invalid->find(own).valid())
+            fill = invalid_ch;
+         else if(pos->find(own).valid())
+            fill = possible_ch;
+         else
+            fill = on_board_ch;
+
+         if(value_mode)
+         {
+            if(fill_middle)
+               s << fill << +(h_elem->value) << fill;
+            else
+               s << ' ' << +(h_elem->value) << ' ';
+         }
+         else
+         {
+            if(fill_middle)
+               s << fill << fill << fill;
+            else if(!no_default_spaces)
+               s << "   ";
+         }
+         if(h_elem->direction == dir)
+         {
+            if(three_chars_after_if_dir)
+               s << fill << fill << fill;
+            else
+               s << fill;
+         }
+         else
+            s << after_otherwise;
+      }
+      else
+         s << middle_if_empty;
+      s << after;
+   }
+   s << '\n';
+   return s.str();
 }
 
-#endif // DEBUG
+std::string domino_problem::board_str() const
+{
+   std::stringstream s;
+
+   static char sep_ver = -77;
+   static char sep_hor = -60;
+   static char sep_cross = -59;
+
+   static char on_board_ch = -79;
+   static char possible_ch = -80;
+   static char invalid_ch = -98;
+   static char fill = on_board_ch;
+
+   std::stringstream ss_hor;
+   ss_hor << sep_hor << sep_hor << sep_hor;
+
+   static std::string s_hor = ss_hor.str();
+   static std::string s_ver = std::string(&sep_ver,1);
+   static std::string s_cross = std::string(&sep_cross,1);
+
+   s << on_board_ch << " - on board, "
+     << possible_ch << " - possible, "
+     << invalid_ch << " - invalid, " << "\n";
+
+   //above board
+   s << domino_problem_input::board_line(0, sep_cross, s_hor, false, right, "", "", s_hor, s_cross);
+
+   for(size_t y = 0; y < height; ++y)
+   {
+      // above domino number
+      std::stringstream ss;
+      ss << fill << fill << fill;
+      s << board_line(y, sep_ver, true, false, right, false, s_ver, "    ", "");
+
+      // domino number
+      std::stringstream ss2;
+      ss2 << fill;
+      s << board_line(y, sep_ver, true, true, right, false, s_ver, "    ", "");
+
+      // below domino number
+      s << board_line(y, sep_ver, true, false, right, false, s_ver, "    ", "");
+
+      // line between dominos
+      s << board_line(y, sep_cross, false, false, down, true, s_hor, "   ", s_cross, true);
+      //s << domino_problem_input::board_line(y, sep_cross, "", false, down, ss.str(), s_hor, "   ", s_cross);
+   }
+   return s.str();
+}
