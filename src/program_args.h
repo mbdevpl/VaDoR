@@ -21,10 +21,12 @@ public:
    program_args(int argc, char **argv);
    void restore();
    bool pop(const arg_t& command);
+   bool popAll() { if(args.length() == 0) return false; args.clear(); return true; }
    long long pop_number(const arg_t& command);
-   arg_t first() { return *(args.first()); }
-   arg_t last() { return *(args.last()); }
-   arg_t element(size_t index) { return *(args.element(index)); }
+   size_t count() { return args.length(); }
+   arg_t first() { if(args.first()) return *(args.first()); else return std::string(); }
+   arg_t last() { if(args.last()) return *(args.last()); else return std::string(); }
+   arg_t element(size_t index) { if(args.element(index)) return *(args.element(index)); else return std::string(); }
 };
 
 #endif // PROGRAM_ARGS_H

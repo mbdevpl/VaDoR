@@ -41,7 +41,9 @@ In text mode, you have many more command line options. For example:
 
 will solve problem3.xml using greedy depth-first search, with purging of useless results in runtime.
 
-For details, please see comments for <code>main()</code> function in <code>main.cpp</code>
+For details of all available options, and other examples, please run:
+
+<code>vador.exe -help</code>
 
 
 Where is everything
