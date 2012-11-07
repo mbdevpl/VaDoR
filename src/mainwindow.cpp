@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), scrollLayoutMembers(),
     ui(new Ui::MainWindow)
 {
+	apprThread_r = NULL;
     ui->setupUi(this);
     selectedAlgorithm = accurate;
     setGuiForAccurate(true);
@@ -189,6 +190,7 @@ void MainWindow::removeNextPieceClicked()
     case mateusz:
         break;
     case radek:
+	 if (apprThread_r != NULL)
         if (apprThread_r->workFlag){
             apprThread_r->increaseMutex();
         }
@@ -206,6 +208,7 @@ void MainWindow::goToEndClicked()
     case mateusz:
         break;
     case radek:
+	 if (apprThread_r != NULL)
         if (apprThread_r->workFlag){
             apprThread_r->setPieceByPiece(false);
             apprThread_r->increaseMutex();
@@ -229,6 +232,7 @@ void MainWindow::stopClicked()
     case mateusz:
         break;
     case radek:
+	 if (apprThread_r != NULL)
         if (apprThread_r->workFlag)
             apprThread_r->stopExecution();
         break;
