@@ -32,8 +32,7 @@ void accurate_thread::run()
    }
    for(domino_problem::elements_t::elem_const e = best_state.on_board_first(); e; ++e)
       present->append(*e);
-   //present and removed are ready below this line
 
-  // emit threadComputationOver(timeElapsed,NULL,NULL);
+   emit threadComputationOver(timeElapsed,present,removed);
 }
 

@@ -36,7 +36,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::resetGUI()
 {
+       clearBoard();
+       setBoardSize(problem_r.board_width,problem_r.board_height);
+       foreach (domino_elem* el, problem_r.elem_list)
+           addPiece(el->h1.loc_x(), el->h1.loc_y(), el->is_vertical, el->h1.value, el->h2.value);
+       setBoardSize(problem_r.board_width,problem_r.board_height);
+       ui->progressBar->setValue(100);
 
+       ui->frame->setEnabled(true);
+       ui->runDirectButton->setEnabled(true);
+       ui->runPieceByPieceButton->setEnabled(true);
+       ui->tabWidget->setTabEnabled(0,true);
+       ui->tabWidget->setTabEnabled(1,true);
 }
 
 void MainWindow::algorithmChanged()
@@ -142,7 +153,7 @@ void MainWindow::openFileClicked()
         problem_r = domino_problem_r();
         problem_r.load(s);
         input = new domino_problem_input(s.toStdString());
-        clearBoard(); // here is the place, where clearing the board should appear, but i am not shure if the trouble lies in not removed pieces ;/
+        clearBoard();
         setBoardSize(problem_r.board_width,problem_r.board_height);
         foreach (domino_elem* el, problem_r.elem_list)
             addPiece(el->h1.loc_x(), el->h1.loc_y(), el->is_vertical, el->h1.value, el->h2.value);
@@ -243,11 +254,6 @@ void MainWindow::setBoardSize(int width, int height)
 
 void MainWindow::clearBoard()
 {
-//   QLayoutItem *child;
-//   while ((child = scrollLayout->takeAt(0)) != 0) {
-//      child->hide()
-//     delete child;
-//   }
    if(elemCurr > 0)
    {
       elemCurr = 0;
@@ -276,8 +282,6 @@ void MainWindow::clearBoard()
       delete *i;
    }
    buttonPieces.clear();
-
-   //scrollLayout->children().clear();
 }
 
 void MainWindow::addPiece(int loc_x, int loc_y, bool isVertical, int val1, int val2)
