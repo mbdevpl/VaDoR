@@ -22,9 +22,10 @@ signals:
 public:
     accurate_thread()
        : present(nullptr), input(nullptr) { }
-    accurate_thread(domino_problem_input& input);
+    accurate_thread(domino_problem_input& input, bool make_it_approximate = false);
     ~accurate_thread();
 private:
+    bool is_in_fact_approximate;
     half_elem*** board;
     QVector<domino_elem_located*>* present;
     QVector<domino_elem_located*> removed;

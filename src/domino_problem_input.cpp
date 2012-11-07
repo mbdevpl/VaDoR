@@ -339,17 +339,18 @@ void domino_problem_input::resolve_elements_by_possible_distances_to_other_eleme
                for(size_t yy = y-1; yy >= 0; --yy)
                {
                   curr_h = board[x][yy];
-                  if(!curr_h)
-                     continue;
-                  curr_elem = curr_h->owner;
-                  if(invalid->find(curr_elem))
-                     break;
-                  if(curr_elem->is_vertical && curr_h->direction == up)
-                     --yy;
-                  if(y-yy == v1)
+                  if(curr_h)
                   {
-                     correct_distance_is_impossible = false;
-                     break;
+                     curr_elem = curr_h->owner;
+                     if(invalid->find(curr_elem))
+                        break;
+                     if(curr_elem->is_vertical && curr_h->direction == up)
+                        --yy;
+                     if(y-yy == v1)
+                     {
+                        correct_distance_is_impossible = false;
+                        break;
+                     }
                   }
                   if(yy == 0)
                      break;
@@ -517,17 +518,18 @@ void domino_problem_input::resolve_elements_by_possible_distances_to_other_eleme
                for(size_t xx = x-1; xx >= 0; --xx)
                {
                   curr_h = board[xx][y];
-                  if(!curr_h)
-                     continue;
-                  curr_elem = curr_h->owner;
-                  if(invalid->find(curr_elem))
-                     break;
-                  if(curr_elem->is_vertical == false && curr_h->direction == left)
-                     --xx;
-                  if(x-xx == v1)
+                  if(curr_h)
                   {
-                     correct_distance_is_impossible = false;
-                     break;
+                     curr_elem = curr_h->owner;
+                     if(invalid->find(curr_elem))
+                        break;
+                     if(curr_elem->is_vertical == false && curr_h->direction == left)
+                        --xx;
+                     if(x-xx == v1)
+                     {
+                        correct_distance_is_impossible = false;
+                        break;
+                     }
                   }
                   if(xx == 0)
                      break;
@@ -573,20 +575,21 @@ void domino_problem_input::resolve_elements_by_possible_distances_to_other_eleme
                for(size_t yy = y-1; yy >= 0; --yy)
                {
                   curr_h = board[x][yy];
-                  if(!curr_h)
-                     continue;
-                  curr_elem = curr_h->owner;
-                  if(invalid->find(curr_elem))
-                     break;
-                  if(curr_elem->is_vertical && curr_h->direction == up)
-                     --yy;
-                  if(y-yy == v1)
+                  if(curr_h)
                   {
-                     half_impossible = false;
-                     break;
+                     curr_elem = curr_h->owner;
+                     if(invalid->find(curr_elem))
+                        break;
+                     if(curr_elem->is_vertical && curr_h->direction == up)
+                        --yy;
+                     if(y-yy == v1)
+                     {
+                        half_impossible = false;
+                        break;
+                     }
+                     //else if(y-yy > v1)
+                     //   break;
                   }
-                  //else if(y-yy > v1)
-                  //   break;
                   if(yy == 0)
                      break;
                }
@@ -601,20 +604,21 @@ void domino_problem_input::resolve_elements_by_possible_distances_to_other_eleme
                   for(size_t yy = y-1; yy >= 0; --yy)
                   {
                      curr_h = board[x+1][yy];
-                     if(!curr_h)
-                        continue;
-                     curr_elem = curr_h->owner;
-                     if(invalid->find(curr_elem))
-                        break;
-                     if(curr_elem->is_vertical && curr_h->direction == up)
-                        --yy;
-                     if(y-yy == v2)
+                     if(curr_h)
                      {
-                        correct_distance_is_impossible = false;
-                        break;
+                        curr_elem = curr_h->owner;
+                        if(invalid->find(curr_elem))
+                           break;
+                        if(curr_elem->is_vertical && curr_h->direction == up)
+                           --yy;
+                        if(y-yy == v2)
+                        {
+                           correct_distance_is_impossible = false;
+                           break;
+                        }
+                        //else if(y-yy > v2)
+                        //   break;
                      }
-                     //else if(y-yy > v2)
-                     //   break;
                      if(yy == 0)
                         break;
                   }

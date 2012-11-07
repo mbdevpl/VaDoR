@@ -54,7 +54,8 @@ public slots:
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
+private:
+    void initAndRunAlgorithmByMateuszBysiek(bool approximateVersion);
 public slots:
     void computationOver(int time, QVector<domino_elem_located*>* present, QVector<domino_elem_located*> removed);
     void removePiece(int loc_x, int loc_y);

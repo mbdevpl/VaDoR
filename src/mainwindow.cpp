@@ -90,6 +90,17 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::initAndRunAlgorithmByMateuszBysiek(bool approximateVersion)
+{
+   accThread = new accurate_thread(*input, approximateVersion);
+   QObject::connect(accThread, SIGNAL(threadRemovePiece(int,int)),
+                    this, SLOT(removePiece(int,int)), Qt::QueuedConnection);
+   QObject::connect(accThread, SIGNAL(threadComputationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)),
+                    this, SLOT(computationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), Qt::QueuedConnection);
+   accThread->start();
+   setGuiEnabledWhileComputing(false,false);
+}
+
 void MainWindow::runClicked()
 {
     if (problem_r.elem_list.size() > 0)
@@ -100,14 +111,16 @@ void MainWindow::runClicked()
         {
             switch (selectedAlgorithm){
             case accurate:
-                accThread = new accurate_thread(*input);
-                QObject::connect(accThread, SIGNAL(threadRemovePiece(int,int)), this, SLOT(removePiece(int,int)), Qt::QueuedConnection);
-                QObject::connect(accThread, SIGNAL(threadComputationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), this, SLOT(computationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), Qt::QueuedConnection);
-                accThread->start();
+                initAndRunAlgorithmByMateuszBysiek(false);
+//                accThread = new accurate_thread(*input);
+//                QObject::connect(accThread, SIGNAL(threadRemovePiece(int,int)), this, SLOT(removePiece(int,int)), Qt::QueuedConnection);
+//                QObject::connect(accThread, SIGNAL(threadComputationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), this, SLOT(computationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), Qt::QueuedConnection);
+//                accThread->start();
 
-                setGuiEnabledWhileComputing(false,false);
+//                setGuiEnabledWhileComputing(false,false);
                 break;
             case mateusz:
+                initAndRunAlgorithmByMateuszBysiek(true);
                 break;
             case radek:
                 apprThread_r = new approximate_r(problem_r);
@@ -126,8 +139,10 @@ void MainWindow::runClicked()
         {
             switch (selectedAlgorithm){
             case accurate:
+                initAndRunAlgorithmByMateuszBysiek(false);
                 break;
             case mateusz:
+                initAndRunAlgorithmByMateuszBysiek(true);
                 break;
             case radek:
                 apprThread_r = new approximate_r(problem_r);

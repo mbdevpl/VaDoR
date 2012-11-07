@@ -355,16 +355,21 @@ void domino_problem::expand()
    for(elements_t::elem_const el = elements->last()/*, on = on_board.first(),
                po = possible.first(), re = removed.first()*/; el; --el)
    {
-      if(on_board_key & 1)
-      {
-         on_board.insertFirst(*el);
-      }
-      on_board_key >>= 1;
       if(possible_key & 1)
       {
          possible.insertFirst(*el);
       }
       possible_key >>= 1;
+      if(invalid->find(*el))
+      {
+         on_board.insertFirst(*el);
+         continue;
+      }
+      if(on_board_key & 1)
+      {
+         on_board.insertFirst(*el);
+      }
+      on_board_key >>= 1;
    }
    is_compact = false;
 }
