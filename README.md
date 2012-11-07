@@ -12,9 +12,12 @@ VAnishing DOmino pRoblem -> VADOR
 Current main features
 ---------------------
 
-The program is able to solve the above-defined problem in exponential time: O(n^2). Currently, 
+The program is able to solve the above-defined problem in exponential time: O(2^n). Currently, 
 it is able to analyze around 16500000 states (possible domino pieces configurations) before 
 running out of memory. In such case, the program provides partial solution.
+
+There is also possibility to solve the problem using approximation. In such case, 
+time complexity is polynomial: O(n^2). User can choose one of several approximation methods.
 
 The program accepts two input formats: XML and txt. XML format is described in detail in initial 
 documentation, and txt in a separate document. You can find all documentation in the repository. 
