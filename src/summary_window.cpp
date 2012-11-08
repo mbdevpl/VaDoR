@@ -24,9 +24,9 @@ void summary_window::publishResults(int time, QVector<domino_elem_located *> pre
 {
     QString piecesLeft = getPiecesInfo(present);
     QString piecesRemoved = getPiecesInfo(removed);
-    QString text = "ELAPSED TIME:\n"+QString::number(time)+" ms \n\n"+
-            "PIECES REMOVED:\n"+piecesRemoved+"\n"+
-            "PIECES LEFT: \n"+piecesLeft;
+    QString text = bolden("ELAPSED TIME: <br>")+QString::number(time)+" ms <br><br>"+
+            bolden("PIECES REMOVED: <br>")+piecesRemoved+"<br>"+
+            bolden("PIECES LEFT: <br>")+piecesLeft;
     ui->infoTextEdit->setText(text);
 }
 
@@ -35,14 +35,31 @@ QString summary_window::bolden(QString text)
     return "<FONT color=\"red\" style=\"font-weight: bold;\" >"+ text +"</FONT> ";
 }
 
+QString summary_window::bolden2(QString text)
+{
+    return "<FONT color=\"blue\" >"+ text +"</FONT> ";
+}
+
+QString summary_window::spc()
+{
+    return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+}
+
+QString summary_window::OrToStr(bool val)
+{
+    if (val==true) return "Vertical";
+    return "Horizontal";
+}
+
 QString summary_window::getPiecesInfo(QVector<domino_elem_located *> pieces)
 {
     QString info;
     foreach (domino_elem_located* piece, pieces)
-        info.append("Value 1: "+QString::number(piece->h1.value)+
-                         "   Value 2: "+QString::number(piece->h2.value)+
-                         "   X location: "+QString::number( piece->x)+
-                         "   Y location: "+QString::number(piece->y)+
-                    "   Vertical: "+QString::number(piece->is_vertical)+ '\n');
+        info.append(bolden2("Value 1: ")+QString::number(piece->h1.value)+
+                    spc()+ bolden2("Value 2: ")+QString::number(piece->h2.value)+
+                    spc()+ bolden2("X: ")+QString::number( piece->x)+
+                    spc()+ bolden2("Y: ")+QString::number(piece->y)+
+                    spc()+ bolden2("Orientation: ")+OrToStr(piece->is_vertical)+"<br>"
+                    );
     return info;
 }

@@ -27,6 +27,9 @@ public slots:
 
 private:
     QString bolden(QString text);
+    QString bolden2(QString text);
+    QString spc();
+    QString OrToStr(bool val);
     QString getPiecesInfo(QVector<domino_elem_located*> pieces);
     Ui::summary_window *ui;
 };

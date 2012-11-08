@@ -32,13 +32,12 @@ private:
 
     void print_out();
     bool isRemovable(int x, int y);
-    bool isBoardEmpty();
     void remove_piece(int x, int y);
     int countFieldValue(int x, int y);
     void run();
+    void sendResultsToGui(int timeElapsed);
 
 public:
-    bool workFlag;
     approximate_r();
     approximate_r(domino_problem_r &problem);
     void setPieceByPiece(bool on);

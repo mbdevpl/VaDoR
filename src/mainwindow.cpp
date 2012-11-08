@@ -24,7 +24,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect( ui->runDirectButton, SIGNAL(clicked()), this, SLOT( runClicked() ) );
     connect( ui->runPieceByPieceButton, SIGNAL(clicked()), this, SLOT( runClicked() ) );
     connect( ui->stopRunDirectButton, SIGNAL(clicked()), this, SLOT( stopClicked() ) );
-    connect( ui->stopRunStepByStepButton, SIGNAL(clicked()), this, SLOT( stopClicked() ) );
     connect( ui->removeNextPieceButton, SIGNAL(clicked()), this, SLOT( removeNextPieceClicked() ) );
     connect( ui->goToEndButton, SIGNAL(clicked()), this, SLOT( goToEndClicked() ) );
     connect( ui->accurateAlgRadioBox, SIGNAL(clicked()), this, SLOT( algorithmChanged()) );
@@ -113,12 +112,6 @@ void MainWindow::runClicked()
             switch (selectedAlgorithm){
             case accurate:
                 initAndRunAlgorithmByMateuszBysiek(false);
-//                accThread = new accurate_thread(*input);
-//                QObject::connect(accThread, SIGNAL(threadRemovePiece(int,int)), this, SLOT(removePiece(int,int)), Qt::QueuedConnection);
-//                QObject::connect(accThread, SIGNAL(threadComputationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), this, SLOT(computationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), Qt::QueuedConnection);
-//                accThread->start();
-
-//                setGuiEnabledWhileComputing(false,false);
                 break;
             case mateusz:
                 initAndRunAlgorithmByMateuszBysiek(true);
@@ -191,9 +184,7 @@ void MainWindow::removeNextPieceClicked()
         break;
     case radek:
 	 if (apprThread_r != NULL)
-        if (apprThread_r->workFlag){
             apprThread_r->increaseMutex();
-        }
         break;
     case stanislaw:
         break;
@@ -209,7 +200,7 @@ void MainWindow::goToEndClicked()
         break;
     case radek:
 	 if (apprThread_r != NULL)
-        if (apprThread_r->workFlag){
+        {
             apprThread_r->setPieceByPiece(false);
             apprThread_r->increaseMutex();
         }
@@ -233,7 +224,6 @@ void MainWindow::stopClicked()
         break;
     case radek:
 	 if (apprThread_r != NULL)
-        if (apprThread_r->workFlag)
             apprThread_r->stopExecution();
         break;
     case stanislaw:
@@ -339,6 +329,9 @@ void MainWindow::addPiece(int loc_x, int loc_y, bool isVertical, int val1, int v
 
 void MainWindow::computationOver(int time, QVector<domino_elem_located*>* present, QVector<domino_elem_located*> removed)
 {
+    ui->removeNextPieceButton->setEnabled(false);
+    ui->goToEndButton->setEnabled(false);
+    ui->stopRunDirectButton->setEnabled(false);
     summary_win.show();
     summary_win.publishResults(time,*present,removed);
 }
@@ -349,8 +342,11 @@ void MainWindow::setGuiEnabledWhileComputing(bool value, bool isPieceByPiece)
     if (isPieceByPiece){
     ui->runPieceByPieceButton->setEnabled(value);
     ui->tabWidget->setTabEnabled(0,value);
+    ui->removeNextPieceButton->setEnabled(!value);
+    ui->goToEndButton->setEnabled(!value);
     } else if (!isPieceByPiece){
         ui->runDirectButton->setEnabled(value);
         ui->tabWidget->setTabEnabled(1,value);
+        ui->stopRunDirectButton->setEnabled(!value);
     }
 }
