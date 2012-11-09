@@ -60,6 +60,7 @@ public:
    //bool pop(value_t value);
    //bool check(value_t value);
    void optimize();
+   bool clear();
 };
 
 #endif // BINARY_HASH_H

@@ -26,6 +26,10 @@ HEADERS += \
     simple_container.h \
     simple_list.h \
     simple_tree.h \
+    binary_hash.h \
+    toolkit/program_info.h \
+    toolkit/program_args.h \
+    toolkit/program_timer.h \
     half_elem.h \
     domino_elem_fwd.h \
     domino_elem.h \
@@ -38,13 +42,14 @@ HEADERS += \
     approximate_r.h \
     summary_window.h \
     domino_problem_solver.h \
-    program_args.h \
-    binary_hash.h \
-    program_timer.h \
     accurate_thread.h
 
 SOURCES += \
     main.cpp \
+    binary_hash.cpp \
+    toolkit/program_info.cpp \
+    toolkit/program_args.cpp \
+    toolkit/program_timer.cpp \
     half_elem.cpp \
     domino_elem.cpp \
     domino_elem_located.cpp \
@@ -55,9 +60,6 @@ SOURCES += \
     approximate_r.cpp \
     summary_window.cpp \
     domino_problem_solver.cpp \
-    program_args.cpp \
-    binary_hash.cpp \
-    program_timer.cpp \
     accurate_thread.cpp
 
 FORMS += \

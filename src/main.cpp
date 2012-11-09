@@ -1,4 +1,4 @@
-#include "program_args.h"
+#include "toolkit/program_args.h"
 
 #include <QtGui/QApplication>
 #include "mainwindow.h"
@@ -14,9 +14,9 @@
 #include <limits>
 #include <iomanip>
 
-#include "binary_hash.h"
+//#include "binary_hash.h"
 
-int main_cmd(program_args& args);
+int main_cmd(toolkit::program_args& args);
 void all_chars(std::ostream& s);
 
 /*!
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 {
    //all_chars(std::cout);
 
-   program_args args(argc, argv);
+   toolkit::program_args args(argc, argv);
 
    if(args.count() == 1)
       std::cout << "use \"vador.exe -help\" to display list of available command line options";
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
    return 0;
 }
 
-int main_cmd(program_args& args)
+int main_cmd(toolkit::program_args& args)
 {
    static bool output = !args.pop("-nocout");
    static bool fullsol = args.pop("-fullsol");

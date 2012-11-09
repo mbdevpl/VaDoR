@@ -1,5 +1,8 @@
 #include "program_args.h"
 
+namespace toolkit
+{
+
 program_args::program_args(int argc, char **argv)
    : argc(argc), argv(argv), args()
 {
@@ -54,4 +57,6 @@ long long program_args::pop_number(const arg_t& command)
       ++e;
    }
    return 0;
+}
+
 }

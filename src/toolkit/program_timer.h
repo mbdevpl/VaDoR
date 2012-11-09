@@ -9,6 +9,9 @@
 #include "windows.h"
 #endif // WINDOWS
 
+namespace toolkit
+{
+
 class program_timer
 {
 private:
@@ -29,5 +32,7 @@ private:
    static std::string systemtime_str(const std::string& format, const SYSTEMTIME& t);
 #endif // WINDOWS
 };
+
+}
 
 #endif // PROGRAM_TIMER_H

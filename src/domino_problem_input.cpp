@@ -1,8 +1,6 @@
 #include "domino_problem_input.h"
 
 domino_problem_input::domino_problem_input()
-//   : alloc(true), elements(new elements_t()), width(0), height(0), board(),
-//     invalid(new elements_t()), unresolved(new elements_t()), checked() { }
    : alloc(true), elements(nullptr), width(0), height(0), board(),
      invalid(nullptr), unresolved(nullptr), checked(), is_compact(false) { }
 
@@ -27,11 +25,15 @@ domino_problem_input::domino_problem_input(const std::string& path)
    resolve_elements_by_board_size();
    if(unresolved->length() > 0)
       throw std::runtime_error("resolving by board size did not end completely");
-   unresolved->append(checked);
-   checked.clear();
-   resolve_elements_by_possible_distances_to_other_elements();
-   if(unresolved->length() > 0)
-      throw std::runtime_error("resolving by possible distances did not end completely");
+   bool resolve_using_distances_between_pieces = true;
+   if(resolve_using_distances_between_pieces)
+   {
+      unresolved->append(checked);
+      checked.clear();
+      resolve_elements_by_possible_distances_to_other_elements();
+      if(unresolved->length() > 0)
+         throw std::runtime_error("resolving by possible distances did not end completely");
+   }
 }
 
 domino_problem_input::~domino_problem_input()
@@ -312,6 +314,154 @@ void domino_problem_input::resolve_elements_by_board_size()
    }
 }
 
+bool domino_problem_input::check_if_direction_valid(size_t x, size_t y, half_direction dir)
+{
+   half_elem* h = board[x][y];
+   if(!h)
+      return false;
+
+   bool correct_distance_is_impossible = true;
+   half_elem* curr_h = nullptr;
+   domino_elem_located* curr_elem = nullptr;
+   if(dir == up)
+   {
+      if(y > 0)
+      {
+         if(h->value == 0 && board[x][y-1])
+            correct_distance_is_impossible = false;
+         else
+            for(size_t yy = y-1; yy >= 0; --yy)
+            {
+               curr_h = board[x][yy];
+               if(curr_h)
+               {
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical && curr_h->direction == up)
+                     --yy;
+                  if(y-yy == h->value)
+                  {
+                     correct_distance_is_impossible = false;
+                     break;
+                  }
+               }
+               else if(yy > 0 && board[x][yy-1] && y-yy == h->value)
+               {
+                  correct_distance_is_impossible = false;
+                  break;
+               }
+               if(yy == 0)
+                  break;
+            }
+      }
+      if(h->value == y)
+         correct_distance_is_impossible = false;
+   }
+   else if(dir == down)
+   {
+      if(y < height-1)
+      {
+         if(h->value == 0 && board[x][y+1])
+            correct_distance_is_impossible = false;
+         else
+            for(size_t yy = y+1; yy < height; ++yy)
+            {
+               curr_h = board[x][yy];
+               if(curr_h)
+               {
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical && curr_h->direction == down)
+                     ++yy;
+                  if(yy-y == h->value)
+                  {
+                     correct_distance_is_impossible = false;
+                     break;
+                  }
+               }
+               else if(yy < height-1 && board[x][yy+1] && yy-y == h->value)
+               {
+                  correct_distance_is_impossible = false;
+                  break;
+               }
+            }
+      }
+      if(h->value == height-1-y)
+         correct_distance_is_impossible = false;
+   }
+   else if(dir == left)
+   {
+      if(x > 0)
+      {
+         if(h->value == 0 && board[x-1][y])
+            correct_distance_is_impossible = false;
+         else
+            for(size_t xx = x-1; xx >= 0; --xx)
+            {
+               curr_h = board[xx][y];
+               if(curr_h)
+               {
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical == false && curr_h->direction == left)
+                     --xx;
+                  if(x-xx == h->value)
+                  {
+                     correct_distance_is_impossible = false;
+                     break;
+                  }
+               }
+               else if(xx > 0 && board[xx-1][y] && x-xx == h->value)
+               {
+                  correct_distance_is_impossible = false;
+                  break;
+               }
+               if(xx == 0)
+                  break;
+            }
+      }
+      if(h->value == x)
+         correct_distance_is_impossible = false;
+   }
+   else if(dir == right)
+   {
+      if(x < width-1)
+      {
+         if(h->value == 0 && board[x+1][y])
+            correct_distance_is_impossible = false;
+         else
+            for(size_t xx = x+1; xx < width; ++xx)
+            {
+               curr_h = board[xx][y];
+               if(curr_h)
+               {
+                  curr_elem = curr_h->owner;
+                  if(invalid->find(curr_elem))
+                     break;
+                  if(curr_elem->is_vertical == false && curr_h->direction == right)
+                     ++xx;
+                  if(xx-x == h->value)
+                  {
+                     correct_distance_is_impossible = false;
+                     break;
+                  }
+               }
+               else if(xx < width-1 && board[xx+1][y] && xx-x == h->value)
+               {
+                  correct_distance_is_impossible = false;
+                  break;
+               }
+            }
+      }
+      if(h->value == width-1-x)
+         correct_distance_is_impossible = false;
+   }
+   return !correct_distance_is_impossible;
+}
+
 void domino_problem_input::resolve_elements_by_possible_distances_to_other_elements()
 {
    if(unresolved->length() == 0)
@@ -322,181 +472,29 @@ void domino_problem_input::resolve_elements_by_possible_distances_to_other_eleme
       domino_elem_located* e = *i;
       size_t x = e->x;
       size_t y = e->y;
-      domino_elem_value_t v1 = e->value1();
-      domino_elem_value_t v2 = e->value2();
 
       bool correct_distance_is_impossible = true;
-      half_elem* curr_h = nullptr;
-      domino_elem_located* curr_elem = nullptr;
       if(e->is_vertical)
       {
          // up
-         if(y > 0)
-         {
-            if(v1 == 0 && board[x][y-1])
-               correct_distance_is_impossible = false;
-            else
-               for(size_t yy = y-1; yy >= 0; --yy)
-               {
-                  curr_h = board[x][yy];
-                  if(curr_h)
-                  {
-                     curr_elem = curr_h->owner;
-                     if(invalid->find(curr_elem))
-                        break;
-                     if(curr_elem->is_vertical && curr_h->direction == up)
-                        --yy;
-                     if(y-yy == v1)
-                     {
-                        correct_distance_is_impossible = false;
-                        break;
-                     }
-                  }
-                  if(yy == 0)
-                     break;
-               }
-         }
-         if(v1 == y)
+         if(check_if_direction_valid(x, y, up))
             correct_distance_is_impossible = false;
 
          // down
-         if(correct_distance_is_impossible && y < height-1)
-         {
-            if(v2 == 0 && board[x][y+2])
-               correct_distance_is_impossible = false;
-            else
-               for(size_t yy = y+2; yy < height; ++yy)
-               {
-                  curr_h = board[x][yy];
-                  if(!curr_h)
-                     continue;
-                  curr_elem = curr_h->owner;
-                  if(invalid->find(curr_elem))
-                     break;
-                  if(curr_elem->is_vertical && curr_h->direction == down)
-                     ++yy;
-                  if(yy-(y+1) == v2)
-                  {
-                     correct_distance_is_impossible = false;
-                     break;
-                  }
-               }
-         }
-         if(v2 == height-1-(y+1))
+         if(correct_distance_is_impossible
+               && check_if_direction_valid(x, y+1, down))
             correct_distance_is_impossible = false;
 
          // left
-         if(correct_distance_is_impossible && x > 0)
-         {
-            bool half_impossible = true;
-            // upper half
-            if(v1 == 0 && board[x-1][y])
-               half_impossible = false;
-            else
-               for(size_t xx = x-1; xx >= 0; --xx)
-               {
-                  curr_h = board[xx][y];
-                  if(!curr_h)
-                     continue;
-                  curr_elem = curr_h->owner;
-                  if(invalid->find(curr_elem))
-                     break;
-                  if(curr_elem->is_vertical == false && curr_h->direction == left)
-                     --xx;
-                  if(x-xx == v1)
-                  {
-                     half_impossible = false;
-                     break;
-                  }
-                  if(xx == 0)
-                     break;
-               }
-            if(v1 == x)
-               half_impossible = false;
-            // lower half
-            if(!half_impossible)
-            {
-               if(v2 == 0 && board[x-1][y+1])
-                  correct_distance_is_impossible = false;
-               else
-                  for(size_t xx = x-1; xx >= 0; --xx)
-                  {
-                     curr_h = board[xx][y+1];
-                     if(!curr_h)
-                        continue;
-                     curr_elem = curr_h->owner;
-                     if(invalid->find(curr_elem))
-                        break;
-                     if(curr_elem->is_vertical == false && curr_h->direction == left)
-                        --xx;
-                     if(x-xx == v2)
-                     {
-                        correct_distance_is_impossible = false;
-                        break;
-                     }
-                     if(xx == 0)
-                        break;
-                  }
-               if(v2 == x)
-                  correct_distance_is_impossible = false;
-            }
-         }
-         if(v1 == x && v2 == x)
+         if(correct_distance_is_impossible
+               && check_if_direction_valid(x, y, left)
+               && check_if_direction_valid(x, y+1, left))
             correct_distance_is_impossible = false;
 
          // right
-         if(correct_distance_is_impossible && x < width-1)
-         {
-            bool half_impossible = true;
-            // upper half
-            if(v1 == 0 && board[x+1][y])
-               half_impossible = false;
-            else
-               for(size_t xx = x+1; xx < width; ++xx)
-               {
-                  curr_h = board[xx][y];
-                  if(!curr_h)
-                     continue;
-                  curr_elem = curr_h->owner;
-                  if(invalid->find(curr_elem))
-                     break;
-                  if(curr_elem->is_vertical == false && curr_h->direction == right)
-                     ++xx;
-                  if(xx-x == v1)
-                  {
-                     half_impossible = false;
-                     break;
-                  }
-               }
-            if(v1 == width-1-x)
-               half_impossible = false;
-            // lower half
-            if(!half_impossible)
-            {
-               if(v2 == 0 && board[x+1][y+1])
-                  correct_distance_is_impossible = false;
-               else
-                  for(size_t xx = x+1; xx < width; ++xx)
-                  {
-                     curr_h = board[xx][y+1];
-                     if(!curr_h)
-                        continue;
-                     curr_elem = curr_h->owner;
-                     if(invalid->find(curr_elem))
-                        break;
-                     if(curr_elem->is_vertical == false && curr_h->direction == right)
-                        ++xx;
-                     if(xx-x == v2)
-                     {
-                        correct_distance_is_impossible = false;
-                        break;
-                     }
-                  }
-               if(v2 == width-1-x)
-                  correct_distance_is_impossible = false;
-            }
-         }
-         if(v1 == width-1-x && v2 == width-1-x)
+         if(correct_distance_is_impossible
+               && check_if_direction_valid(x, y, right)
+               && check_if_direction_valid(x, y+1, right))
             correct_distance_is_impossible = false;
 
          if(correct_distance_is_impossible)
@@ -510,178 +508,24 @@ void domino_problem_input::resolve_elements_by_possible_distances_to_other_eleme
       else
       {
          // left
-         if(x > 0)
-         {
-            if(v1 == 0 && board[x-1][y])
-               correct_distance_is_impossible = false;
-            else
-               for(size_t xx = x-1; xx >= 0; --xx)
-               {
-                  curr_h = board[xx][y];
-                  if(curr_h)
-                  {
-                     curr_elem = curr_h->owner;
-                     if(invalid->find(curr_elem))
-                        break;
-                     if(curr_elem->is_vertical == false && curr_h->direction == left)
-                        --xx;
-                     if(x-xx == v1)
-                     {
-                        correct_distance_is_impossible = false;
-                        break;
-                     }
-                  }
-                  if(xx == 0)
-                     break;
-               }
-         }
-         if(v1 == x)
+         if(check_if_direction_valid(x, y, left))
             correct_distance_is_impossible = false;
 
          // right
-         if(correct_distance_is_impossible && x < width-1)
-         {
-            if(v1 == 0 && board[x+2][y])
-               correct_distance_is_impossible = false;
-            else
-               for(size_t xx = x+2; xx < width; ++xx)
-               {
-                  curr_h = board[xx][y];
-                  if(!curr_h)
-                     continue;
-                  curr_elem = curr_h->owner;
-                  if(invalid->find(curr_elem))
-                     break;
-                  if(curr_elem->is_vertical == false && curr_h->direction == right)
-                     ++xx;
-                  if(xx-(x+1) == v1)
-                  {
-                     correct_distance_is_impossible = false;
-                     break;
-                  }
-               }
-         }
-         if(v1 == width-1-(x+1))
+         if(correct_distance_is_impossible
+               && check_if_direction_valid(x+1, y, right))
             correct_distance_is_impossible = false;
 
          // up
-         if(y > 0)
-         {
-            bool half_impossible = true;
-            // left half
-            if(v1 == 0 && board[x][y-1])
-               half_impossible = false;
-            else
-               for(size_t yy = y-1; yy >= 0; --yy)
-               {
-                  curr_h = board[x][yy];
-                  if(curr_h)
-                  {
-                     curr_elem = curr_h->owner;
-                     if(invalid->find(curr_elem))
-                        break;
-                     if(curr_elem->is_vertical && curr_h->direction == up)
-                        --yy;
-                     if(y-yy == v1)
-                     {
-                        half_impossible = false;
-                        break;
-                     }
-                     //else if(y-yy > v1)
-                     //   break;
-                  }
-                  if(yy == 0)
-                     break;
-               }
-            if(v1 == y)
-               half_impossible = false;
-            // right half
-            if(!half_impossible)
-            {
-               if(v2 == 0 && board[x+1][y-1])
-                  correct_distance_is_impossible = false;
-               else
-                  for(size_t yy = y-1; yy >= 0; --yy)
-                  {
-                     curr_h = board[x+1][yy];
-                     if(curr_h)
-                     {
-                        curr_elem = curr_h->owner;
-                        if(invalid->find(curr_elem))
-                           break;
-                        if(curr_elem->is_vertical && curr_h->direction == up)
-                           --yy;
-                        if(y-yy == v2)
-                        {
-                           correct_distance_is_impossible = false;
-                           break;
-                        }
-                        //else if(y-yy > v2)
-                        //   break;
-                     }
-                     if(yy == 0)
-                        break;
-                  }
-               if(v2 == y)
-                  correct_distance_is_impossible = false;
-            }
-         }
-         if(v1 == y && v2 == y)
+         if(correct_distance_is_impossible
+               && check_if_direction_valid(x, y, up)
+               && check_if_direction_valid(x+1, y, up))
             correct_distance_is_impossible = false;
 
          // down
-         if(correct_distance_is_impossible && y < height-1)
-         {
-            bool half_impossible = true;
-            // left half
-            if(v1 == 0 && board[x][y+1])
-               half_impossible = false;
-            else
-               for(size_t yy = y+1; yy < height; ++yy)
-               {
-                  curr_h = board[x][yy];
-                  if(!curr_h)
-                     continue;
-                  curr_elem = curr_h->owner;
-                  if(invalid->find(curr_elem))
-                     break;
-                  if(curr_elem->is_vertical && curr_h->direction == down)
-                     ++yy;
-                  if(yy-y == v1)
-                  {
-                     half_impossible = false;
-                     break;
-                  }
-               }
-            if(v1 == height-1-y)
-               half_impossible = false;
-            // right half
-            if(!half_impossible)
-            {
-               if(v2 == 0 && board[x+1][y+1])
-                  correct_distance_is_impossible = false;
-               else
-                  for(size_t yy = y+1; yy < height; ++yy)
-                  {
-                     curr_h = board[x+1][yy];
-                     if(!curr_h)
-                        continue;
-                     curr_elem = curr_h->owner;
-                     if(invalid->find(curr_elem))
-                        break;
-                     if(curr_elem->is_vertical && curr_h->direction == down)
-                        ++yy;
-                     if(yy-y == v2)
-                     {
-                        correct_distance_is_impossible = false;
-                        break;
-                     }
-                  }
-               if(v2 == height-1-y)
-                  correct_distance_is_impossible = false;
-            }
-         }
-         if(v1 == height-1-y && v2 == height-1-y)
+         if(correct_distance_is_impossible
+               && check_if_direction_valid(x, y, down)
+               && check_if_direction_valid(x+1, y, down))
             correct_distance_is_impossible = false;
 
          if(correct_distance_is_impossible)

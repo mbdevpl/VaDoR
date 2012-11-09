@@ -16,10 +16,10 @@ void domino_problem_solver::execute(bool output, long long delay, bool approxima
                                     bool purgeUseless)
 {
    ull* filler = nullptr;
+   // memory needed in case of bad alloc
+   filler = new ull[262144]; // 262144 * 64 bits = 2MB
    try
    {
-      // memory needed in case of bad alloc
-      filler = new ull[262144]; // 262144 * 64 bits = 2MB
       if(approximate)
          construct_path(output, delay, false, size()*size());
       else
@@ -69,8 +69,8 @@ void domino_problem_solver::construct_full_tree(bool output, long long delay, bo
    // exploration starts from root i.e. initial state
    new_states_in_tree.append(states.root());
 
-   program_timer global_timer;
-   program_timer timer;
+   toolkit::program_timer global_timer;
+   toolkit::program_timer timer;
    global_timer.start();
    timer.start();
 
@@ -90,11 +90,24 @@ void domino_problem_solver::construct_full_tree(bool output, long long delay, bo
    if(new_states_in_tree.length() > 0)
       new_states_in_tree.first().value_ref().value_ref().scan_board();
 
-   static const long long hash_optimization_step = 1000000;
+#ifdef DEBUG
+   static const long long memory_checking_step = 5000;
+   static const unsigned long long memory_checking_value = 1800000000;
+#else
+   static const long long memory_checking_step = 100000;
+   static const unsigned long long memory_checking_value = 1800000000;
+#endif // DEBUG
+   static const long long hash_optimization_step = 2000000;
+   long long memory_checking = memory_checking_step;
    long long hash_optimization = hash_optimization_step;
+
+   //   // memory needed in case of bad alloc
+   //   ull* filler = new ull[262144]; // 262144 * 64 bits = 2MB
 
    while(new_states_in_tree.length() > 0)
    {
+      //      try
+      //      {
       simple_list<states_t::elem,size_t>::elem state_elem
             = depthFirst ? new_states_in_tree.last() : new_states_in_tree.first();
       states_t::elem& state = *state_elem;
@@ -185,7 +198,7 @@ void domino_problem_solver::construct_full_tree(bool output, long long delay, bo
       }
       else
       {
-         if(purgeUseless && depthFirst && states.count() > 10000)
+         if(purgeUseless && depthFirst && states.count() > 20000)
             purge_right_side(state, true);
       }
       state_elem.remove();
@@ -196,7 +209,52 @@ void domino_problem_solver::construct_full_tree(bool output, long long delay, bo
          break;
       if(stopOnFirstDeadEnd && !new_possibilities)
          break;
+
+      // memory cleanup
+      if(!memory_checking)
+      {
+         memory_checking = memory_checking_step;
+         unsigned long long mem = toolkit::program_info::physical_memory_used();
+         if(mem > memory_checking_value)
+         {
+            unsigned long long cleared = in_tree.nodes();
+            in_tree.clear();
+            if(output)
+            {
+               std::cout
+                     << "  Removed " << cleared << " nodes from hash."
+                     << " Memory " << mem / MEGABYTE_DIVISOR
+                     << "MB -> " << toolkit::program_info::physical_memory_used()/ MEGABYTE_DIVISOR << "MB"
+                     << std::endl;
+            }
+         }
+      }
+      else
+         --memory_checking;
+      //      }
+      //      catch(std::bad_alloc& ex)
+      //      {
+      //         delete filler;
+      //         filler = nullptr;
+      //         if(output)
+      //         {
+      //            cout_status(state_count, new_states_in_tree.length(), global_timer, false, best_on_board);
+      //            std::cout << "At this point, hash that remembers checked states has to be cleared, \""
+      //                   << ex.what() << "\"." << std::endl;
+      //         }
+      //         in_tree.clear();
+      //         if(output)
+      //         {
+      //            cout_status(state_count, new_states_in_tree.length(), global_timer, false, best_on_board);
+      //         }
+      //         filler = new ull[262144]; // 262144 * 64 bits = 2MB
+      //      }
    }
+   //   if(filler)
+   //   {
+   //      delete filler;
+   //      filler = nullptr;
+   //   }
    if(output)
    {
       timer.stop();
@@ -213,18 +271,20 @@ void domino_problem_solver::construct_path(bool output, long long delay, bool st
 }
 
 void domino_problem_solver::cout_status(unsigned long long scanned_states, unsigned long long not_scanned_states,
-                                        program_timer& timer, bool show_pieces,
+                                        toolkit::program_timer& timer, bool show_pieces,
                                         unsigned long long pieces_left)
 {
    //static const size_t output_indent = 10;
    static std::string timer_format("h:m.s");
-   std::cout << " scanned: " << std::setw(9) << std::setfill(' ') << scanned_states;
-   std::cout << "; new: " << std::setw(3) << std::setfill(' ') << not_scanned_states;
-   std::cout << "; hash: " << std::setw(8) << std::setfill(' ') << in_tree.nodes();
-   std::cout << "; tree: " << std::setw(6) << std::setfill(' ') << states.count();
+   std::cout
+         << " scanned: " << std::setw(9) << std::setfill(' ') << scanned_states
+         << "; new: " << std::setw(3) << std::setfill(' ') << not_scanned_states
+         << "; hash: " << std::setw(8) << std::setfill(' ') << in_tree.nodes()
+         << "; tree: " << std::setw(6) << std::setfill(' ') << states.count();
    if(show_pieces)
       std::cout << "; pieces left: " << std::setw(3) << std::setfill(' ') << pieces_left;
    std::cout << "; " << timer.str(timer_format);
+   //std::cout << "; " << toolkit::program_info::physical_memory_used();
    std::cout << std::endl;
 }
 

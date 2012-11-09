@@ -163,3 +163,14 @@ void binary_hash::optimize()
    //hash_t* levels = new hash_t[size+1];
    optimize_node(root/*, levels*//*, 0*/);
 }
+
+bool binary_hash::clear()
+{
+   if(!root)
+      return false;
+   delete root;
+   root = nullptr;
+   leaf_count = 0;
+   node_count = 0;
+   return true;
+}

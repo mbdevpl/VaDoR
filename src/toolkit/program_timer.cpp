@@ -1,5 +1,8 @@
 #include "program_timer.h"
 
+namespace toolkit
+{
+
 program_timer::program_timer(bool local)
    : local(local), running(false), start_time(), stop_time() { }
 
@@ -87,3 +90,5 @@ std::string program_timer::systemtime_str(const std::string& format, const SYSTE
 }
 
 #endif // WINDOWS
+
+}

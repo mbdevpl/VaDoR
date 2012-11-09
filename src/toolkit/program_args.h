@@ -9,6 +9,9 @@
 #include <iostream>
 #endif // DEBUG
 
+namespace toolkit
+{
+
 class program_args
 {
    typedef std::string arg_t;
@@ -28,5 +31,7 @@ public:
    arg_t last() { if(args.last()) return *(args.last()); else return std::string(); }
    arg_t element(size_t index) { if(args.element(index)) return *(args.element(index)); else return std::string(); }
 };
+
+}
 
 #endif // PROGRAM_ARGS_H

@@ -56,6 +56,7 @@ private:
    void init_board();
    // checks all unresolved pieces to know which cannot be removed at all
    void resolve_elements_by_board_size();
+   bool domino_problem_input::check_if_direction_valid(size_t x, size_t y, half_direction dir);
    void resolve_elements_by_possible_distances_to_other_elements();
 public:
    // Packs the object, decreasing memory usage.

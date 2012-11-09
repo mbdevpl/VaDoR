@@ -7,7 +7,8 @@
 #include <new> // for bad_alloc
 #include "simple_tree.h"
 #include "binary_hash.h"
-#include "program_timer.h"
+#include "toolkit/program_timer.h"
+#include "toolkit/program_info.h"
 
 #ifdef DEBUG
 #endif // DEBUG
@@ -18,6 +19,7 @@
 #define BREADTH 8
 
 #define STATE_COUNT_DELAY 100000
+#define MEGABYTE_DIVISOR 1048576
 
 class domino_problem_solver : public domino_problem
 {
@@ -57,7 +59,7 @@ private:
    void construct_path(bool output = true, long long delay = STATE_COUNT_DELAY, bool stopOnFirstDeadEnd = false,
                        long long maxStatesChecked = -1);
    void cout_status(unsigned long long scanned_states, unsigned long long not_scanned_states,
-                    program_timer& timer, bool show_pieces,
+                    toolkit::program_timer& timer, bool show_pieces,
                     unsigned long long pieces_left = 0);
    void purge_right_side(states_t::elem startElem, bool stopAtBestPath);
    void rebuild_best_path();
