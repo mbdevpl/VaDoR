@@ -58,9 +58,10 @@ private:
    //  a dead-end is reached
    void construct_path(bool output = true, long long delay = STATE_COUNT_DELAY, bool stopOnFirstDeadEnd = false,
                        long long maxStatesChecked = -1);
+   long double estimate_progress(const states_t::elem& state);
    void cout_status(unsigned long long scanned_states, unsigned long long not_scanned_states,
                     toolkit::program_timer& timer, bool show_pieces,
-                    unsigned long long pieces_left = 0);
+                    unsigned long long pieces_left, const states_t::elem& state);
    void purge_right_side(states_t::elem startElem, bool stopAtBestPath);
    void rebuild_best_path();
 public:

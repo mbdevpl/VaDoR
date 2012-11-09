@@ -101,7 +101,7 @@ int main(int argc, char **argv)
          if(args.pop("-testmem"))
          {
             long long* ptr;
-            for(int i=0;i<930;++i) ptr = new long long[262144];
+            for(int i=0;i<1600;++i) ptr = new long long[131072]; // 131072 * 64 bits = 1MB
             ptr = nullptr;
          }
          if(args.pop("-testloop"))

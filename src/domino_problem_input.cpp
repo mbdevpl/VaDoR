@@ -2,11 +2,13 @@
 
 domino_problem_input::domino_problem_input()
    : alloc(true), elements(nullptr), width(0), height(0), board(),
-     invalid(nullptr), unresolved(nullptr), checked(), is_compact(false) { }
+     invalid(nullptr), unresolved(nullptr), checked(), checked_key(0),
+     is_compact(false) { }
 
 domino_problem_input::domino_problem_input(const domino_problem_input& input)
    : elements(input.elements), width(input.width), height(input.height), board(input.board),
-     invalid(input.invalid), unresolved(input.unresolved), checked(input.checked), is_compact(false)
+     invalid(input.invalid), unresolved(input.unresolved), checked(input.checked),
+     checked_key(0), is_compact(false)
 {
    alloc = false;
    if(input.is_compact)
@@ -15,7 +17,8 @@ domino_problem_input::domino_problem_input(const domino_problem_input& input)
 
 domino_problem_input::domino_problem_input(const std::string& path)
    : alloc(true), elements(new elements_t()), width(0), height(0), board(),
-     invalid(new elements_t()), unresolved(new elements_t()), checked(), is_compact(false)
+     invalid(new elements_t()), unresolved(new elements_t()), checked(), checked_key(0),
+     is_compact(false)
 {
    if(path.substr(path.find_last_of(".") + 1) == "xml")
       read_xml(path);

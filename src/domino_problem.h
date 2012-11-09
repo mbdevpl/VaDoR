@@ -32,8 +32,8 @@ protected:
    // sequence of zeros and ones, with ones when a given element from 'elements'
    //  can be removed in current situation
    ull possible_key;
-   // sequence of zeros and ones, with ones when a given element from 'elements' is removed
-   ull removed_key;
+   //// sequence of zeros and ones, with ones when a given element from 'elements' is removed
+   //ull removed_key;
 public:
    // Default constructor.
    domino_problem();
@@ -59,6 +59,8 @@ private:
    size_t distance(size_t x, size_t y, half_direction dir);
    void remove_at(size_t x, size_t y);
 public:
+   // sets *_key fields according to current contents of the lists
+   void calculate_keys();
    // Packs the object, decreasing memory usage.
    void pack();
    // Unpacks the object, increasing memory usage.
@@ -68,6 +70,7 @@ public:
    size_t on_board_length() const { return on_board.length(); }
    size_t possible_length() const { return possible.length(); }
    size_t removed_length() const { return removed.length(); }
+   ull on_board_key_value() const { return on_board_key; }
    std::string on_board_str() const { return on_board.str(); }
    std::string possible_str() const { return possible.str(); }
    std::string removed_str(bool compact = false) const

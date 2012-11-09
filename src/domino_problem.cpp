@@ -1,28 +1,30 @@
 #include "domino_problem.h"
 
 domino_problem::domino_problem()
-   : domino_problem_input(), on_board(), possible(), removed() { }
+   : domino_problem_input(), on_board(), possible(), removed()/*, on_board_key(0),
+     possible_key(0)*/ { }
 
 domino_problem::domino_problem(const domino_problem& problem)
    : domino_problem_input(problem), on_board(problem.on_board), possible(problem.possible),
-     removed(problem.removed) { }
-
-domino_problem::domino_problem(const domino_problem& problem, bool copy_possible)
-   : domino_problem_input(problem), on_board(problem.on_board),
-     possible(), removed(problem.removed)
+     removed(problem.removed), on_board_key(0), possible_key(0)
 {
-   if(copy_possible)
-      possible.initFrom(problem.possible);
    if(problem.is_compact)
       throw std::runtime_error("cannot copy packed object, use expand() first");
 }
 
-domino_problem::domino_problem(const domino_problem_input& input)
-   : domino_problem_input(input), on_board(*elements), possible(), removed()
+domino_problem::domino_problem(const domino_problem& problem, bool copy_possible)
+   : domino_problem_input(problem), on_board(problem.on_board),
+     possible(), removed(problem.removed), on_board_key(0), possible_key(0)
 {
-   //resolve_elements();
-   //scan_board();
+   if(problem.is_compact)
+      throw std::runtime_error("cannot copy packed object, use expand() first");
+   if(copy_possible)
+      possible.initFrom(problem.possible);
 }
+
+domino_problem::domino_problem(const domino_problem_input& input)
+   : domino_problem_input(input), on_board(*elements), possible(), removed(),
+     on_board_key(0), possible_key(0) { }
 
 //domino_problem::~domino_problem()
 //{
@@ -49,7 +51,7 @@ void domino_problem::scan_board()
 void domino_problem::add_possible_outcomes(domino_problem::solution_t& outcomes)
 {
    if(is_compact)
-      throw std::runtime_error("use expand() first");
+      throw std::runtime_error("use expand() before exploring possible outcomes");
    if(possible.length() == 0)
       return;
    for (elements_t::elem i = possible.first(); i; ++i)
@@ -79,7 +81,18 @@ domino_problem::solution_t domino_problem::get_possible_outcomes()
 bool domino_problem::state_equals(const domino_problem& problem)
 {
    if(is_compact || problem.is_compact)
+   {
+      if(problem.is_compact)
+      {
+         calculate_keys();
+         return problem.on_board_key == on_board_key;
+      }
+      else
+      {
+         // unimplemented
+      }
       throw std::runtime_error("cannot compare packed objects");
+   }
 
    if(problem.on_board == on_board)
       return true;
@@ -294,7 +307,7 @@ void domino_problem::remove_at(size_t x, size_t y)
    board[e->x][e->y] = 0;
 }
 
-void domino_problem::pack()
+void domino_problem::calculate_keys()
 {
    if(is_compact)
       return;
@@ -331,6 +344,15 @@ void domino_problem::pack()
       //         //re;
       //      }
    }
+}
+
+void domino_problem::pack()
+{
+   if(is_compact)
+      return;
+
+   calculate_keys();
+
    on_board.clear();
    possible.clear();
    //removed.clear();
