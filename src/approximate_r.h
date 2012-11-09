@@ -32,6 +32,8 @@ private:
 
     void print_out();
     bool isRemovable(int x, int y);
+    bool checkSide(int x, int y, half_direction direction);
+    bool toBoolean(int value);
     void remove_piece(int x, int y);
     int countFieldValue(int x, int y);
     void run();

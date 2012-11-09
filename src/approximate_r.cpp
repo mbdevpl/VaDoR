@@ -6,7 +6,7 @@
   */
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-// computational functions - influencing the computation
+// computational functions
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -45,9 +45,9 @@ void approximate_r::run()
 
     do {
         iterPiecesRemoved = 0;
-        for (int y = 0; y < this->board_height ; y++)
+        for (int y = 0; y <this->board_height ; y++)
             for (int x = 0; x < this->board_width; x++)
-                    if (present->size() > 0 && isRemovable(x,y))
+                if (board[x][y]!=NULL && isRemovable(x,y))
                     {
                         remove_piece(x,y);
                         iterPiecesRemoved += 1;
@@ -59,43 +59,36 @@ void approximate_r::run()
 }
 
 /*
-  Assigns values for each domino half piece, depending on element removability.
-  Adds 2, if an element can be removed with regard to the shorter side.
-  Adds 1, id a half element satisfies condition of removability, with regard to the longer side.
-*/
-int approximate_r::countFieldValue(int x, int y)
+  checks if element value is equal to distance to the other piece in given direction
+  */
+bool approximate_r::checkSide(int x, int y, half_direction direction)
 {
-    half_direction direction = board[x][y]->direction;
-    int result = 0;
     int cnt=0,xt=x,yt=y;
-    if (direction == right || direction == up || direction == down){
+    switch (direction)
+    {
+        case left:
         if (xt > 0)
             while(board[--xt][yt]==NULL){ cnt++; if (xt==0)break;}
-        if (board[x][y]->value == cnt && direction == right) result += 2;
-        else if (board[x][y]->value == cnt) result += 1;
-    }
-    cnt=0;xt=x;yt=y;
-    if (direction == left || direction == up || direction == down){
+        if (board[x][y]->value == cnt)
+            return true;
+        break;
+        case right:
         if (xt < this->board_width-1)
             while(board[++xt][yt]==NULL){ cnt++; if (xt==this->board_width-1)break;}
-        if (board[x][y]->value == cnt && direction == left) result += 2;
-        else if (board[x][y]->value == cnt) result += 1;
-    }
-    cnt=0;xt=x;yt=y;
-    if (direction == down || direction == right || direction == left){
+        if (board[x][y]->value == cnt) return true;
+        break;
+        case up:
         if (yt > 0)
             while(board[xt][--yt]==NULL){ cnt++; if (yt==0)break;}
-        if (board[x][y]->value == cnt && direction == down) result += 2;
-        else if (board[x][y]->value == cnt) result += 1;
-    }
-    cnt=0;xt=x;yt=y;
-    if (direction == up || direction == right || direction == left){
+        if (board[x][y]->value == cnt) return true;
+        break;
+        case down:
         if (yt < this->board_height-1)
             while(board[xt][++yt]==NULL){ cnt++; if (yt==this->board_height-1)break;}
-        if (board[x][y]->value == cnt && direction == up) result += 2;
-        else if (board[x][y]->value == cnt) result += 1;
+        if (board[x][y]->value == cnt) return true;
+        break;
     }
-    return result;
+    return false;
 }
 
 /*
@@ -103,54 +96,51 @@ int approximate_r::countFieldValue(int x, int y)
   */
 bool approximate_r::isRemovable(int x, int y)
 {
-    int me,sibling=0;
-    if (board[x][y] != NULL)
+    bool isVertical = board[x][y]->owner->is_vertical;
+    if (!isVertical)
     {
-        if (board[x][y]->value == 0) return true;
-        else
-        {
-            me = countFieldValue(x,y);
-            switch(board[x][y]->direction){
-            case up:
-                sibling = countFieldValue(x,y-1);
-                break;
-            case down:
-                sibling = countFieldValue(x,y+1);
-                break;
-            case left:
-                sibling = countFieldValue(x-1,y);
-                break;
-            case right:
-                sibling = countFieldValue(x+1,y);
-                break;
-            default:
-                break;
-            }
-            if ((me+sibling)>=2) return true;
-        }
-    } else
-        return false;
+           if (checkSide( board[x][y]->loc_x(), board[x][y]->loc_y(), left))
+                return true;
+           else if (checkSide( board[x][y]->owner->h2.loc_x(), board[x][y]->owner->h2.loc_y(), right))
+                return true;
+           else if (checkSide( board[x][y]->owner->h1.loc_x(), board[x][y]->owner->h1.loc_y(), down) &&
+                checkSide( board[x][y]->owner->h2.loc_x(), board[x][y]->owner->h2.loc_y(), down) )
+            return true;
+            else if (checkSide( board[x][y]->owner->h1.loc_x(), board[x][y]->owner->h1.loc_y(), up) &&
+                checkSide( board[x][y]->owner->h2.loc_x(), board[x][y]->owner->h2.loc_y(), up) )
+            return true;
+   } else
+    {
+        if (checkSide( board[x][y]->owner->h1.loc_x(), board[x][y]->owner->h1.loc_y(), up))
+            return true;
+        else if (checkSide( board[x][y]->owner->h2.loc_x(), board[x][y]->owner->h2.loc_y(), down))
+            return true;
+        else if (checkSide( board[x][y]->owner->h1.loc_x(), board[x][y]->owner->h1.loc_y(), left) &&
+            checkSide( board[x][y]->owner->h2.loc_x(), board[x][y]->owner->h2.loc_y(), left) )
+        return true;
+        else if (checkSide( board[x][y]->owner->h1.loc_x(), board[x][y]->owner->h1.loc_y(), right) &&
+            checkSide( board[x][y]->owner->h2.loc_x(), board[x][y]->owner->h2.loc_y(), right) )
+        return true;
+    }
     return false;
 }
+
 
 /*
   Removes element from a board
   */
 void approximate_r::remove_piece(int x, int y)
 {
-    for(int i =0; i < present->size();i++)
-        if ((present->at(i)->h1.loc_x()==x && present->at(i)->h1.loc_y()==y)||
-                (present->at(i)->h2.loc_x()==x && present->at(i)->h2.loc_y()==y))
-        {
-            board[present->at(i)->h1.loc_x()][present->at(i)->h1.loc_y()] = NULL;
-            board[present->at(i)->h2.loc_x()][present->at(i)->h2.loc_y()] = NULL;
-            removed.push_back(present->at(i));
-            present->remove(i);
-            break;
-        }
+        removed.push_back(board[x][y]->owner);
+        present->remove(present->indexOf(board[x][y]->owner));
+        board[board[x][y]->other_half->loc_x()][board[x][y]->other_half->loc_y()] = NULL;
+        board[board[x][y]->loc_x()][board[x][y]->loc_y()] = NULL;
 }
 
-
+bool approximate_r::toBoolean(int value)
+{
+    return (value>0);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
