@@ -42,7 +42,9 @@ HEADERS += \
     approximate_r.h \
     summary_window.h \
     domino_problem_solver.h \
-    accurate_thread.h
+    accurate_thread.h \
+    domino_problem_s.h \
+    approximate_s.h
 
 SOURCES += \
     main.cpp \
@@ -60,7 +62,9 @@ SOURCES += \
     approximate_r.cpp \
     summary_window.cpp \
     domino_problem_solver.cpp \
-    accurate_thread.cpp
+    accurate_thread.cpp \
+    domino_problem_s.cpp \
+    approximate_s.cpp
 
 FORMS += \
     mainwindow.ui \
