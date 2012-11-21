@@ -13,55 +13,72 @@
 #include "half_elem.h"
 #include "domino_elem_located.h"
 
-using std::cout;
-using std::endl;
-
-using std::ifstream;
-
-const int MAX_CHARS_PER_LINE = 128;
-const int MAX_TOKENS_PER_LINE = 5;
-const char* const DELIMITER = ";";
-
-
+//#ifdef DEBUG
+//#define _CRT_SECURE_NO_WARNINGS 1
+//#endif // DEBUG
 
 class domino_problem_input
 {
-private:
-    void read_xml(const std::string& path);
-    void read_txt(const std::string& path);
-
-protected:
+public:
    typedef simple_list<domino_elem_located*,size_t> elements_t;
+protected:
    typedef simple_list<half_elem*,size_t> column_t;
    typedef simple_list<column_t,size_t> board_t;
 protected:
-   // collection of domino_elem*
+   // Indication that this object allocated memory under its pointers.
+   bool alloc;
+   // Collection of domino_elem_located pointers.
    elements_t* elements;
    size_t width;
    size_t height;
-   // collection of half_elem* that come from 'elements' field
+   // Collection of half_elem* that come from 'elements' field.
    board_t board;
-   // impossible to remove due to size of the board
+   // Impossible to remove due to size of the board.
    elements_t* invalid;
-   // algorithm does not know anything about these pieces
+   // Algorithm does not know anything about these pieces.
    elements_t* unresolved;
-   // possible to remove if other pieces are placed right
+   // Possible to remove if other pieces are placed right.
    elements_t checked;
-public:
-   domino_problem_input(const std::string& path);
-   ~domino_problem_input();
+   // sequence of zeros and ones, with ones when a given element from 'elements' is checked
+   unsigned long long checked_key;
+   // true if this object has all lists empty and encoded in keys representing them
+   bool is_compact;
 protected:
    domino_problem_input();
    domino_problem_input(const domino_problem_input& input);
-private:
-   // checks all unresolved pieces to know which cannot be removed at all
-   void resolve_elements();
 public:
+   domino_problem_input(const std::string& path);
+   /*virtual*/ ~domino_problem_input();
+   void release();
+private:
+   void read_txt(const std::string& path);
+   void read_xml(const std::string& path);
+   void init_board();
+   // checks all unresolved pieces to know which cannot be removed at all
+   void resolve_elements_by_board_size();
+   bool domino_problem_input::check_if_direction_valid(size_t x, size_t y, half_direction dir);
+   void resolve_elements_by_possible_distances_to_other_elements();
+public:
+   // Packs the object, decreasing memory usage.
+   void pack();
+   // Unpacks the object, increasing memory usage.
+   void expand();
    const elements_t::elem_const elements_first() const { return elements->first(); }
    size_t size() const { return elements->length(); }
    inline domino_elem_located* elem(size_t index) { return elements->element(index).value_ref(); }
+   size_t invalid_length() const { return invalid->length(); }
+   size_t checked_length() const { return checked.length(); }
+   std::string invalid_str() const { return invalid->str(); }
+   std::string checked_str() const { return checked.str(); }
    inline size_t w() { return width; }
    inline size_t h() { return height; }
+protected:
+   std::string board_line(
+         size_t line, char before_line, const std::string& middle, bool value_mode,
+         half_direction dir, const std::string& after_if_dir, const std::string& after_otherwise,
+         const std::string& middle_if_empty = "    ", const std::string& after = "",
+         const std::string& after_line = "\n") const;
+public:
    std::string board_str() const;
    friend std::ostream& operator<<(std::ostream& os, const domino_problem_input& input)
    {

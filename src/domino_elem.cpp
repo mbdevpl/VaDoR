@@ -1,5 +1,8 @@
 #include "domino_elem.h"
 
+domino_elem::domino_elem()
+   : h1(), h2(), is_vertical(false) { }
+
 domino_elem::domino_elem(domino_elem_value_t val1, domino_elem_value_t val2,
                          bool is_vertical)
    : h1(half_elem(val1)), h2(half_elem(val2)), is_vertical(is_vertical) {
@@ -14,9 +17,22 @@ domino_elem::domino_elem(domino_elem_value_t val1, domino_elem_value_t val2,
    //h2.owner = this;
 }
 
+domino_elem::domino_elem(const domino_elem& domino)
+   : h1(domino.h1), h2(domino.h2), is_vertical(domino.is_vertical) { }
+
+domino_elem& domino_elem::operator=(const domino_elem& domino)
+{
+   h1 = domino.h1;
+   h2 = domino.h2;
+   h1.other_half = &h2;
+   h2.other_half = &h1;
+   is_vertical = domino.is_vertical;
+   return *this;
+}
+
 std::ostream& operator<<(std::ostream& os, const domino_elem& domino)
 {
-   os << '[' << domino.h1.value << ' ' << domino.h2.value << ' '
+   os << '[' << +(domino.h1.value) << ' ' << +(domino.h2.value) << ' '
       << (domino.is_vertical ? "ver" : "hor") << ']';
    return os;
 }

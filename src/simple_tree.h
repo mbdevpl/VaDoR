@@ -38,6 +38,8 @@ private:
    typedef S L;
 
 private:
+   class elem_raw;
+   typedef simple_list<elem_raw*,S> subelems_list_t;
    // Single element of the tree, pointing to the root and sub-elements.
    class elem_raw
    {
@@ -47,7 +49,7 @@ private:
       // Pointer to the root element.
       elem_raw* ptr_root;
       // Pointers to the sub-elements.
-      simple_list<elem_raw*,S> subelems_list;
+      subelems_list_t subelems_list;
    public:
       ELEM_RAW_DEF_CONSTR, ptr_root(nullptr) { }
       ELEM_RAW_VAL_CONSTR, ptr_root(nullptr) { }
@@ -56,12 +58,32 @@ private:
          : elem_value(value), ptr_root(root) { }
       // Destructor.
       ELEM_RAW_DESTR { ELEM_RAW_DESTR_T ptr_root = nullptr; subelems_list.clear(); }
+      //      void release()
+      //      {
+      //         for(subelems_list_t::elem sub = subelems_list.first(); sub; sub.removeAndForward())
+      //         {
+      //            (*sub)->release();
+      //            delete *sub;
+      //            *sub = 0;
+      //         }
+      //         subelems_list.clear();
+      //      }
    public:
       inline elem_raw*& root() { return ptr_root; }
-      inline simple_list<elem_raw*,S>& subList() { return subelems_list; }
-      inline typename simple_list<elem_raw*,S>::elem sub(S index) { return subelems_list.element(index); }
-      inline typename simple_list<elem_raw*,S>::elem findSub(elem_raw*& e)
-      { return subelems_list.find(e); }
+      inline subelems_list_t& subList() { return subelems_list; }
+      inline typename subelems_list_t::elem sub(S index) { return subelems_list.element(index); }
+      inline typename subelems_list_t::elem findSub(elem_raw*& e) { return subelems_list.find(e); }
+      inline void disconnectSub(elem_raw*& e)
+      {
+         for(subelems_list_t::elem sub = subelems_list.first(); sub; ++sub)
+         {
+            if(*sub == e)
+            {
+               sub.remove();
+               return;
+            }
+         }
+      }
       inline S subCount() const { return subelems_list.length(); }
 #ifdef DEBUG
    public:
@@ -124,25 +146,67 @@ public:
       // Goes to the right.
       elem& right(S count);
       // Goes to the first sub-element.
+      elem& firstSub();
+      // Goes to the first sub-element.
       elem& sub();
       // Goes to the sub-element with given index (n-th child).
       elem& sub(S index);
       // Goes to the last sub-element.
       elem& lastSub();
    public:
+      // Inserts an element between this elem ant its root.
       void insertAbove(const T& value);
+      // Adds new leftmost sibling, unless this elem is a tree root.
       void insertLeftmost(const T& value);
+      // Adds sibling to the left, moving count times before addition.
+      //  Does nothing if this elem is a tree root.
       void insertLeft(S count, const T& value);
+      // Adds sibling to the left, unless this elem is a tree root.
       void insertLeft(const T& value);
+      // Adds sibling to the right, unless this elem is a tree root.
+      //  It also works when tree is empty, then this elem becomes the main root.
       void insertRight(const T& value);
+      // Adds sibling to the right, moving count times before addition.
+      //  Does nothing if this elem is a tree root.
       void insertRight(S count, const T& value);
+      // Adds new rightmost sibling, unless this elem is a tree root.
       void insertRightmost(const T& value);
+      // Inserts a new elem between this node and its n-th child.
+      //  The same as \code elem(*this).sub(index).insertAbove(value); \endcode
       void insertBelow(S index, const T& value);
+      // The same as elem(*this).firstSub().insertLeft(value);
       void insertFirstSub(const T& value);
+      // The same as elem(*this).sub(index).insertLeft(value);
       void insertBeforeSub(S index, const T& value);
+      // The same as elem(*this).sub(index).insertRight(value);
       void insertAfterSub(S index, const T& value);
+      // The same as elem(*this).lastSub().insertRight(value);
       void insertLastSub(const T& value);
+      // The same as insertLastSub(value);
       void appendSub(const T& value);
+      /*!
+        \brief Removes the current element and moves all its subelements.
+
+        Subelements are moved in such a way, so that afterwards they become
+        subelements of the root of the current element. All of these subelements are
+        inserted in the place where this element is.
+
+        Exceptional behaviour:
+        if a root node is removed, all elements of tree are removed, i.e. the method
+        behaves like removeRecursive(), or clear() method ran directly on the tree.
+
+        Example, having tree with the following connections:
+        1->(2,3,4); 3->(5,6); 6->(7)
+        after executing 3.remove(), the tree becomes:
+        1->(2,5,6,4); 6->(7)
+        then, after 6.remove():
+        1->(2,5,7,4)
+        and then, after 1.remove(), all elements are removed, regardless whether element 1
+        had only one child, or not.
+      */
+      void remove();
+      // Removes this element and all its subelements.
+      void removeRecursive();
 #ifdef DEBUG
    public:
       static std::ostream& test(std::ostream& s = std::cout);
@@ -159,6 +223,8 @@ public:
    simple_tree();
    // Creates a one element tree, i.e. a tree with root only.
    simple_tree(const T& value);
+   // Destructor.
+   ~simple_tree() { release(); }
 public:
    // Returns first element of the list.
    elem root() { return root_elem; }
@@ -166,6 +232,10 @@ public:
    S count() const { return elem_count; }
 protected:
    simple_tree<T,S>& initFrom(const T& value);
+public:
+   void clear();
+private:
+   void release();
 public:
    const simple_list<const T*,S> getHorizontalList(S level) const;
    const simple_list<const T*,S> getVerticalList(S subelemIndex) const;
@@ -323,6 +393,11 @@ typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::left()
    elem_raw* r = e->root();
    simple_list<C::elem_raw*,S>::elem this_as_sub = r->findSub(e);
    this_as_sub.back();
+   if(this_as_sub.empty())
+   {
+      clear();
+      return *this;
+   }
    e = this_as_sub.value_ref();
    // as one line command:
    //e = r->subList().find(e).back().value_ref();
@@ -507,6 +582,26 @@ void simple_tree<T,S>::elem::insertLastSub(const T& value)
 template<typename T, typename S>
 void simple_tree<T,S>::elem::appendSub(const T& value) { insertLastSub(value); }
 
+template<typename T, typename S>
+void simple_tree<T,S>::elem::removeRecursive()
+{
+   if(empty() || !connected())
+      return;
+
+   simple_list<elem,S> subs = subList();
+   for(simple_list<elem,S>::elem el = subs.last(); el; --el)
+      (*el).removeRecursive();
+
+   if(hasRoot())
+   {
+      e->root()->disconnectSub(e);
+   }
+
+   delete e;
+   c->elem_count -= 1;
+   clear();
+}
+
 //// simple_tree
 
 template<typename T, typename S>
@@ -526,11 +621,54 @@ simple_tree<T,S>::simple_tree(const T& value)
 template<typename T, typename S>
 simple_tree<T,S>& simple_tree<T,S>::initFrom(const T& value)
 {
-   //release();
+   release();
    root_elem = elem();
    root_elem.connectTo(this);
    root_elem.insertRight(value);
    return *this;
+}
+
+template<typename T, typename S>
+void simple_tree<T,S>::clear()
+{
+   if(elem_count == 0)
+      return;
+   release();
+
+   //((elem_raw*)root_elem)->release();
+   //delete ((elem_raw*)root_elem);
+   root_elem = elem();
+   root_elem.connectTo(this);
+   elem_count = 0;
+}
+
+template<typename T, typename S>
+void simple_tree<T,S>::release()
+{
+   if(root_elem.empty())
+      return;
+
+   simple_list<elem,S> queue;
+   queue.append(root_elem);
+   for(simple_list<elem,S>::elem e = queue.first(); e; e.removeAndForward())
+   {
+      queue.append((*e).subList());
+      elem_raw* raw = (elem_raw*)(*e);
+      delete raw;
+   }
+
+   //elem_raw* raw = (elem_raw*)root_elem;
+   //raw->release();
+   //delete raw;
+   //      elem_raw* temp = raw;
+   //      while(temp)
+   //      {
+   //         raw = raw->next();
+   //         delete temp;
+   //         temp = raw;
+   //      }
+
+   //root_elem = elem();
 }
 
 template<typename T, typename S>

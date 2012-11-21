@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>725</width>
-    <height>576</height>
+    <width>1006</width>
+    <height>601</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,8 +48,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>499</width>
-         <height>466</height>
+         <width>723</width>
+         <height>483</height>
         </rect>
        </property>
       </widget>
@@ -60,7 +60,7 @@
       <property name="title">
        <string>Settings</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2" rowstretch="20,80">
+      <layout class="QGridLayout" name="gridLayout_2" rowstretch="30,70">
        <item row="0" column="0">
         <widget class="QFrame" name="frame">
          <property name="frameShape">
@@ -97,21 +97,21 @@
           <item>
            <widget class="QRadioButton" name="matiAlgRadioBox">
             <property name="text">
-             <string>Mati's</string>
+             <string>Mateusz Bysiek</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="radekAlgRadioBox">
             <property name="text">
-             <string>Radzio's</string>
+             <string>Radoslaw Lojek</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="stanislawAlgRadioBox">
             <property name="text">
-             <string>Stasiek's</string>
+             <string>Stanislaw Peryt</string>
             </property>
            </widget>
           </item>
@@ -190,12 +190,15 @@
               </item>
               <item row="2" column="0" colspan="2">
                <widget class="QPushButton" name="stopRunDirectButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
-                 <string>Stop</string>
+                 <string>To the End</string>
                 </property>
                 <property name="icon">
                  <iconset>
-                  <normaloff>pictures/stop.png</normaloff>pictures/stop.png</iconset>
+                  <normaloff>pictures/prev.png</normaloff>pictures/prev.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -240,6 +243,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_4">
               <item>
                <widget class="QPushButton" name="removeNextPieceButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Next</string>
                 </property>
@@ -256,24 +262,10 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="stopRunStepByStepButton">
-                <property name="text">
-                 <string>Stop</string>
-                </property>
-                <property name="icon">
-                 <iconset>
-                  <normaloff>pictures/stop.png</normaloff>pictures/stop.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>25</width>
-                  <height>25</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QPushButton" name="goToEndButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>To the End</string>
                 </property>
@@ -294,6 +286,34 @@
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="tab_3">
+          <attribute name="title">
+           <string>Output</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QTextEdit" name="infoTextEdit">
+             <property name="lineWrapMode">
+              <enum>QTextEdit::NoWrap</enum>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="ReloadButton">
+             <property name="text">
+              <string>Reload</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>pictures/reload.png</normaloff>pictures/reload.png</iconset>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>
@@ -305,6 +325,20 @@
        <string/>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>% Removed:</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QProgressBar" name="progressBar">
          <property name="value">
@@ -1188,7 +1222,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>725</width>
+     <width>1006</width>
      <height>20</height>
     </rect>
    </property>
@@ -1197,7 +1231,6 @@
      <string>File</string>
     </property>
     <addaction name="OpenMenu"/>
-    <addaction name="separator"/>
     <addaction name="separator"/>
     <addaction name="ExitMenu"/>
    </widget>
@@ -1223,6 +1256,11 @@
   <action name="ExitMenu">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionClearBoard">
+   <property name="text">
+    <string>Clear board</string>
    </property>
   </action>
  </widget>

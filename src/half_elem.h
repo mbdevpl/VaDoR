@@ -7,24 +7,27 @@
 
 class half_elem {
 public:
+   // Value.
    domino_elem_value_t value;
+   // Pointer to the 2nd half of the piece.
    half_elem* other_half;
+   // Direction to the 2nd half of the piece.
    half_direction direction;
+   // Pointer to the owner of this half.
    domino_elem_located* owner;
-//#ifdef RADZIO_WHY
-   int loc_x;
-   int loc_y;
-//#endif // RADZIO_WHY
-public:
-   half_elem()
-      : value(0), other_half(0), direction(none), owner(0) { }
-   half_elem(domino_elem_value_t value)
-      : value(value), other_half(0), direction(none), owner(0) { }
-public:
 
 public:
-   friend std::ostream& operator<<(std::ostream& os, const half_elem& domino);
-   friend std::ostream& operator<<(std::ostream& os, half_elem* domino);
+   half_elem();
+   half_elem(domino_elem_value_t value);
+   half_elem(const half_elem& half);
+   half_elem& operator=(const half_elem& half);
+
+public:
+   size_t loc_x();
+   size_t loc_y();
+public:
+   friend std::ostream& operator<<(std::ostream& os, const half_elem& half);
+   friend std::ostream& operator<<(std::ostream& os, half_elem* half);
 };
 
 #endif // HALF_ELEM_H

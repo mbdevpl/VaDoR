@@ -1,26 +1,40 @@
 #include "domino_problem.h"
 
 domino_problem::domino_problem()
-   : domino_problem_input(), on_board(), possible(), removed()/*, checked()*/ { }
+   : domino_problem_input(), on_board(), possible(), removed()/*, on_board_key(0),
+     possible_key(0)*/ { }
 
 domino_problem::domino_problem(const domino_problem& problem)
    : domino_problem_input(problem), on_board(problem.on_board), possible(problem.possible),
-     removed(problem.removed) { }
+     removed(problem.removed), on_board_key(0), possible_key(0)
+{
+   if(problem.is_compact)
+      throw std::runtime_error("cannot copy packed object, use expand() first");
+}
 
 domino_problem::domino_problem(const domino_problem& problem, bool copy_possible)
    : domino_problem_input(problem), on_board(problem.on_board),
-     possible(), removed(problem.removed)
+     possible(), removed(problem.removed), on_board_key(0), possible_key(0)
 {
+   if(problem.is_compact)
+      throw std::runtime_error("cannot copy packed object, use expand() first");
    if(copy_possible)
       possible.initFrom(problem.possible);
 }
 
 domino_problem::domino_problem(const domino_problem_input& input)
-   : domino_problem_input(input), on_board(*elements), possible(), removed()/*, checked()*/
-{
-   //resolve_elements();
-   //scan_board();
-}
+   : domino_problem_input(input), on_board(*elements), possible(), removed(),
+     on_board_key(0), possible_key(0) { }
+
+//domino_problem::~domino_problem()
+//{
+//   if(!is_compact)
+//   {
+//      on_board.clear();
+//      possible.clear();
+//      removed.clear();
+//   }
+//}
 
 void domino_problem::scan_board()
 {
@@ -36,6 +50,8 @@ void domino_problem::scan_board()
 
 void domino_problem::add_possible_outcomes(domino_problem::solution_t& outcomes)
 {
+   if(is_compact)
+      throw std::runtime_error("use expand() before exploring possible outcomes");
    if(possible.length() == 0)
       return;
    for (elements_t::elem i = possible.first(); i; ++i)
@@ -44,9 +60,14 @@ void domino_problem::add_possible_outcomes(domino_problem::solution_t& outcomes)
       domino_problem& pr = outcomes.last().value_ref();
       domino_elem_located* e = i.value_ref();
       pr.remove_at(e->x, e->y);
-      //pr.possible.clear();
+      //#ifdef DEBUG
+      //      std::cout << pr.board_str();
+      //#endif
       pr.scan_board();
    }
+   //#ifdef DEBUG
+   //      std::cout << possible.length();
+   //#endif
 }
 
 domino_problem::solution_t domino_problem::get_possible_outcomes()
@@ -59,14 +80,71 @@ domino_problem::solution_t domino_problem::get_possible_outcomes()
 
 bool domino_problem::state_equals(const domino_problem& problem)
 {
+   if(is_compact || problem.is_compact)
+   {
+      if(problem.is_compact)
+      {
+         calculate_keys();
+         return problem.on_board_key == on_board_key;
+      }
+      else
+      {
+         // unimplemented
+      }
+      throw std::runtime_error("cannot compare packed objects");
+   }
+
    if(problem.on_board == on_board)
       return true;
    return false;
 }
 
+bool domino_problem::operator<(const domino_problem& problem)
+{
+   if(is_compact || problem.is_compact)
+      throw std::runtime_error("cannot compare packed objects");
+
+   if(on_board.length() < problem.on_board.length())
+      return true;
+   if(on_board.length() > problem.on_board.length())
+      return false;
+
+   if(possible.length() > problem.possible.length())
+      return true;
+   return false;
+}
+
+bool domino_problem::operator>(const domino_problem& problem)
+{
+   if(is_compact || problem.is_compact)
+      throw std::runtime_error("cannot compare packed objects");
+
+   if(on_board.length() > problem.on_board.length())
+      return true;
+   if(on_board.length() < problem.on_board.length())
+      return false;
+
+   if(possible.length() < problem.possible.length())
+      return true;
+   return false;
+
+}
+
 bool domino_problem::can_be_removed(size_t x, size_t y)
 {
-   domino_elem_located* e = board[x][y]->owner;
+   if(is_compact)
+      throw std::runtime_error("use expand() before checking if a piece can be removed");
+   half_elem* h = board[x][y];
+#ifdef DEBUG
+   if(h == nullptr)
+   {
+      //std::cout << board_str();
+      return false;
+   }
+#endif // DEBUG
+   domino_elem_located* e = h->owner;
+   if(e == nullptr)
+      throw std::runtime_error("owner of half_elem must be set");
    size_t dist_up = distance(e->x, e->y, up);
    size_t dist_left = distance(e->x, e->y, left);
    if(e->is_vertical)
@@ -99,6 +177,8 @@ bool domino_problem::can_be_removed(size_t x, size_t y)
 
 size_t domino_problem::distance(size_t x, size_t y, half_direction dir)
 {
+   if(is_compact)
+      throw std::runtime_error("use expand() first");
    if(dir == up)
    {
       // check up
@@ -196,33 +276,232 @@ size_t domino_problem::distance(size_t x, size_t y, half_direction dir)
 
 void domino_problem::remove_at(size_t x, size_t y)
 {
-   half_elem*& he = board[x][y];
+   if(is_compact)
+      throw std::runtime_error("use expand() first");
+   half_elem* he = board[x][y];
+   if(he == nullptr)
+      return;
    domino_elem_located* e = he->owner;
+   if(e == nullptr)
+      throw std::runtime_error("owner of half_elem must be set");
    removed.append(e);
    possible.find(e).remove();
    checked.find(e).remove();
    on_board.find(e).remove();
-   board[e->x][e->y] = 0;
    if(e->is_vertical)
-      board[e->x][e->y+1] = 0;
-   else
-      board[e->x+1][e->y] = 0;
-}
-
+   {
 #ifdef DEBUG
-
-void domino_problem::demo_solution()
-{
-   //std::cout << find_all_possible_moves(board) << std::endl;
-   std::cout << board_str() << std::endl;
-   remove_at(2, 0);
-
-   //std::cout << find_all_possible_moves(board) << std::endl;
-   std::cout << board_str() << std::endl;
-   remove_at(1, 1);
-
-   //std::cout << find_all_possible_moves(board) << std::endl;
-   std::cout << board_str() << std::endl;
+      if(board[e->x][(e->y)+1]->owner != board[e->x][e->y]->owner)
+         throw std::runtime_error("owner mismatch");
+#endif // DEBUG
+      board[e->x][(e->y)+1] = 0;
+   }
+   else
+   {
+#ifdef DEBUG
+      if(board[(e->x)+1][e->y]->owner != board[e->x][e->y]->owner)
+         throw std::runtime_error("owner mismatch");
+#endif // DEBUG
+      board[(e->x)+1][e->y] = 0;
+   }
+   board[e->x][e->y] = 0;
 }
 
-#endif // DEBUG
+void domino_problem::calculate_keys()
+{
+   if(is_compact)
+      return;
+
+   on_board_key = 0;
+   possible_key = 0;
+   //removed_key = 0;  // this is in fact equal to bitwise !(on_board_key)
+   //  but order also has to be stored, therefore I can't see how to encode this, yet
+   for(elements_t::elem_const el = elements->first(), on = on_board.first(),
+       po = possible.first()/*, re = removed.first()*/; el; ++el)
+   {
+      if(invalid->find(*el))
+      {
+         ++on;
+         continue;
+      }
+      on_board_key <<= 1;
+      if(on && *el == *on)
+      {
+         on_board_key += 1;
+         ++on;
+      }
+      possible_key <<= 1;
+      if(po && *el == *po)
+      {
+         possible_key += 1;
+         ++po;
+      }
+      //      re = removed.find(*el);
+      //      removed_key <<= 1;
+      //      if(re && *el == *re)
+      //      {
+      //         removed_key += 1;
+      //         //re;
+      //      }
+   }
+}
+
+void domino_problem::pack()
+{
+   if(is_compact)
+      return;
+
+   calculate_keys();
+
+   on_board.clear();
+   possible.clear();
+   //removed.clear();
+
+   domino_problem_input::pack();
+
+   is_compact = true;
+}
+
+void domino_problem::expand()
+{
+   if(!is_compact)
+      return;
+
+   if(on_board.length() > 0 || possible.length() > 0)
+      throw std::runtime_error("error: problem was modified while packed");
+
+   domino_problem_input::expand();
+
+   for(elements_t::elem_const el = elements->last()/*, on = on_board.first(),
+                           po = possible.first(), re = removed.first()*/; el; --el)
+   {
+      if(invalid->find(*el))
+      {
+         on_board.insertFirst(*el);
+         continue;
+      }
+      if(on_board_key & 1)
+      {
+         on_board.insertFirst(*el);
+      }
+      on_board_key >>= 1;
+      if(possible_key & 1)
+      {
+         possible.insertFirst(*el);
+      }
+      possible_key >>= 1;
+   }
+   is_compact = false;
+}
+
+std::string domino_problem::board_line(
+      size_t line, char before_line, bool fill_middle, bool value_mode,
+      half_direction dir, bool three_chars_after_if_dir, const std::string& after_otherwise,
+      const std::string& middle_if_empty, const std::string& after, bool no_default_spaces) const
+{
+   static char sep_ver = -77;
+   static char sep_hor = -60;
+   static char sep_cross = -59;
+
+   static char on_board_ch = -79;
+   static char possible_ch = -80;
+   static char invalid_ch = -98;
+   static char fill = on_board_ch;
+
+   std::stringstream s;
+   s << before_line;
+   for(size_t x = 0; x < width; ++x)
+   {
+      half_elem* h_elem = board[x][line];
+      if(h_elem)
+      {
+         elements_t* pos = (elements_t*)&possible;
+         typedef domino_elem_located* del_p;
+         const del_p own = h_elem->owner;
+         if(invalid->find(own).valid())
+            fill = invalid_ch;
+         else if(pos->find(own).valid())
+            fill = possible_ch;
+         else
+            fill = on_board_ch;
+
+         if(value_mode)
+         {
+            if(fill_middle)
+               s << fill << +(h_elem->value) << fill;
+            else
+               s << ' ' << +(h_elem->value) << ' ';
+         }
+         else
+         {
+            if(fill_middle)
+               s << fill << fill << fill;
+            else if(!no_default_spaces)
+               s << "   ";
+         }
+         if(h_elem->direction == dir)
+         {
+            if(three_chars_after_if_dir)
+               s << fill << fill << fill;
+            else
+               s << fill;
+         }
+         else
+            s << after_otherwise;
+      }
+      else
+         s << middle_if_empty;
+      s << after;
+   }
+   s << '\n';
+   return s.str();
+}
+
+std::string domino_problem::board_str() const
+{
+   std::stringstream s;
+
+   static char sep_ver = -77;
+   static char sep_hor = -60;
+   static char sep_cross = -59;
+
+   static char on_board_ch = -79;
+   static char possible_ch = -80;
+   static char invalid_ch = -98;
+   static char fill = on_board_ch;
+
+   std::stringstream ss_hor;
+   ss_hor << sep_hor << sep_hor << sep_hor;
+
+   static std::string s_hor = ss_hor.str();
+   static std::string s_ver = std::string(&sep_ver,1);
+   static std::string s_cross = std::string(&sep_cross,1);
+
+   s << on_board_ch << " - on board, "
+     << possible_ch << " - possible, "
+     << invalid_ch << " - invalid, " << "\n";
+
+   //above board
+   s << domino_problem_input::board_line(0, sep_cross, s_hor, false, right, "", "", s_hor, s_cross);
+
+   for(size_t y = 0; y < height; ++y)
+   {
+      // above domino number
+      std::stringstream ss;
+      ss << fill << fill << fill;
+      s << board_line(y, sep_ver, true, false, right, false, s_ver, "    ", "");
+
+      // domino number
+      std::stringstream ss2;
+      ss2 << fill;
+      s << board_line(y, sep_ver, true, true, right, false, s_ver, "    ", "");
+
+      // below domino number
+      s << board_line(y, sep_ver, true, false, right, false, s_ver, "    ", "");
+
+      // line between dominos
+      s << board_line(y, sep_cross, false, false, down, true, s_hor, "   ", s_cross, true);
+      //s << domino_problem_input::board_line(y, sep_cross, "", false, down, ss.str(), s_hor, "   ", s_cross);
+   }
+   return s.str();
+}

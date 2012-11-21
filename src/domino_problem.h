@@ -27,27 +27,50 @@ protected:
    elements_t possible;
    // not longer on board, removed in the previous turns
    elements_t removed;
+   // sequence of zeros and ones, with ones when a given element from 'elements' is on board
+   ull on_board_key;
+   // sequence of zeros and ones, with ones when a given element from 'elements'
+   //  can be removed in current situation
+   ull possible_key;
+   //// sequence of zeros and ones, with ones when a given element from 'elements' is removed
+   //ull removed_key;
 public:
+   // Default constructor.
    domino_problem();
+   // Copy constructor.
    domino_problem(const domino_problem& problem);
+   // Creates a copy with or without copying 'possible' field.
    domino_problem(const domino_problem& problem, bool copy_possible);
+   // Creates a problem from a problem input.
    domino_problem(const domino_problem_input& input);
+   // Destructor.
+   // ~domino_problem();
 public:
-   // scans board to find removable pieces
+   // Scans board to find removable pieces.
    void scan_board();
 public:
    void add_possible_outcomes(domino_problem::solution_t& outcomes);
    domino_problem::solution_t get_possible_outcomes();
    bool state_equals(const domino_problem& problem);
+   bool operator<(const domino_problem& problem);
+   bool operator>(const domino_problem& problem);
 private:
    bool can_be_removed(size_t x, size_t y);
    size_t distance(size_t x, size_t y, half_direction dir);
    void remove_at(size_t x, size_t y);
 public:
+   // sets *_key fields according to current contents of the lists
+   void calculate_keys();
+   // Packs the object, decreasing memory usage.
+   void pack();
+   // Unpacks the object, increasing memory usage.
+   void expand();
    const elements_t::elem_const on_board_first() const { return on_board.first(); }
-   ull on_board_length() const { return on_board.length(); }
-   ull possible_length() const { return possible.length(); }
-   ull removed_length() const { return removed.length(); }
+   const elements_t::elem_const removed_first() const { return removed.first(); }
+   size_t on_board_length() const { return on_board.length(); }
+   size_t possible_length() const { return possible.length(); }
+   size_t removed_length() const { return removed.length(); }
+   ull on_board_key_value() const { return on_board_key; }
    std::string on_board_str() const { return on_board.str(); }
    std::string possible_str() const { return possible.str(); }
    std::string removed_str(bool compact = false) const
@@ -63,9 +86,11 @@ public:
       s << '}';
       return s.str();
    }
-#ifdef DEBUG
-   void demo_solution();
-#endif // DEBUG
+   std::string board_line(
+         size_t line, char before_line, bool fill_middle, bool value_mode,
+         half_direction dir, bool three_chars_after_if_dir, const std::string& after_otherwise,
+         const std::string& middle_if_empty, const std::string& after, bool no_default_spaces = false) const;
+   std::string board_str() const;
 };
 
 #endif // DOMINO_PROBLEM_H
