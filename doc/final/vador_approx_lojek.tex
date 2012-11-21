@@ -6,25 +6,6 @@ possible elements along its way. If a domino piece satisfies necessary condition
 it is thrown away from a board of elements. The operation is repeated for all consecutive elements
 until nothing can't be removed, or the domino board is empty.
 
-\subsubsection{Data structure}
-The data structure I have decided to use is a two dimensional array of objects, where object is a
-single domino field. Each object consists of fields such as: its value, location X and Y, boolean
-saying if a piece is placed horizontally/vertically, boolean saying if it is successor or
-predecessor field (value above or on the left side of a domino piece is successor, otherwise
-predecessor) and of course pointer to the other half of the piece. If a single cell in a matrix is
-empty, meaning that no piece is there, it is marked as a null pointer.
-\\
-\begin{minted}[linenos,numbersep=5pt]{c++}
-class dominoField {
-   int value;
-   int X;
-   int Y; 
-   boolean isSuccessor;
-   boolean isVertical; 
-   dominoField *twinField; 
-}
-\end{minted}
-
 
 \subsubsection{Algorithm Pseudo-Code}
 The algorithm takes as a parameters two dimensional array of elements and its vertical and
