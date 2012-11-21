@@ -1,16 +1,18 @@
 ﻿VAnishing DOmino pRoblem
 ========================
 
-This file is in Markdown, paste it here:
+VAnishing DOmino pRoblem -> VaDoR
+
+This file is in Markdown, you may paste it here:
 http://daringfireball.net/projects/markdown/dingus
-if you cannot see formatting.
+if you cannot see formatting and this file is not very readible for you.
 
 This is a solution of the problem defined at:
 http://alpha.mini.pw.edu.pl/~lucknerm/downloads/AC/domino.pdf
 
-The above file is mirrored in this repository.
-
-VAnishing DOmino pRoblem -> VADOR
+The above file, together with source code, binaries, and full documentation of this project 
+is mirrored in this repository:
+https://www.assembla.com/code/vador/git/nodes
 
 
 Current main features
@@ -51,15 +53,16 @@ For details of all available options, and other examples, please run:
 <code>vador.exe -help</code>
 
 
-Where is everything
--------------------
+Where is everything, i.e. structure of the repository
+-----------------------------------------------------
 
 * */bin/windows* - windows binaries, compiled with Qt4.8.3 and MSVC2010
 * */doc/problem* - description of the problem
 * */doc/txt* - description of the accepted txt input file format
 * */doc/initial* - initial documentation, description of the problem and the theoretical outline of the solution
-* */doc/doxygen* - documentation of classes **(not yet ready)**
-* */doc/userguide* - user guide **(not yet ready)**
+* */doc/final* - final documentation, outline of the solution described after implementation
+* */doc/doxygen* - documentation of classes **(not yet ready, for now see comments in the code)**
+* */doc/userguide* - user guide **(not yet ready, please use this readme as a guide)**
 * */res* - resources used for development
 * */src* - source code and Qt Creator project files
 * */src/approximate_r.cpp* - approximate algorithm by Radosław Łojek

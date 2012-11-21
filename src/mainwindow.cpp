@@ -176,7 +176,7 @@ void MainWindow::runClicked()
 
 void MainWindow::show_info_file()
 {
-    QDesktopServices::openUrl(QUrl::fromLocalFile("bysiek,lojek,peryt-vador_initial.pdf")); // Mati! You are allowed to modify this URL as you wish ;)
+    QDesktopServices::openUrl(QUrl::fromLocalFile("bysiek,lojek,peryt-vador_final.pdf")); // Mati! You are allowed to modify this URL as you wish ;)
 }
 
 void MainWindow::openFileClicked()
