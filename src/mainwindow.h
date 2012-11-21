@@ -12,8 +12,10 @@
 #include <rapidxml.hpp>
 #include <math.h>
 #include "domino_problem_r.h"
+#include "domino_problem_s.h"
 #include "summary_window.h"
 #include "approximate_r.h"
+#include "approximate_s.h"
 #include "domino_problem_input.h"
 #include "domino_problem_solver.h"
 #include "accurate_thread.h"
@@ -34,9 +36,11 @@ private:
     QList<QPushButton*> buttonPieces;
     QGridLayout *scrollLayout;
     domino_problem_r problem_r;
+    domino_problem_s problem_s;
     domino_problem_input *input;
     QWidget *viewport;
     approximate_r *apprThread_r;
+    approximate_s *apprThread_s;
     accurate_thread *accThread;
     QMessageBox msgBox;
     current_algorithm selectedAlgorithm;

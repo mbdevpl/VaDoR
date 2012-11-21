@@ -57,7 +57,7 @@ Where is everything
 * */doc/userguide* - user guide **(not yet ready)**
 * */res* - resources used for development
 * */src* - source code and Qt Creator project files
-
+* */src/approximate_r.cpp - approximate algorithm by Radosław Łojek
 
 License
 -------

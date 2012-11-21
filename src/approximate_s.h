@@ -1,14 +1,14 @@
-#ifndef APPROXIMATE_R_H
-#define APPROXIMATE_R_H
+#ifndef APPROXIMATE_S_H
+#define APPROXIMATE_S_H
 
-#include<domino_problem_r.h>
-#include<QVector>
-#include<QThread>
-#include<QMutex>
-#include<QTime>
+#include <QThread>
+#include <QVector>
+#include <QMutex>
+#include <QTime>
 #include "domino_elem_fwd.h"
+#include "domino_problem_s.h"
 
-class approximate_r : public QThread
+class approximate_s : public QThread
 {
     Q_OBJECT
 signals:
@@ -18,6 +18,8 @@ signals:
 private:
     half_elem*** board;
     QVector<domino_elem_located*>* present;
+    QVector<domino_elem_located*>* neighbors;
+    QVector<domino_elem_located*>* removedPreviously;
     QVector<domino_elem_located*> removed;
     int board_width;
     int board_height;
@@ -37,11 +39,18 @@ private:
     void remove_piece(int x, int y);
     int countFieldValue(int x, int y);
     void run();
+    void solve();
+    void findRoots();
+    bool classify(domino_elem_located* piece);
+    bool isIndependent(int x, int y);
+    void determineNewNeighbors();
+    bool checkHalfBoardIndependence(int x, int y, half_direction direction);
+    void test(QVector<domino_elem_located *> pieces);
     void sendResultsToGui(int timeElapsed);
 
 public:
-    approximate_r();
-    approximate_r(domino_problem_r &problem);
+    approximate_s(void);
+    approximate_s(domino_problem_s &problem);
     void setPieceByPiece(bool on);
     void setIsDelay(bool on);
     void setDelay(int delay);
@@ -49,4 +58,4 @@ public:
     void stopExecution();
 };
 
-#endif // APPROXIMATE_R_H
+#endif // APPROXIMATE_S_H

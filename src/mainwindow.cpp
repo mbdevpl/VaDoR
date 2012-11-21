@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
 	apprThread_r = NULL;
+    apprThread_s = NULL;
     ui->setupUi(this);
     selectedAlgorithm = accurate;
     setGuiForAccurate(true);
@@ -125,6 +126,13 @@ void MainWindow::runClicked()
                 setGuiEnabledWhileComputing(false,false);
                 break;
             case stanislaw:
+                problem_s = domino_problem_s(problem_r);
+                apprThread_s = new approximate_s(problem_s);
+                if (ui->isDelayCheckBox->isChecked() && ui->spinBox->value()>0) apprThread_s->setDelay(ui->spinBox->value());
+                QObject::connect(apprThread_s, SIGNAL(threadRemovePiece(int,int)), this, SLOT(removePiece(int,int)), Qt::QueuedConnection);
+                QObject::connect(apprThread_s, SIGNAL(threadComputationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), this, SLOT(computationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), Qt::QueuedConnection);
+                apprThread_s->start();
+                setGuiEnabledWhileComputing(false,false);
                 break;
             }
 
@@ -147,6 +155,13 @@ void MainWindow::runClicked()
                 setGuiEnabledWhileComputing(false,true);
                 break;
             case stanislaw:
+                problem_s = domino_problem_s(problem_r);
+                apprThread_s = new approximate_s(problem_s);
+                apprThread_s->setPieceByPiece(true);
+                QObject::connect(apprThread_s, SIGNAL(threadRemovePiece(int,int)), this, SLOT(removePiece(int,int)), Qt::QueuedConnection);
+                QObject::connect(apprThread_s, SIGNAL(threadComputationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), this, SLOT(computationOver(int, QVector<domino_elem_located*>*, QVector<domino_elem_located*>)), Qt::QueuedConnection);
+                apprThread_s->start();
+                setGuiEnabledWhileComputing(false,true);
                 break;
         }
         }
@@ -187,6 +202,8 @@ void MainWindow::removeNextPieceClicked()
             apprThread_r->increaseMutex();
         break;
     case stanislaw:
+        if (apprThread_s != NULL)
+               apprThread_s->increaseMutex();
         break;
     }
 }
@@ -206,6 +223,11 @@ void MainWindow::goToEndClicked()
         }
         break;
     case stanislaw:
+        if (apprThread_s != NULL)
+           {
+               apprThread_s->setPieceByPiece(false);
+               apprThread_s->increaseMutex();
+           }
         break;
     }
 }
@@ -227,6 +249,8 @@ void MainWindow::stopClicked()
             apprThread_r->stopExecution();
         break;
     case stanislaw:
+        if(apprThread_s != NULL)
+            apprThread_s->stopExecution();
         break;
     }
 }
