@@ -284,6 +284,7 @@ void MainWindow::removePiece(int loc_x, int loc_y)
          else
              item->widget()->setStyleSheet("QPushButton{ background:url(pictures/blankpiecevertout.png) no-repeat center; }");
      }
+    this->elemCurr -=1;
     ui->piecesCurrLcdNumber->display(this->elemCurr);
     double val = (this->elemCurr/ui->piecesInitLcdNumber->value())*100;
     ui->progressBar->setValue(100 - (val+((int)((val-floor(val))>0.5)?1:0)));
