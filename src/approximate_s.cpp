@@ -31,7 +31,7 @@ approximate_s::approximate_s(domino_problem_s &problem_s)
         board[el->h2.loc_x()][el->h2.loc_y()] = &el->h2;
     }
     setPieceByPiece(false);
-    isDelay=false;
+    isDelay=false; delay=0;
 }
 
 void approximate_s::run()
@@ -631,7 +631,7 @@ void approximate_s::sendResultsToGui(int timeElapsed)
     mutex.lock();
     foreach(domino_elem_located* elem,removed)
     {
-            if (delay>0) this->msleep(this->delay);
+            if (this->isDelay) this->msleep(this->delay);
             else if (isPieceByPiece) mutex.lock();
             emit threadRemovePiece(elem->y,elem->x);
     }
