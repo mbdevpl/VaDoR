@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect( ui->matiAlgRadioBox, SIGNAL(clicked()), this, SLOT( algorithmChanged()) );
     connect( ui->radekAlgRadioBox, SIGNAL(clicked()), this, SLOT( algorithmChanged()) );
     connect( ui->stanislawAlgRadioBox, SIGNAL(clicked()), this, SLOT( algorithmChanged()) );
+    connect( ui->ReloadButton, SIGNAL(clicked()), this, SLOT( resetGUI()) );
     QObject::connect(&summary_win, SIGNAL(reloadGUI()), this, SLOT(resetGUI()), Qt::QueuedConnection);
     QObject::connect(ui->actionClearBoard, SIGNAL(triggered()), this, SLOT(clearBoard()));
 }
@@ -258,8 +259,15 @@ void MainWindow::stopClicked()
 void MainWindow::removePiece(int loc_x, int loc_y)
 {
     QLayoutItem *item = scrollLayout->itemAtPosition(loc_x, loc_y);
-    if (item!=NULL) item->widget()->close();
-    this->elemCurr-=1;
+   // if (item!=NULL) item->widget()->close();
+     if (item!=NULL)
+     {
+         item->widget()->setEnabled(false);
+         if (item->widget()->height() < 2*HALF_PIECE_DIM)
+            item->widget()->setStyleSheet("QPushButton{ background:url(pictures/blankpiecehorout.png) no-repeat center; }");
+         else
+             item->widget()->setStyleSheet("QPushButton{ background:url(pictures/blankpiecevertout.png) no-repeat center; }");
+     }
     ui->piecesCurrLcdNumber->display(this->elemCurr);
     double val = (this->elemCurr/ui->piecesInitLcdNumber->value())*100;
     ui->progressBar->setValue(100 - (val+((int)((val-floor(val))>0.5)?1:0)));
@@ -356,8 +364,16 @@ void MainWindow::computationOver(int time, QVector<domino_elem_located*>* presen
     ui->removeNextPieceButton->setEnabled(false);
     ui->goToEndButton->setEnabled(false);
     ui->stopRunDirectButton->setEnabled(false);
-    summary_win.show();
-    summary_win.publishResults(time,*present,removed);
+    ui->tabWidget->setCurrentIndex(2);
+  //  summary_win.show();
+  //  summary_win.publishResults(time,*present,removed);
+    QString piecesLeft = getPiecesInfo(*present);
+    QString piecesRemoved = getPiecesInfo(removed);
+    QString text = bolden("SCORE: <br>")+ QString::number(present->size()) +"<br><br>"+
+            bolden("ELAPSED TIME: <br>")+QString::number(time)+" ms <br><br>"+
+            bolden("PIECES REMOVED: <br>")+piecesRemoved+"<br>"+
+            bolden("PIECES LEFT: <br>")+piecesLeft;
+    ui->infoTextEdit->setText(text);
 }
 
 void MainWindow::setGuiEnabledWhileComputing(bool value, bool isPieceByPiece)
@@ -374,3 +390,39 @@ void MainWindow::setGuiEnabledWhileComputing(bool value, bool isPieceByPiece)
         ui->stopRunDirectButton->setEnabled(!value);
     }
 }
+
+QString MainWindow::bolden(QString text)
+{
+    return "<FONT color=\"red\" style=\"font-weight: bold;\" >"+ text +"</FONT> ";
+}
+
+QString MainWindow::bolden2(QString text)
+{
+    return "<FONT color=\"blue\" >"+ text +"</FONT> ";
+}
+
+QString MainWindow::spc()
+{
+    return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+}
+
+QString MainWindow::OrToStr(bool val)
+{
+    if (val==true) return "Vertical";
+    return "Horizontal";
+}
+
+QString MainWindow::getPiecesInfo(QVector<domino_elem_located *> pieces)
+{
+    QString info;
+    foreach (domino_elem_located* piece, pieces)
+        info.append(bolden2("Value 1: ")+QString::number(piece->h1.value)+
+                    spc()+ bolden2("Value 2: ")+QString::number(piece->h2.value)+
+                    spc()+ bolden2("X: ")+QString::number( piece->x)+
+                    spc()+ bolden2("Y: ")+QString::number(piece->y)+
+                    spc()+ bolden2("Orientation: ")+OrToStr(piece->is_vertical)+"<br>"
+                    );
+    return info;
+}
+
+

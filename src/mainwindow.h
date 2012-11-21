@@ -53,8 +53,13 @@ private:
     void addPiece(int loc_x, int loc_y, bool isVertical, int val1, int val2);
     void setGuiEnabledWhileComputing(bool value, bool isPieceByPiece);
     void setGuiForAccurate(bool value);
-public slots:
-    void clearBoard();
+    QString bolden(QString text);
+    QString bolden2(QString text);
+    QString spc();
+    QString OrToStr(bool val);
+    QString getPiecesInfo(QVector<domino_elem_located*> pieces);
+
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -71,6 +76,7 @@ public slots:
     void stopClicked();
     void removeNextPieceClicked();
     void resetGUI();
+    void clearBoard();
 };
 
 #endif // MAINWINDOW_H
