@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
                                    & ~Qt::WindowCloseButtonHint) );
     connect( ui->ExitMenu, SIGNAL(triggered()), this, SLOT( exitApplicationClicked() ) );
     connect( ui->OpenMenu, SIGNAL(triggered()), this, SLOT( openFileClicked() ) );
+    connect( ui->actionDocumentation, SIGNAL(triggered()), this, SLOT( show_info_file()) );
     connect( ui->runDirectButton, SIGNAL(clicked()), this, SLOT( runClicked() ) );
     connect( ui->runPieceByPieceButton, SIGNAL(clicked()), this, SLOT( runClicked() ) );
     connect( ui->stopRunDirectButton, SIGNAL(clicked()), this, SLOT( stopClicked() ) );
@@ -45,7 +46,7 @@ void MainWindow::resetGUI()
            addPiece(el->h1.loc_x(), el->h1.loc_y(), el->is_vertical, el->h1.value, el->h2.value);
        setBoardSize(problem_r.board_width,problem_r.board_height);
        ui->progressBar->setValue(0);
-
+       ui->infoTextEdit->setText(nullptr);
        ui->frame->setEnabled(true);
        ui->runDirectButton->setEnabled(true);
        ui->runPieceByPieceButton->setEnabled(true);
@@ -173,8 +174,23 @@ void MainWindow::runClicked()
     }
 }
 
+void MainWindow::show_info_file()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile("bysiek,lojek,peryt-vador_initial.pdf")); // Mati! You are allowed to modify this URL as you wish ;)
+}
+
 void MainWindow::openFileClicked()
 {
+
+    ui->progressBar->setValue(0);
+    ui->infoTextEdit->setText(nullptr);
+    ui->frame->setEnabled(true);
+    ui->runDirectButton->setEnabled(true);
+    ui->runPieceByPieceButton->setEnabled(true);
+    ui->tabWidget->setTabEnabled(0,true);
+    ui->tabWidget->setTabEnabled(1,true);
+    if (ui->accurateAlgRadioBox->isChecked())
+        setGuiForAccurate(true);
     QString s = QFileDialog::getOpenFileName(this, tr("Open File"),"", tr("Vador files (*.xml *.txt)"));
 
     if (!s.isEmpty())

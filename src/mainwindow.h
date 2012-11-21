@@ -10,6 +10,8 @@
 #include <QObject>
 #include <QWidget>
 #include <rapidxml.hpp>
+#include <QDesktopServices>
+#include <QUrl>
 #include <math.h>
 #include "domino_problem_r.h"
 #include "domino_problem_s.h"
@@ -62,6 +64,7 @@ private:
 
 public:
     explicit MainWindow(QWidget *parent = 0);
+
     ~MainWindow();
 private:
     void initAndRunAlgorithmByMateuszBysiek(bool approximateVersion);
@@ -77,6 +80,8 @@ public slots:
     void removeNextPieceClicked();
     void resetGUI();
     void clearBoard();
+    void show_info_file();
+
 };
 
 #endif // MAINWINDOW_H
