@@ -1,0 +1,82 @@
+\subsection{by Stanislaw Peryt}
+
+\subsubsection{Input Data}
+collection of domino pieces from input file
+\subsubsection{Description and Class Variables}
+This algorithm is based on the idea of Greedy algorithms. I assume some additional classification
+which is done only once for each element. For classification purposes each dominoPiece should
+contain some additional fields:
+
+\begin{minted}[linenos,numbersep=5pt]{c++}
+boolean isIndependent; //can be removed even from empty board, so it does not have to 
+   // be removed immediately
+boolean canBeRemoved; //initially false. Changes to true, when fulfills removal conditions
+list<waitingFor>; // list of pieces for which it is waiting;
+list<waitForMe>; // list of pieces waiting for it;
+\end{minted}
+
+I decided to add this classification, because in greedy strategy, we could remove pieces immediately
+when they fulfill removal requirements. But it may happen, that there are some pieces, for which
+pieces we already removed are necessary to fulfill removal requirements. When we have this
+classification based on scopes of domino pieces, we can wait with removing, and eliminate at least
+some of those situations described above, providing better local optimal choices.
+
+For this algorithm we also need:
+board – contains all domino pieces that have remained on the board
+roots – contains possible starting pieces, i.e. containing zero
+neighbors – contains domino pieces, which are neighbors of deleted piece, i.e. pieces alongside empty fields
+\subsubsection{Algorithm}
+\begin{enumerate}[noitemsep,nolistsep]
+   \item Create board from input
+   \item Find possible roots and assign them to neighbors
+   \item for each dominoPiece in board assign scopes and waiting property
+   \begin{enumerate}[noitemsep,nolistsep]
+      \item determine scopes based on numbers given on dominoPiece
+      \item determine dominoPieces on scopes and assign them to the waitForMe list
+      \item tell those pieces to assign this dominoPiece on their waitingFor list
+   \end{enumerate}
+   \item stop=false;
+   \item while(!stop)\{
+   \begin{itemize}[noitemsep,nolistsep]
+     \item for each dominoPiece in neighbors\{
+         \begin{enumerate}[noitemsep,nolistsep]
+            \item if dominoPiece can be removed \{
+            \begin{enumerate}[noitemsep,nolistsep]
+               \item if (domino Piece isIndependent) and (list of pieces it is waiting for is not empty) \{ \\
+                  wait with removal; \\
+               \}
+               \item else
+                  remove it(from neighbors and board) and tell waiting pieces, if there were any waiting
+                  for this piece, that it does not need waiting any more. (i.e. delete piece from waiting
+                  list)
+            \end{enumerate}
+            \}
+         \end{enumerate}
+         \} \\
+         determine new neighbors into temp (each removed piece can produce at most 6 new neighbors)
+     \item if temp equals neighbors\{
+         \begin{itemize}[noitemsep,nolistsep]
+            \item check if (something can be removed): remove first;
+            \item else stop=true;
+         \end{itemize}
+         \}
+     \item else neighbors=temp;
+   \end{itemize}
+   \}
+   \item calculate score
+\end{enumerate}
+\subsubsection{Estimation of complexity}
+Partial Complexities:
+
+$n$-complexity of classification
+
+$n^2$-complexity of part at “while(!stop) loop”
+
+In order to associate attributes for classification we need to iterate once through whole collection
+which is of size n. Then in the while loop we are trying to remove pieces. In worst case we delete
+only one piece in one iteration which gives us at most n runs of while and inside while loop, we
+iterate through neighbors collection which is always smaller than n, but it is n dependent.
+Therefore for each n, algorithm executes number of operations proportional to n, which gives us
+quadratic time complexity.
+
+Final worst case complexity : $n^2 + n$

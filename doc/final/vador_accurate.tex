@@ -1,0 +1,211 @@
+\subsection{Class variables}
+Main class of the program is called domino\_problem. Rough list of fields of the class:
+
+\begin{minted}[linenos,numbersep=5pt]{ruby}
+# size_t is an integral type
+# elements_t is a list of domino pieces
+# board_t is a two-dimensional array of references to the halves of domino pieces
+   size_t width
+   size_t height
+   # collection of pieces
+   elements_t elements
+   # collection of halves of pieces that come from 'elements' field
+   board_t board
+   # pieces currently on the board
+   elements_t on_board
+   # possible to remove in the next turn
+   elements_t possible
+   # not longer on board, removed in the previous turns
+   elements_t removed
+   # algorithm does not know anything about these pieces
+   elements_t unresolved
+   # possible to remove if other pieces are placed right
+   elements_t checked
+   # impossible to remove due to size of the board and/or dependencies on other invalid pieces
+   elements_t invalid
+\end{minted}
+
+There is also a derived class, called domino\_problem\_solver, which contains several other
+variables, which store data about every state analyzed by the algorithm.
+
+\begin{minted}[mathescape,linenos,numbersep=5pt,gobble=0,framesep=2mm]{ruby}
+# state_list_t is a list of states (domino_problem-s)
+# dag_t is a directed acyclic graph
+# hash_t is a radix-based hashing table for integral types
+   # contains unexplored states
+   state_list_t unexplored
+   # contains current tree of states (some explored, some not) connected
+   #  according to the rules given below
+   dag_t tree
+   # contains explored states
+   hash_t hashed
+   # reference to currently best known state (state with max. number of removed pieces)
+   domino_problem best_state
+\end{minted}
+
+%\pagebreak[4]
+
+\subsection{Algorithm}
+%Because of large number of loops involved in the algorithm, 
+%I will provide pseudo-code, and will write down 
+%a description of instructions.
+% \begin{enumerate}[noitemsep,nolistsep]
+%    \item Input data is read: width and height.
+%    \item All pieces present on board are stored into 'elements' field
+%    this list does not change with time
+%    \item 'board' is generated for convienience.
+%    \item 'elements' are copied into other lists: 'on\_board' and 'unresolved'
+%    \item 'unresolved' are partitioned into 'checked' and 'invalid'
+%    \item add current problem to the graph
+%    \item CHECKING: each piece from 'checked' is examined, and if it can be removed 
+%    from the board it is copied to 'possible'
+%    \item for each 'possible' piece, new object of class domino\_problem is created
+%    via copy constructor
+%    \begin{enumerate}[noitemsep,nolistsep]
+%       \item from each copy of current domino\_problem, the corresponding piece of 'possible'
+%       is moved to 'removed', and the same piece is deleted from 'checked', 'on\_board' 
+%       and 'board'.
+%       \item all lists of 'possible' from current domino\_problem copies are cleared
+%       \item add all copies to the graph with exception of those that already exist
+%       in the graph, because removing first piece A and then B gives the same resulting state 
+%       as removing first piece B and then A. Calculating all possibilities with duplicates would
+%       result in factorial complexity of the algorithm ($n!$).
+%       \item connect current problem to all of the copies
+%       \item for each copy, perform all steps starting from CHECKING
+%    \end{enumerate}
+%    \item after the graph is constructed, find the longest path, starting from 
+%    initial domino\_problem.
+% \end{enumerate}
+
+Below is an outline of the algorithm for deterministic RAM:
+
+\begin{minted}[linenos,numbersep=5pt]{ruby}
+   # 1. read input data
+   width = from input
+   height = from input
+   elements = all pieces present on board # this list does not change with time
+   # board is generated using 3 above variables
+   board = generate_board(elements, width, height) 
+   # 'elements' are copied into 'on_board' and 'unresolved'
+   on_board = unresolved = elements
+   # 'unresolved' are partitioned into 'checked' and 'invalid'
+   resolve(unresolved, checked, invalid)
+   # current state is copied from initial data of the problem, and it is put into the tree,
+   #  becoming its root
+   domino_problem current_state = self
+   tree += current_state
+   unexplored += current_state
+   best_state = current_state
+   # all pieces that can be removed in current state are found,
+   #  by analyzing the 'checked' list
+   find_possible(current_state)
+   
+   # 2. build the tree of states
+   while unexplored is not empty do
+      domino_problem s = unexplored.last_element
+      unexplored -= s
+      
+      state_list_t new_states
+      for element e in s.possible
+         # make a copy of 's', with the exception of list of possible pieces
+         domino_problem pr = s 
+         # from copy of current domino\_problem, the corresponding piece is added to 'removed',
+         # and the same piece is deleted from 'checked' and 'on\_board'
+         pr.on_board -= e
+         pr.checked -= e
+         pr.removed += e
+         find_possible(pr)
+         new_states += pr
+      end
+       
+      # sort new_states ascending, using length of list of 'possible' as criteria
+      sort(new_states)
+      
+      # add all new states to 'tree', with exception of those that already exist
+      # in 'tree', because removing first piece A and then B gives the same resulting state 
+      # as removing first piece B and then A. Calculating all possibilities with duplicates would
+      # result in factorial complexity of the algorithm (n!).
+      for domino_problem st in new_states
+         if hashed does not contain st
+            hashed += st
+            unexplored += st
+            # add the new state to 'tree', as a child of 's'
+            add_child(tree, s, st)
+         end
+      end
+      
+      if best_state.on_board.length > s.on_board.length then
+         best_state = s
+         if best_state.on_board.length == invalid.length then
+            break
+      end
+   
+      # this optimization causes complexity to go beyond 2^n, but it is used only if
+      # algorithm would have ended computation otherwise due to no memory
+      if running out of memory then
+         hashed.remove_all
+      end
+   end
+   
+   # 3. return final result
+   return best_state
+\end{minted}
+
+\subsection{Estimation of complexity}
+
+\subsubsection{Number of states}
+Let us assume that we have a set of $n$ domino pieces that are arranged on a board. Then, 
+let us assume that we are taking away pieces from the board, one at a time. If we consider each 
+state after removing a piece, how many different states do we have? For a given state, for each piece, 
+we have a choice: the piece either is on the board, or it is not. In total we have $2$ possible scenarios
+for one piece, and $n$ pieces, which gives us exactly $2^n$ different states.
+
+\subsubsection{Relations between the states}
+We can construct a following directed acyclic graph (DAG) $G$:
+\begin{enumerate}[noitemsep,nolistsep]
+  \item each vertex $V$ represents a state (configuration of pieces on the board)
+  \item each directed edge $E$ represents the relation between states. Edges 
+  are positioned in such way, that start point is at state $V_1$, and such that 
+  the end point of the edge is connected to the state $V_2$ that can be obtained 
+  directly from state $V_1$ by removing one domino piece from the board.
+\end{enumerate}
+
+\subsubsection{Proof that VaDoR is NP}
+
+Below, outline of the algorithm for a non-deterministic RAM:
+
+\begin{minted}[linenos,numbersep=5pt]{ruby}
+input: b # list of elements on board
+
+var r # list of removed elements, initially empty
+
+for each element e in b
+   # magical 'if' that knows when putting current element to the list 
+   #  is the best possible option - such 'if-better' is allowed for non. det. RAMs
+   if-better 
+      add e to r
+   else
+      next
+
+return r
+
+\end{minted}
+
+\subsubsection{Final estimation of complexity}
+Having a DAG $G$, the domino problem is equivalent to finding the longest path of DAG. 
+Unfortunately, graph has to be constructed at runtime, and that takes time. 
+
+Since, for each state, the calculation of related states will be performed (and there are $2^n$
+states in total) I estimate the complexity of accurate algorithm as exponential. Due to this maximum
+number of states, I also informally classify this algorithm as NP-complete, however, it is only my
+intuition.
+
+After the DAG is constructed, by finding its longest path, an optimal solution is obtained. But,
+because the DAG is not given as input, but rather constructed during algorithm's operation, finding
+longest path can be done while constructing the DAG, therefore no extra time is needed for it.
+
+My estimations indicate that calculation of possible sub-states for a given single state takes
+polynomial time. Therefore, the total complexity of the accurate algorithm should be roughly $ 2^n $
+In practice, however, I have noticed that it is not such, because problems encountered in practice
+tend to have far less possible choices, due to strong inter-piece dependencies.
+ 

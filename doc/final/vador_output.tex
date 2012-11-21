@@ -1,0 +1,36 @@
+% Another XML file.
+% 
+% \begin{minted}[linenos,numbersep=5pt]{xml}
+% <domino_board width="5" height="4">
+%     <piece x="0" y="0" orientation="vertical" value1="2" value2="1" />
+%     <piece x="0" y="2" orientation="vertical" value1="3" value2="2" />
+%     <piece x="3" y="0" orientation="horizontal" value1="3" value2="3" />
+%     <piece x="4" y="1" orientation="vertical" value1="4" value2="4" />
+%     <removed_pieces>
+%        <piece order="0" x="1" y="0" orientation="horizontal" value1="1" value2="0" />
+%        <piece order="1" x="1" y="1" orientation="vertical" value1="3" value2="0" />
+%        <piece order="2" x="2" y="1" orientation="vertical" value1="1" value2="1" />
+%        <piece order="3" x="3" y="1" orientation="vertical" value1="0" value2="2" />
+%        <piece order="4" x="1" y="3" orientation="horizontal" value1="0" value2="0" />
+%        <piece order="5" x="3" y="3" orientation="horizontal" value1="2" value2="2" />
+%     </removed_pieces>
+% </domino_board>
+% \end{minted}
+% 
+% It is an extension of an input format. Program will be designed in such a way, that output from the program 
+% can be used again as an input (as it is described in ``Input'' section).
+% 
+% \vspace{7pt}
+% 
+% Description of extension the \verb|piece| tag:
+% \begin{itemize}[noitemsep,nolistsep]
+%   \item order - number, from zero, increasing in order in which the pieces were removed from the board
+% \end{itemize}
+% 
+% \vspace{7pt}
+% 
+% The \verb|removed_pieces| tag contains all of the pieces that were removed from the board, with complete 
+% information about their origin. 
+
+Output is given either as output in command line, or as a graphical representation of a final state
+of the board in GUI. Output format depends on how user launched the application.

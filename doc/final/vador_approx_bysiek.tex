@@ -1,0 +1,46 @@
+\subsection{By Mateusz Bysiek}
+
+\subsubsection{Class variables}
+The same as in case of accurate algorithm.
+
+\subsubsection{Algorithm}
+Development of approximations of NP problems is usually a consequence 
+of deep understanding of the problem, and extensive experience in solving it using
+some kind of accurate algorithm.
+
+During my experiments, I have discovered that depth-first construction/search of DAG is far more
+efficient than breadth-first, when it comes to actual time needed to find the best result. It is so
+because we need to find any best result, not all of them. In case of breadth-first, 
+
+I have put all above optimizations into the accurate algorithm, and I have created approximate one
+by simply limiting number of possible options to be explored. I have limited number of explored
+options to $n^2$, where $n$ is number of elements initially on board. In short, after line 60, I
+added this:
+
+\begin{minted}[linenos,numbersep=5pt]{ruby}
+   if hashed.element_count > square(elements.length)
+      break
+\end{minted}
+
+\subsubsection{Optimizations}
+I have also noticed that when I use depth-first search in such way as described in the accurate
+algorithm's pseudo-code, the tree is searched from 'right' to 'left', and when algorithm is
+analyzing any state x, that means that all states to the right of it are already explored.
+
+I have used this to develop optimization which removes obsolete explored branches, i.e. those
+branches that do not contain currently known best state. This greatly reduced memory usage.
+
+I have also noticed that list of pieces currently on board can be easily converted to integral type
+(if number of pieces initially on board is less than maximum number of bits stored in that type).
+Keeping all lists of pieces (with exception of the 'reference' list used to convert them back) as
+integers also greatly decreased memory usage, and allowed creation of a very cheap (in terms of time
+and memory) hash table (used as the field 'hashed'), which has constant access/storage/search time
+equal to $\log (k)$ where $k$ is number of pieces initially on board.
+
+The above (and some other, minor) optimizations caused the algorithm to be able to solve problems
+with at most 64 not-invalid pieces. This means that if length of 'checked' exceeds 64, the program
+will crash, when either accurate algorithm, or approximate algorithm created by me (M. Bysiek) is used.
+
+\subsubsection{Complexity}
+Due to hard limit of checking at most $n^2$ states, and assuming that checking each state takes
+polynomial time, such approximate algorithm is also polynomial.
