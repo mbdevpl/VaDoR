@@ -381,6 +381,7 @@ void MainWindow::computationOver(int time, QVector<domino_elem_located*>* presen
     ui->removeNextPieceButton->setEnabled(false);
     ui->goToEndButton->setEnabled(false);
     ui->stopRunDirectButton->setEnabled(false);
+    ui->ReloadButton->setEnabled(true);
     ui->tabWidget->setCurrentIndex(2);
   //  summary_win.show();
   //  summary_win.publishResults(time,*present,removed);
@@ -396,6 +397,7 @@ void MainWindow::computationOver(int time, QVector<domino_elem_located*>* presen
 void MainWindow::setGuiEnabledWhileComputing(bool value, bool isPieceByPiece)
 {
     ui->frame->setEnabled(value);
+    ui->ReloadButton->setEnabled(value);
     if (isPieceByPiece){
     ui->runPieceByPieceButton->setEnabled(value);
     ui->tabWidget->setTabEnabled(0,value);
