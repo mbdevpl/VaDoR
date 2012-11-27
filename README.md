@@ -1,4 +1,4 @@
-﻿VAnishing DOmino pRoblem
+﻿VAnishing DOmino pRoblem {#mainpage}
 ========================
 
 VAnishing DOmino pRoblem -> VaDoR
@@ -61,7 +61,7 @@ Where is everything, i.e. structure of the repository
 * */doc/txt* - description of the accepted txt input file format
 * */doc/initial* - initial documentation, description of the problem and the theoretical outline of the solution
 * */doc/final* - final documentation, outline of the solution described after implementation
-* */doc/doxygen* - documentation of classes **(not yet ready, for now see comments in the code)**
+* */doc/doxygen* - documentation of classes **(only partial documentation is available)**
 * */doc/userguide* - user guide **(not yet ready, please use this readme as a guide)**
 * */res* - resources used for development
 * */src* - source code and Qt Creator project files
