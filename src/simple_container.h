@@ -152,12 +152,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
    private: \
    inline elem(const T& value) \
    : elem_const(value) { } \
-   inline void clear() { e = 0; } \
+   inline void clear() { this->e = 0; } \
    public: \
    /*! Returns copy of this element. */ \
    inline elem copy() const { return elem(*this); } \
    /*! Reference to the value stored in this element. */ \
-   inline T& value_ref() { return e->value_ref(); } \
+   inline T& value_ref() { return this->e->value_ref(); } \
    public: \
    elem& operator=(const elem& element) \
 { \
@@ -180,14 +180,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
    */ \
    inline void connectTo(C* the_c) \
 { \
-   if(connected()) \
+   if(this->connected()) \
    return; \
-   c = the_c; \
+   this->c = the_c; \
    } \
    /*! Reference to the value stored in this element. */ \
    inline T& operator*() { return value_ref(); } \
    inline operator elem_const() { return elem_const(*this); } \
-   inline operator elem_raw*() { return e; }
+   inline operator elem_raw*() { return this->e; }
 
 #define ELEM_TRAVERSE(decrement,increment) \
 public: \

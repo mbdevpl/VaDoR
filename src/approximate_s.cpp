@@ -337,6 +337,8 @@ bool approximate_s::checkHalfBoardIndependence(int x, int y, half_direction dire
         case down:
         if (board[x][y]->value == this->board_height-y-1) return true;
         break;
+        default:
+        break;
     }
     return false;
 }
@@ -562,6 +564,8 @@ bool approximate_s::checkSide(int x, int y, half_direction direction)
         if (yt < this->board_height-1)
             while(board[xt][++yt]==NULL){ cnt++; if (yt==this->board_height-1)break;}
         if (board[x][y]->value == cnt) return true;
+        break;
+        default:
         break;
     }
     return false;

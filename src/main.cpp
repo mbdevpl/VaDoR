@@ -1,6 +1,6 @@
 #include "toolkit/program_args.h"
 
-#include <QtGui/QApplication>
+#include <QApplication>
 #include "mainwindow.h"
 
 #include <iostream>

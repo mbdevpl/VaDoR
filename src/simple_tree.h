@@ -75,7 +75,7 @@ private:
       inline typename subelems_list_t::elem findSub(elem_raw*& e) { return subelems_list.find(e); }
       inline void disconnectSub(elem_raw*& e)
       {
-         for(subelems_list_t::elem sub = subelems_list.first(); sub; ++sub)
+         for(typename subelems_list_t::elem sub = subelems_list.first(); sub; ++sub)
          {
             if(*sub == e)
             {
@@ -242,7 +242,7 @@ public:
 public:
    simple_list<simple_list<typename simple_tree<T,S>::elem,S>,S> find_all_longest_paths(
          S lengthLimit = 0, typename simple_tree<T,S>::elem startingPoint = elem()) const;
-   simple_list<typename simple_tree<T,S>::elem,S> simple_tree<T,S>::find_first_longest_path(
+   simple_list<typename simple_tree<T,S>::elem,S> find_first_longest_path(
          S lengthLimit = 0, typename simple_tree<T,S>::elem startingPoint = elem()) const;
 private:
    void longest_path(S lengthLimit, typename simple_tree<T,S>::elem currentElem, S length,
@@ -287,7 +287,7 @@ const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::left(
    }
    elem_raw* r = e->root();
    elem_raw*& x = *(elem_raw**)(&e);
-   simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
+   typename simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
    el.back(count);
    *(C::elem_raw**)(&e) = el.value_ref();
    return *this;
@@ -305,7 +305,7 @@ const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::left(
    }
    elem_raw* r = e->root();
    elem_raw*& x = *(elem_raw**)(&e);
-   simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
+   typename simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
    el.back();
    *(C::elem_raw**)(&e) = el.value_ref();
    return *this;
@@ -323,7 +323,7 @@ const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::right
    }
    elem_raw* r = e->root();
    elem_raw*& x = *(elem_raw**)(&e);
-   simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
+   typename simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
    el.forward();
    *(C::elem_raw**)(&e) = el.value_ref();
    // as one operation:
@@ -344,7 +344,7 @@ const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::right
    }
    elem_raw* r = e->root();
    elem_raw*& x = *(elem_raw**)(&e);
-   simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
+   typename simple_list<C::elem_raw*,S>::elem el = r->findSub(x);
    el.forward(count);
    *(elem_raw**)(&e) = el.value_ref();
    return *this;
@@ -353,11 +353,11 @@ const typename simple_tree<T,S>::elem_const& simple_tree<T,S>::elem_const::right
 //// simple_tree::elem
 
 template<typename T, typename S>
-typename simple_list<typename simple_tree<T,S>::elem,S> simple_tree<T,S>::elem::subList()
+simple_list<typename simple_tree<T,S>::elem,S> simple_tree<T,S>::elem::subList()
 {
-   simple_list<simple_tree<T,S>::elem_raw*,S> raw_sub = e->subList();
+   simple_list<simple_tree<T,S>::elem_raw*,S> raw_sub = this->e->subList();
    simple_list<elem,S> sub_elems;
-   for(simple_list<simple_tree<T,S>::elem_raw*,S>::elem i = raw_sub.first(); i ; ++i)
+   for(typename simple_list<simple_tree<T,S>::elem_raw*,S>::elem i = raw_sub.first(); i ; ++i)
    {
       elem el(*this);
       el.e = *i;
@@ -369,36 +369,36 @@ typename simple_list<typename simple_tree<T,S>::elem,S> simple_tree<T,S>::elem::
 template<typename T, typename S>
 typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::root()
 {
-   if(empty())
+   if(this->empty())
       return *this;
-   if(!hasRoot())
+   if(!this->hasRoot())
    {
       clear();
       return *this;
    }
-   e = e->root();
+   this->e = this->e->root();
    return *this;
 }
 
 template<typename T, typename S>
 typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::left()
 {
-   if(empty())
+   if(this->empty())
       return *this;
-   if(!hasRoot())
+   if(!this->hasRoot())
    {
       clear();
       return *this;
    }
-   elem_raw* r = e->root();
-   simple_list<C::elem_raw*,S>::elem this_as_sub = r->findSub(e);
+   elem_raw* r = this->e->root();
+   typename simple_list<C::elem_raw*,S>::elem this_as_sub = r->findSub(this->e);
    this_as_sub.back();
    if(this_as_sub.empty())
    {
       clear();
       return *this;
    }
-   e = this_as_sub.value_ref();
+   this->e = this_as_sub.value_ref();
    // as one line command:
    //e = r->subList().find(e).back().value_ref();
    return *this;
@@ -407,22 +407,22 @@ typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::left()
 template<typename T, typename S>
 typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::right()
 {
-   if(empty())
+   if(this->empty())
       return *this;
-   if(!hasRoot())
+   if(!this->hasRoot())
    {
       clear();
       return *this;
    }
-   elem_raw* r = e->root();
-   simple_list<C::elem_raw*,S>::elem this_as_sub = r->findSub(e);
+   elem_raw* r = this->e->root();
+   typename simple_list<C::elem_raw*,S>::elem this_as_sub = r->findSub(this->e);
    this_as_sub.forward();
    if(this_as_sub.empty())
    {
       clear();
       return *this;
    }
-   e = this_as_sub.value_ref();
+   this->e = this_as_sub.value_ref();
    // as one line command:
    //e = r->subList().find(e).back().value_ref();
    return *this;
@@ -431,34 +431,34 @@ typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::right()
 template<typename T, typename S>
 typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::sub()
 {
-   if(empty())
+   if(this->empty())
       return *this;
-   if(subCount() == 0)
+   if(this->subCount() == 0)
    {
       clear();
       return *this;
    }
-   e = e->subList().first().value_ref();
+   this->e = this->e->subList().first().value_ref();
    return *this;
 }
 
 template<typename T, typename S>
 typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::sub(S index)
 {
-   if(empty())
+   if(this->empty())
       return *this;
-   if(subCount() == 0)
+   if(this->subCount() == 0)
    {
       clear();
       return *this;
    }
-   simple_list<C::elem_raw*,S>::elem element = e->subList().element(index);
+   typename simple_list<C::elem_raw*,S>::elem element = this->e->subList().element(index);
    if(element.empty())
    {
       clear();
       return *this;
    }
-   e = element.value_ref();
+   this->e = element.value_ref();
    return *this;
 }
 
@@ -466,14 +466,14 @@ typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::sub(S index)
 template<typename T, typename S>
 typename simple_tree<T,S>::elem& simple_tree<T,S>::elem::lastSub()
 {
-   if(empty())
+   if(this->empty())
       return *this;
-   if(subCount() == 0)
+   if(this->subCount() == 0)
    {
       clear();
       return *this;
    }
-   e = e->subList().last().value_ref();
+   this->e = this->e->subList().last().value_ref();
    return *this;
 }
 
@@ -493,55 +493,55 @@ void simple_tree<T,S>::elem::insertLeftmost(const T& value)
 template<typename T, typename S>
 void simple_tree<T,S>::elem::insertLeft(const T& value)
 {
-   if(!connected())
+   if(!this->connected())
       return;
-   if(empty())
+   if(this->empty())
    {
-      if(c->elem_count > 0)
+      if(this->c->elem_count > 0)
          return; // something's wrong, element is empty but the tree is not
    }
-   if(!empty() && !hasRoot())
+   if(!this->empty() && !this->hasRoot())
       return; // cannot add siblings to the main root of the tree
    typedef simple_tree<T,S>::elem_raw elem_raw_t;
    elem_raw_t* new_elem = new elem_raw_t(value);
-   if(empty())
+   if(this->empty())
    {
-      e = new_elem;
-      c->root_elem = *this;
-      c->elem_count = 1;
+      this->e = new_elem;
+      this->c->root_elem = *this;
+      this->c->elem_count = 1;
       return;
    }
-   new_elem->root() = e->root();
-   simple_list<C::elem_raw*,S>::elem this_as_sub = e->root()->findSub(e);
+   new_elem->root() = this->e->root();
+   typename simple_list<C::elem_raw*,S>::elem this_as_sub = this->e->root()->findSub(this->e);
    this_as_sub.insertPrev(new_elem);
-   c->elem_count += 1;
+   this->c->elem_count += 1;
 }
 
 template<typename T, typename S>
 void simple_tree<T,S>::elem::insertRight(const T& value)
 {
-   if(!connected())
+   if(!this->connected())
       return;
-   if(empty())
+   if(this->empty())
    {
-      if(c->elem_count > 0)
+      if(this->c->elem_count > 0)
          return; // something's wrong, element is empty but the tree is not
    }
-   if(!empty() && !hasRoot())
+   if(!this->empty() && !this->hasRoot())
       return; // cannot add siblings to the main root of the tree
    typedef simple_tree<T,S>::elem_raw elem_raw_t;
    elem_raw_t* new_elem = new elem_raw_t(value);
-   if(empty())
+   if(this->empty())
    {
-      e = new_elem;
-      c->root_elem = *this;
-      c->elem_count = 1;
+      this->e = new_elem;
+      this->c->root_elem = *this;
+      this->c->elem_count = 1;
       return;
    }
-   new_elem->root() = e->root();
-   simple_list<C::elem_raw*,S>::elem this_as_sub = e->root()->findSub(e);
+   new_elem->root() = this->e->root();
+   typename simple_list<C::elem_raw*,S>::elem this_as_sub = this->e->root()->findSub(this->e);
    this_as_sub.insertNext(new_elem);
-   c->elem_count += 1;
+   this->c->elem_count += 1;
 }
 
 template<typename T, typename S>
@@ -571,12 +571,12 @@ void simple_tree<T,S>::elem::insertAfterSub(S index, const T& value)
 template<typename T, typename S>
 void simple_tree<T,S>::elem::insertLastSub(const T& value)
 {
-   if(!connected() || empty())
+   if(!this->connected() || this->empty())
       return;
    typedef simple_tree<T,S>::elem_raw elem_raw_t;
-   elem_raw_t* new_elem = new elem_raw_t(value, e);
-   e->subList().insertLast(new_elem);
-   c->elem_count += 1;
+   elem_raw_t* new_elem = new elem_raw_t(value, this->e);
+   this->e->subList().insertLast(new_elem);
+   this->c->elem_count += 1;
 }
 
 template<typename T, typename S>
@@ -585,20 +585,20 @@ void simple_tree<T,S>::elem::appendSub(const T& value) { insertLastSub(value); }
 template<typename T, typename S>
 void simple_tree<T,S>::elem::removeRecursive()
 {
-   if(empty() || !connected())
+   if(this->empty() || !this->connected())
       return;
 
    simple_list<elem,S> subs = subList();
-   for(simple_list<elem,S>::elem el = subs.last(); el; --el)
+   for(typename simple_list<elem,S>::elem el = subs.last(); el; --el)
       (*el).removeRecursive();
 
-   if(hasRoot())
+   if(this->hasRoot())
    {
-      e->root()->disconnectSub(e);
+      this->e->root()->disconnectSub(this->e);
    }
 
-   delete e;
-   c->elem_count -= 1;
+   delete this->e;
+   this->c->elem_count -= 1;
    clear();
 }
 
@@ -650,7 +650,7 @@ void simple_tree<T,S>::release()
 
    simple_list<elem,S> queue;
    queue.append(root_elem);
-   for(simple_list<elem,S>::elem e = queue.first(); e; e.removeAndForward())
+   for(typename simple_list<elem,S>::elem e = queue.first(); e; e.removeAndForward())
    {
       queue.append((*e).subList());
       elem_raw* raw = (elem_raw*)(*e);
@@ -727,20 +727,20 @@ simple_list<simple_list<typename simple_tree<T,S>::elem,S>,S> simple_tree<T,S>::
    {
       std::cout << paths[i].length() << " ";
       for(S j=0; j < paths[i].length(); ++j)
-         std::cout << paths[i][j]/*.value_ref().removed_str()*/ << ",";
+         std::cout /*<< paths[i][j]*//*.value_ref().removed_str()*/ << ",";
       std::cout << "\n";
    }
 #endif
 
    S max_len = 0;
-   for(simple_list<simple_list<simple_tree<T,S>::elem,S>,S>::elem i = paths.first();
+   for(typename simple_list<simple_list<simple_tree<T,S>::elem,S>,S>::elem i = paths.first();
        i; ++i)
    {
       S len = (*i).length();
       if(len > max_len)
          max_len = len;
    }
-   for(simple_list<simple_list<simple_tree<T,S>::elem,S>,S>::elem i = paths.first();
+   for(typename simple_list<simple_list<simple_tree<T,S>::elem,S>,S>::elem i = paths.first();
        i;)
       if((*i).length() < max_len)
          i.removeAndForward();
@@ -771,7 +771,7 @@ void simple_tree<T,S>::longest_path(S lengthLimit, typename simple_tree<T,S>::el
    simple_list<elem,S> subs = currentElem.subList();
    bool first = true;
    simple_list<elem,S> backup(paths[index]);
-   for(simple_list<elem,S>::elem sub = subs.first(); sub; ++sub)
+   for(typename simple_list<elem,S>::elem sub = subs.first(); sub; ++sub)
    {
       if(first)
       {
@@ -805,15 +805,15 @@ template<typename T, typename S>
 std::ostream& simple_tree<T,S>::elem::test(std::ostream& s)
 {
    ELEM_BASIC_TEST;
-   elem e;
-   e.left(2);
-   e.left();
-   e.right();
-   e.right(2);
-   e.sub();
-   e.sub(2);
-   e.lastSub();
-   e.hasRoot();
+   elem f;
+   f.left(2);
+   f.left();
+   f.right();
+   f.right(2);
+   f.sub();
+   f.sub(2);
+   f.lastSub();
+   f.hasRoot();
    return s;
 }
 

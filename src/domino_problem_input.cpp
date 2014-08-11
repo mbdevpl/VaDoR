@@ -333,7 +333,7 @@ bool domino_problem_input::check_if_direction_valid(size_t x, size_t y, half_dir
          if(h->value == 0 && board[x][y-1])
             correct_distance_is_impossible = false;
          else
-            for(size_t yy = y-1; yy >= 0; --yy)
+            for(size_t yy = y-1;; --yy)
             {
                curr_h = board[x][yy];
                if(curr_h)
@@ -401,7 +401,7 @@ bool domino_problem_input::check_if_direction_valid(size_t x, size_t y, half_dir
          if(h->value == 0 && board[x-1][y])
             correct_distance_is_impossible = false;
          else
-            for(size_t xx = x-1; xx >= 0; --xx)
+            for(size_t xx = x-1;; --xx)
             {
                curr_h = board[xx][y];
                if(curr_h)

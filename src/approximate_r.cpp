@@ -87,6 +87,8 @@ bool approximate_r::checkSide(int x, int y, half_direction direction)
             while(board[xt][++yt]==NULL){ cnt++; if (yt==this->board_height-1)break;}
         if (board[x][y]->value == cnt) return true;
         break;
+        default:
+        break;
     }
     return false;
 }

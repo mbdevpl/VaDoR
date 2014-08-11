@@ -3,6 +3,7 @@
 #define BINARY_HASH_H
 
 #include <typeinfo>
+#include <cstdlib>
 
 class binary_hash
 {
@@ -14,7 +15,7 @@ public:
       hash_t* one;
       hash_t()
          : zero(nullptr), one(nullptr) { }
-      ~hash_t()
+      virtual ~hash_t()
       {
          if(zero)
          {

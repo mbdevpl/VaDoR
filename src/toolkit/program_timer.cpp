@@ -4,7 +4,11 @@ namespace toolkit
 {
 
 program_timer::program_timer(bool local)
+#ifdef WINDOWS
    : local(local), running(false), start_time(), stop_time() { }
+#else
+   : local(local), running(false) { }
+#endif
 
 void program_timer::start()
 {

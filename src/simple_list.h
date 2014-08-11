@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #endif // SIMPLE_LIST_NOSTRINGS
 
+#include <stdexcept>
+
 #ifdef DEBUG
 #include <typeinfo> // test()
 #include <string>
@@ -307,13 +309,13 @@ class simpler_list : public simple_list<T, unsigned long long>
 {
 public:
    simpler_list()
-      : simple_list() { }
+      : simple_list<T, unsigned long long>() { }
    simpler_list(const simpler_list<T>& list)
-      : simple_list(list) { }
+      : simple_list<T, unsigned long long>(list) { }
    simpler_list(const T& value)
-      : simple_list(value) { }
+      : simple_list<T, unsigned long long>(value) { }
    simpler_list(unsigned long long length, const T array[])
-      : simple_list(length, array) { }
+      : simple_list<T, unsigned long long>(length, array) { }
 };
 
 /*!
@@ -396,38 +398,38 @@ const typename simple_list<T,L>::elem_const& simple_list<T,L>::elem_const::back(
 template<typename T, typename L>
 typename simple_list<T,L>::elem& simple_list<T,L>::elem::forward()
 {
-   if(empty())
+   if(this->empty())
       return *this;
-   e = e->next();
+   this->e = this->e->next();
    return *this;
 }
 
 template<typename T, typename L>
 typename simple_list<T,L>::elem& simple_list<T,L>::elem::forward(L count)
 {
-   if(!count || empty())
+   if(!count || this->empty())
       return *this;
    for(;count > 0; --count)
-      e = e->next();
+      this->e = this->e->next();
    return *this;
 }
 
 template<typename T, typename L>
 typename simple_list<T,L>::elem& simple_list<T,L>::elem::back()
 {
-   if(empty())
+   if(this->empty())
       return *this;
-   e = e->prev();
+   this->e = this->e->prev();
    return *this;
 }
 
 template<typename T, typename L>
 typename simple_list<T,L>::elem& simple_list<T,L>::elem::back(L count)
 {
-   if(!count || empty())
+   if(!count || this->empty())
       return *this;
    for(;count > 0; --count)
-      e = e->prev();
+      this->e = this->e->prev();
    return *this;
 }
 
@@ -435,59 +437,59 @@ typename simple_list<T,L>::elem& simple_list<T,L>::elem::back(L count)
 template<typename T, typename L>
 typename simple_list<T,L>::elem& simple_list<T,L>::elem::swapWith(typename simple_list<T,L>::elem& element)
 {
-   if(empty() || !connected())
+   if(this->empty() || !this->connected())
       return *this;
-   if(element.empty() || !element.connected() || c != element.c)
+   if(element.empty() || !element.connected() || this->c != element.c)
    {
       clear();
       return *this;
    }
    //C::elem_raw* this_e = e;
    C::elem_raw* element_e = (C::elem_raw*)element;
-   if(e == element_e)
+   if(this->e == element_e)
       return *this;
 
    C::elem_raw* temp;
 
-   temp = e->next();
-   if(element_e->next() != e)
-      e->next() = element_e->next();
+   temp = this->e->next();
+   if(element_e->next() != this->e)
+      this->e->next() = element_e->next();
    else
-      e->next() = element_e;
+      this->e->next() = element_e;
    if(temp != element_e)
       element_e->next() = temp;
    else
-      element_e->next() = e;
+      element_e->next() = this->e;
 
-   temp = e->prev();
-   if(element_e->prev() != e)
-      e->prev() = element_e->prev();
+   temp = this->e->prev();
+   if(element_e->prev() != this->e)
+      this->e->prev() = element_e->prev();
    else
-      e->prev() = element_e;
+      this->e->prev() = element_e;
    if(temp != element_e)
       element_e->prev() = temp;
    else
-      element_e->prev() = e;
+      element_e->prev() = this->e;
 
-   if(e->prev())
-      e->prev()->next() = e;
-   if(e->next())
-      e->next()->prev() = e;
+   if(this->e->prev())
+      this->e->prev()->next() = this->e;
+   if(this->e->next())
+      this->e->next()->prev() = this->e;
 
    if(element_e->prev())
       element_e->prev()->next() = element_e;
    if(element_e->next())
       element_e->next()->prev() = element_e;
 
-   if(e == (C::elem_raw*)c->first_elem)
-      c->first_elem = element;
-   else if(element_e == (C::elem_raw*)c->first_elem)
-      c->first_elem = *this;
+   if(this->e == (C::elem_raw*)this->c->first_elem)
+      this->c->first_elem = element;
+   else if(element_e == (C::elem_raw*)this->c->first_elem)
+      this->c->first_elem = *this;
 
-   if(e == (C::elem_raw*)c->last_elem)
-      c->last_elem = element;
-   else if(element_e == (C::elem_raw*)c->last_elem)
-      c->last_elem = *this;
+   if(this->e == (C::elem_raw*)this->c->last_elem)
+      this->c->last_elem = element;
+   else if(element_e == (C::elem_raw*)this->c->last_elem)
+      this->c->last_elem = *this;
 
    return *this;
 }
@@ -502,46 +504,46 @@ typename simple_list<T,L>::elem& simple_list<T,L>::elem::swapWith(typename simpl
 template<typename T, typename L>
 void simple_list<T,L>::elem::delete_and_clear()
 {
-   if(empty())
+   if(this->empty())
       return;
    // organize connected elements
-   if(e->prev())
-      e->prev()->next() = e->next();
-   if(e->next())
-      e->next()->prev() = e->prev();
+   if(this->e->prev())
+      this->e->prev()->next() = this->e->next();
+   if(this->e->next())
+      this->e->next()->prev() = this->e->prev();
    // release memory
-   delete e;
+   delete this->e;
    clear();
 }
 
 template<typename T, typename L>
 void simple_list<T,L>::elem::insertNext(const T& value)
 {
-   if(empty())
+   if(this->empty())
    {
-      if(connected() && c->list_length == 0)
+      if(this->connected() && this->c->list_length == 0)
       {
-         e = new elem_raw(value);
-         c->last_elem = c->first_elem = *this;
-         c->list_length = 1;
+         this->e = new elem_raw(value);
+         this->c->last_elem = this->c->first_elem = *this;
+         this->c->list_length = 1;
       }
       return;
    }
    elem_raw* new_elem = new elem_raw(value);
-   new_elem->prev() = e;
-   if(e->next()) {
-      new_elem->next() = e->next();
-      e->next()->prev() = new_elem;
+   new_elem->prev() = this->e;
+   if(this->e->next()) {
+      new_elem->next() = this->e->next();
+      this->e->next()->prev() = new_elem;
    }
-   e->next() = new_elem;
-   if(connected())
+   this->e->next() = new_elem;
+   if(this->connected())
    {
-      L& len = c->list_length;
+      L& len = this->c->list_length;
       ++len;
       if(len == 1)
          throw std::runtime_error("something went wrong: empty list has a non empty element");
-      if(e == c->last_elem.e)
-         c->last_elem.forward();
+      if(this->e == this->c->last_elem.e)
+         this->c->last_elem.forward();
       return;
    }
 }
@@ -549,31 +551,31 @@ void simple_list<T,L>::elem::insertNext(const T& value)
 template<typename T, typename L>
 void simple_list<T,L>::elem::insertPrev(const T& value)
 {
-   if(empty())
+   if(this->empty())
    {
-      if(connected() && c->list_length == 0)
+      if(this->connected() && this->c->list_length == 0)
       {
-         e = new elem_raw(value);
-         c->last_elem = c->first_elem = *this;
-         c->list_length = 1;
+         this->e = new elem_raw(value);
+         this->c->last_elem = this->c->first_elem = *this;
+         this->c->list_length = 1;
       }
       return;
    }
    elem_raw* new_elem = new elem_raw(value);
-   new_elem->next() = e;
-   if(e->prev()) {
-      new_elem->prev() = e->prev();
-      e->prev()->next() = new_elem;
+   new_elem->next() = this->e;
+   if(this->e->prev()) {
+      new_elem->prev() = this->e->prev();
+      this->e->prev()->next() = new_elem;
    }
-   e->prev() = new_elem;
-   if(connected())
+   this->e->prev() = new_elem;
+   if(this->connected())
    {
-      L& len = c->list_length;
+      L& len = this->c->list_length;
       ++len;
       if(len == 1)
          throw std::runtime_error("something went wrong: empty list has a non empty element");
-      if(e == c->first_elem.e)
-         c->first_elem.back();
+      if(this->e == this->c->first_elem.e)
+         this->c->first_elem.back();
       return;
    }
 }
@@ -597,22 +599,22 @@ void simple_list<T,L>::elem::removeBefore()
 template<typename T, typename L>
 void simple_list<T,L>::elem::remove()
 {
-   if(empty())
+   if(this->empty())
       return;
-   if(connected())
+   if(this->connected())
    {
-      L& len = c->list_length;
+      L& len = this->c->list_length;
       --len;
       if(!len)
       {
          // zero elements left => this is the only elem in the list
-         c->first_elem.clear();
-         c->last_elem.clear();
+         this->c->first_elem.clear();
+         this->c->last_elem.clear();
       }
-      else if(e == c->first_elem.e)
-         c->first_elem.forward();
-      else if(e == c->last_elem.e)
-         c->last_elem.back();
+      else if(this->e == this->c->first_elem.e)
+         this->c->first_elem.forward();
+      else if(this->e == this->c->last_elem.e)
+         this->c->last_elem.back();
    }
    delete_and_clear();
 }
@@ -1061,13 +1063,13 @@ void simple_list<T,L>::sort_bubblesort()
 }
 
 template<typename T, typename L>
-const typename T& simple_list<T,L>::operator[](const L& index) const
+const T& simple_list<T,L>::operator[](const L& index) const
 {
    return element(index).value_ref_const();
 }
 
 template<typename T, typename L>
-typename T& simple_list<T,L>::operator[](const L& index)
+T& simple_list<T,L>::operator[](const L& index)
 {
    return element(index).value_ref();
 }

@@ -1,11 +1,14 @@
 #pragma once
+#ifdef WINDOWS
 #pragma comment(lib, "psapi.lib")
+#endif
 #ifndef TOOLKIT_PROGRAM_INFO_H
 #define TOOLKIT_PROGRAM_INFO_H
 
 //#include "MBdev_QtTools_global.h"
 //#include <string>
 #include <ostream>
+#include <cstddef>
 
 #ifdef WINDOWS
 #define NOMINMAX // to avoid min/max macro problems

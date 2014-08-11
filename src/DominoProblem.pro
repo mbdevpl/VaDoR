@@ -6,6 +6,9 @@ CONFIG += qt
 QT += core gui
 QT += xml
 
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += c++11
 
 # platform specific defines
 unix:DEFINES += LINUX
