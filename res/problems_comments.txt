@@ -1,0 +1,5 @@
+Statistics in breath-first search:
+
+problem1.xml : around 103 possible states
+problem2.txt : ? states
+problem3.xml : around 12826 possible states
