@@ -1,6 +1,7 @@
-/Dell 1557 setup.pdf
+/bysiek,lojek,peryt-vador_final.pdf
 
 # temporary files
+/_minted-*
 /tmp
 *.synctex.gz
 *.synctex.gz(busy)
