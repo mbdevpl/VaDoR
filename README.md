@@ -73,26 +73,26 @@ Command-line options
 
 To start Qt GUI, execute:
 
-    vador.exe
+    vador
 
 To run in text mode, execute:
 
-    vador.exe -cmd file.xml/txt
+    vador -cmd file.xml/txt
 
 In text mode, you have many more command line options. For example:
 
-    vador.exe -cmd -delay=200 problem3.xml -depthsort -purge
+    vador -cmd -delay=200 problem3.xml -depthsort -purge
 
 will solve problem3.xml using greedy depth-first search, with purging of useless results in runtime.
 
 For details of all available options, and other examples, please run:
 
-    vador.exe -help
+    vador -help
 
 
 Notes
 -----
 
 This file is in Markdown, paste it here: `http://daringfireball.net/projects/markdown/dingus`
-if you cannot see formatting and this file is not very readible for you.
+if you cannot see formatting and this file is not very readable for you.
 
