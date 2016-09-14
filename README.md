@@ -22,7 +22,7 @@ students of Faculty of Mathematics and Information Sciences at Warsaw University
 About this project
 ------------------
 
-This is a 3-person team project that we did for Algorithms & Complexity course during our Bachelor
+A 3-person team project that we did for Algorithms & Complexity course during our Bachelor
 studies. The project introduced the problem starting with a rectangular board filled with domino
 pieces, and defined certain rules for removing them. The task was to design and implement an
 algorithm that removes (in accordance with rules) as many domino pieces as possible from the board
@@ -37,16 +37,16 @@ Technicalities
 --------------
 
 We implemented the solver to the above-defined problem that solves it in exponential time, O( 2^n ).
-There are also several approximate solvers available, with polynomial time complexity,
-O( n^2 ), but the solutution obtained by those is not guaranteed to be optimal of course.
+We also prepared several approximate solvers, each with polynomial time complexity,
+O( n^2 ), but the solutions obtained by those is not guaranteed to be optimal of course.
 
-Program accepts two input formats: XML and txt. Format detailes are described in the documentation.
+Program accepts two input formats: XML and txt. Format details are described in the documentation.
 
-This software depends on Qt. It should work with Qt 4.8, 5.5, 5.7 and most probably with many other
-Qt versions. It should work on Ubuntu 14.04, Ubuntu 16.04, Windows 7 and maybe other systems too.
+This software depends on Qt. It works with Qt 4.8, 5.5, 5.7 and most probably with many other
+Qt versions. It works on Ubuntu 14.04, Ubuntu 16.04, Windows 7 and maybe other systems too.
 
 Program uses as much memory as available, so it might need several Gigabytes of RAM for large
-problems. For example it analyzed around 15000000 states (possible domino pieces configurations)
+problems. For example it analysed around 15000000 states (possible domino pieces configurations)
 before running out of memory on my lap-top which had 2GiB of RAM at the time. In such cases program
 clears some of the allocated memory and proceeds. It is still able to produce a correct answer,
 however the complexity might increase beyond O( 2^n ) because of some repeated computation.
