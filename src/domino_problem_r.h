@@ -4,6 +4,7 @@
 #include<iostream>
 #include <fstream>
 #include <cstring>
+#include <stdexcept>
 #include <string>
 #include <streambuf>
 #include<QVector>
