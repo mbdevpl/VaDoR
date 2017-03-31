@@ -1,7 +1,10 @@
 ﻿VAnishing DOmino pRoblem {#mainpage}
 ========================
 
-Copyright 2012, 2014, 2016 by Mateusz Bysiek, Radosław Łojek, Stanisław Peryt -- in 2012,
+[![build status from Travis CI](https://travis-ci.org/mbdevpl/VaDoR.svg?branch=master)](https://travis-ci.org/mbdevpl/VaDoR)
+[![license](https://img.shields.io/github/license/mbdevpl/VaDoR.svg)](https://github.com/mbdevpl/VaDoR)
+
+Copyright 2012, 2014, 2016, 2017 by Mateusz Bysiek, Radosław Łojek, Stanisław Peryt -- in 2012,
 students of Faculty of Mathematics and Information Sciences at Warsaw University of Technology.
 
     This file is part of VaDoR.
@@ -42,8 +45,9 @@ O( n^2 ), but the solutions obtained by those is not guaranteed to be optimal of
 
 Program accepts two input formats: XML and txt. Format details are described in the documentation.
 
-This software depends on Qt. It works with Qt 4.8, 5.5, 5.7 and most probably with many other
-Qt versions. It works on Ubuntu 14.04, Ubuntu 16.04, Windows 7 and maybe other systems too.
+This software depends on Qt. It works with Qt 4.8, 5.5, 5.6, 5.7 and most probably with many other
+Qt versions. It works on Ubuntu 12.04, Ubuntu 14.04, Ubuntu 16.04, Windows 7 and probably some
+other systems too.
 
 Program uses as much memory as available, so it might need several Gigabytes of RAM for large
 problems. For example it analysed around 15000000 states (possible domino pieces configurations)

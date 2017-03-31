@@ -1,0 +1,28 @@
+sudo: required
+language: cpp
+os:
+  - linux
+#  - osx
+
+compiler:
+#  - clang
+  - gcc
+
+install:
+  - sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-add-repository -y ppa:beineri/opt-qt562
+#  - sudo apt-add-repository -y ppa:beineri/opt-qt58-trusty
+  - sudo apt-get -qq update
+  - sudo apt-get install qt56base qt56tools qt56canvas3d qt56svg
+#  - sudo apt-get install qt58base qt58tools
+
+before_script:
+  - /opt/qt56/bin/qmake --version
+  - /opt/qt56/bin/qmake src/DominoProblem.pro
+
+script:
+  - make
+
+notifications:
+  slack:
+    secure: knV32lPoitJRyWBPeWKdYV5QGvNsoZV3RtodybGE3xv0Ly8LnUCMmk/ccpl+zEbOw2fkNIu0v0EsnHqtBwmnsDbQTvIQNdrJ9b7cbAq0zFNvzjHslnAcWiVW4km0w+GZ6GXopP02oeaLmtKDAmFKh5XDTgdFhm0GFJdVWN+y+Rnz7zAYKZEVCobPetfl5qr8wSqt9XZ0Fd6fosYMYHQ1V2juu1NFbAhEXYj9WZ/RUcGS1eVcQt7fs8bY4t3LWAE1rDGt++2CMF6PhokG2cCmdQpYcC2pRcfh90lDTq5FmLl0WOFcv1F8qcwlRj6a90yTaLHkgVB+Pds3+y1f8lt1jRRYmwGUuGqSVT1jEu+vco0y7SNDs5fkj2CzGZ+ptOe4DeCMF8qVhLbdQeFS6KaFZQqyv1/fFKMiiAqHVLzfVf+h6OdemMRIVCQxjV061/mEFG/DKBbLW1GAM6sG9kpUZU8MA9vCndmVRk4XmqUvZKJj9BuQLKXFZdiRj9+lz36KBWVUIhyft3Ne/Shq/DnGtMgLrMaSY9ZlGlRZDll3heqIqOTQZ8sZGuSjFTDfiRZRxAKiCCVrydQT4bu66XnZ9oXS49TsMBSoRVvLunoYfISE0U+5QMEC9ZnHefaQ+HONPV5V1PlcKpZjVexr8Hvsrxu6ofE5c8UngUq1jfbZtNs=
