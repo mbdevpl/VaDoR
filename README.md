@@ -2,6 +2,7 @@
 ========================
 
 [![build status from Travis CI](https://travis-ci.org/mbdevpl/VaDoR.svg?branch=master)](https://travis-ci.org/mbdevpl/VaDoR)
+[![build status from AppVeyor](https://ci.appveyor.com/api/projects/status/github/mbdevpl/VaDoR?svg=true&branch=master)](https://ci.appveyor.com/project/mbdevpl/VaDoR)
 [![license](https://img.shields.io/github/license/mbdevpl/VaDoR.svg)](https://github.com/mbdevpl/VaDoR)
 
 Copyright 2012, 2014, 2016, 2017 by Mateusz Bysiek, Radosław Łojek, Stanisław Peryt -- in 2012,
