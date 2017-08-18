@@ -22,6 +22,7 @@ before_script:
 
 script:
   - make
+  - ./vador -cmd res/problems/problem1.xml
 
 notifications:
   slack:
