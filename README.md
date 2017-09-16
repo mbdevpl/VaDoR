@@ -46,9 +46,8 @@ O( n^2 ), but the solutions obtained by those is not guaranteed to be optimal of
 
 Program accepts two input formats: XML and txt. Format details are described in the documentation.
 
-This software depends on Qt. It works with Qt 4.8, 5.5, 5.6, 5.7 and most probably with many other
-Qt versions. It works on Ubuntu 12.04, Ubuntu 14.04, Ubuntu 16.04, Windows 7 and probably some
-other systems too.
+This software depends on Qt. It works with Qt 5.5 and above.
+It works on Ubuntu 12.04, Ubuntu 14.04, Ubuntu 16.04, Windows 7 and probably some other systems too.
 
 Program uses as much memory as available, so it might need several Gigabytes of RAM for large
 problems. For example it analysed around 15000000 states (possible domino pieces configurations)
